@@ -1,17 +1,15 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using work_platform_backend.Validations;
 
 namespace work_platform_backend.Dtos
 {
-    public class RegisterDto
+    public class RegisterRequest
     {
         [Required]
          public string Username { get; set; }
         
-        [EmailAddress(ErrorMessage = "Email is not Valid...")]
-        [EmailAttributeUniqueValidation] // not tested yet
         [Required]
+        [EmailAddress(ErrorMessage = "Email is not Valid.")]
          public string Email { get; set; }
         
         [Required]
@@ -23,9 +21,13 @@ namespace work_platform_backend.Dtos
          [MinLength(6)]
          [Required]
          public string Password { get; set; }
+
+         [MinLength(6)]
+         [Required]
+         public string ConfirmPassword { get; set; }
         
         [Required]
-         public string Phone { get; set; }
+         public string PhoneNumber { get; set; }
          
          [Required]
          public string BirthDate { get; set; }

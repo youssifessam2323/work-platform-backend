@@ -10,7 +10,8 @@ namespace work_platform_backend.mapper
         public UserProfile()
         {
 
-            CreateMap<RegisterDto,User>();
+            CreateMap<RegisterRequest,User>();
+            CreateMap<User,RegisterRequest>();
         }
 
 

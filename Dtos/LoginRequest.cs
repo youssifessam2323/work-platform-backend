@@ -1,15 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Sockets;
-using work_platform_backend.Validations;
 
 namespace work_platform_backend.Dtos
 {
-    public class LoginDto
+    public class LoginRequest
     {
 
+        [Required]
+        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
         [Required]
+        [MinLength(5)]
         public string Password { get; set; }
         
         

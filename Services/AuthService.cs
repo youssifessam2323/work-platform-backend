@@ -1,104 +1,186 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using work_platform_backend.Authorization;
 using work_platform_backend.Dtos;
-using work_platform_backend.Exceptions;
 using work_platform_backend.Models;
-using work_platform_backend.Repos;
 
 namespace work_platform_backend.Services
 {
     public class AuthService
     {
 
-        private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
         private readonly IEmailService emailService;
-        private readonly IVerificationTokenRepository verificationTokenRepository;
+        private UserManager<User> userManager;
 
-        public AuthService(IUserRepository userRepository , IMapper mapper , IConfiguration configuration , IEmailService emailService ,IVerificationTokenRepository verificationTokenRepository)
+        public AuthService(IMapper mapper , IConfiguration configuration , IEmailService emailService, UserManager<User> userManager )
         {
-            this.userRepository = userRepository ; 
             this.mapper = mapper;
             this.configuration = configuration ; 
-            this.emailService = emailService ; 
-            this.verificationTokenRepository = verificationTokenRepository;
+            this.emailService = emailService ;
+            this.userManager = userManager; 
         }
-        public async Task SignUp(RegisterDto registerDto)
+        public async Task<AuthenticationResponse> SignUp(RegisterRequest registerRequest)
         {
-            VerificationToken verificationToken = createVerificationToken(); 
-            User user = createUser(registerDto , verificationToken);
-            await SendConfirmationMail(registerDto.Email,verificationToken);
-            await userRepository.AddNewUser(user);
-            userRepository.SaveChanges();
+             if(registerRequest.Password != registerRequest.ConfirmPassword)
+            {
+                return new AuthenticationResponse
+                {
+                    Message = "Confirm Password Does not match the Password",
+                    IsSuccess  = false 
+                };
+            }
+
+            var newUser = mapper.Map<User>(registerRequest);
+            var isCreated = await userManager.CreateAsync(newUser,registerRequest.Password);
+            
+            if(isCreated.Succeeded)
+            {
+                var userId = newUser.Id;
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(newUser); 
+                var validTokenForWeb = createValidTokenForWeb(token);
+
+
+                await SendConfirmationMail(userId,registerRequest.Email,validTokenForWeb);
+                
+                return new AuthenticationResponse
+                {
+                    Message = "User Added Successfully",
+                    IsSuccess = true,
+                    Errors = new List<string>()
+                };
+
+               
+            }
+            
+            return new AuthenticationResponse
+            {
+                IsSuccess = false,
+                Message = "User Didn't Created.",
+                Errors = isCreated.Errors.Select(error => error.Description)
+            };      
         }
 
-        private async Task SendConfirmationMail(string email ,VerificationToken verificationToken)
+        private string createValidTokenForWeb(string token)
         {
-            string confimationUrl = "http://localhost:5000/api/v1/auth/"+verificationToken.token; 
+            var encodedToken = Encoding.UTF8.GetBytes(token);
+            return WebEncoders.Base64UrlEncode(encodedToken);
+        }
+
+
+        private async Task SendConfirmationMail(string id ,string email,string token)
+        {
+            string confimationUrl = "http://localhost:5000/api/v1/auth/confirmemail?userid="+id+"&token="+token; 
             Message message 
             = new Message(email, "Email Confirmation","Welcome to our Platform Please Click in the Link to Verify Your Email.", confimationUrl);
            
             await emailService.SendEmailAsync(message);
         }
 
-        internal async Task VerifyEmail(string token)
+        internal async Task<AuthenticationResponse> VerifyEmail(string userId,string token)
         {
-            User user = await userRepository.getUserByToken(token);
-            user.isEnabled = true ;
-            verificationTokenRepository.deleteVerificationToken(user.verificationToken);
-            verificationTokenRepository.SaveChanges();   
+                User user = await userManager.FindByIdAsync(userId);
+                if(user == null)
+                {
+                    return new AuthenticationResponse
+                    {
+                        IsSuccess = false,
+                    }; 
+                }
+               bool result = await ConfirmEmail(user,token);      
+
+               if(result)
+               {
+                   return new AuthenticationResponse
+                   {
+                       IsSuccess = true
+                   };
+               }        
+
+               return new AuthenticationResponse
+               {
+                   IsSuccess = false
+               } ;          
         }
 
-        private User createUser(RegisterDto registerDto , VerificationToken verificationToken)
+        private async Task<bool> ConfirmEmail(User user, string token)
         {
-            User user = mapper.Map<User>(registerDto);
-            user.isEnabled = false ;
-            user.Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
-            user.createdDate = DateTime.Now ;
-            user.BirthDate = DateTime.Parse(registerDto.BirthDate);
-            user.verificationToken = verificationToken;
+            var decodedToken = WebEncoders.Base64UrlDecode(token);
+            string normalToken  = Encoding.UTF8.GetString(decodedToken);
 
-            return user; 
-        }
-
-        public async Task<AuthenticationResponse> Signin(LoginDto loginDto)
-        {
-            User user = await AuthenticateUser(loginDto);
-
-            if(user != null)
+            var result =  await userManager.ConfirmEmailAsync(user,normalToken);
+            if(result.Succeeded)
             {
-                var token = GenerateJwtToken(user);
-                return new AuthenticationResponse(token,user.Username,user.Email);
-            }    
-
-            return null;
-        }
-
-
-        private async Task<User> AuthenticateUser(LoginDto loginDto)
-        {
-            User user = await userRepository.GetUserByEmail(loginDto.Email);
-            bool isValidPassword = BCrypt.Net.BCrypt.Verify(loginDto.Password,user.Password);
-
-            if(isValidPassword)
-            {
-                return user;  
+                return true ;
             }
 
-            return null ; 
+            return false;
+        }
+        public async Task<AuthenticationResponse> Signin(LoginRequest loginRequest)
+        {
+            User user = await userManager.FindByEmailAsync(loginRequest.Email);
+
+
+            if(user == null)
+            {
+                return new AuthenticationResponse
+                {
+                    Message = "User is not Exist...",
+                    IsSuccess = false
+                } ;                 
+            }
+
+            var result =await userManager.CheckPasswordAsync(user,loginRequest.Password);
+
+            if(!result)
+            {
+                return new AuthenticationResponse
+                {
+                    Message = "Invalid password",
+                    IsSuccess = false,
+                };
+            }
+            
+            var token = CreateJWTToken(user); 
+            return new AuthenticationResponse
+            {
+                Message = token ,
+                IsSuccess = true,
+                Errors = new List<string>()
+            };
         }
 
-        
+        private string CreateJWTToken(User user)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]));
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Email,user.Email),
+                new Claim(ClaimTypes.NameIdentifier,user.Id)
+            };
+            var token = new JwtSecurityToken(
+                issuer:configuration["Jwt:Issuer"],
+                audience:configuration["Jwt:Audience"],
+                claims:claims,
+                signingCredentials: new SigningCredentials(key,SecurityAlgorithms.HmacSha256)
+            );
+
+            var tokenAsString = new JwtSecurityTokenHandler().WriteToken(token);
+            return tokenAsString;
+        }
+
+
         private string  GenerateJwtToken(User user)
         {
             var securityKey =
@@ -108,7 +190,6 @@ namespace work_platform_backend.Services
             
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub,user.Username.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email , user.Email),
                 new Claim("role" , Policies.LEADER),
                 new Claim(JwtRegisteredClaimNames.Jti , Guid.NewGuid().ToString())
@@ -125,11 +206,6 @@ namespace work_platform_backend.Services
         }
 
 
-        private VerificationToken createVerificationToken()
-        {
-            VerificationToken verificationToken = new VerificationToken();
-            verificationToken.token = Guid.NewGuid().ToString();
-            return verificationToken;
-        }
+       
     }
 }

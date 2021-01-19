@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using work_platform_backend.Authorization;
-using work_platform_backend.Models;
-using work_platform_backend.Repos;
-using work_platform_backend.Services;
 
 namespace work_platform_backend.Controllers
 {
     [ApiController]
+    [AllowAnonymous]
     [Route("api/weather")]
     public class WeatherForecastController : ControllerBase
     {
@@ -23,12 +19,10 @@ namespace work_platform_backend.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
-        private readonly IUserRepository userRepository;
         
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IUserRepository userRepository)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
-            this.userRepository = userRepository;
         }
 
         [HttpGet]
@@ -36,6 +30,8 @@ namespace work_platform_backend.Controllers
         [Authorize]
         public IEnumerable<WeatherForecast> Get(string data)
         {
+            _logger.LogDebug (HttpContext.User.Identity.AuthenticationType);
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -45,5 +41,17 @@ namespace work_platform_backend.Controllers
             })
             .ToArray();
         }
+
+        [HttpGet]
+        [Route("task")]
+        [Authorize]
+        public async Task<string> getTheTaskByCondition(int roomId)
+        {
+            var user = HttpContext.User;
+            _logger.LogDebug(user.ToString());
+            return "you accessed me successfully";
+        }
+    
+       
     }
 }

@@ -1,12 +1,10 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using work_platform_backend.Repos;
+
 using work_platform_backend.Dtos;
 using work_platform_backend.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using work_platform_backend.Exceptions;
+
 using System;
 
 namespace work_platform_backend.Controllers
@@ -17,53 +15,62 @@ namespace work_platform_backend.Controllers
     [Route("/api/v1/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly IUserRepository userRepository;
         private readonly AuthService authService;
-        public AuthController(IUserRepository userRepository, AuthService authService)
+        public AuthController(AuthService authService)
         {
-            this.userRepository = userRepository;
             this.authService = authService ; 
         }
 
 
         [HttpPost]
         [Route("signup")]
-        public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
+        public async Task<ActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
-            try
+            AuthenticationResponse authenticationResponse = await authService.SignUp(registerRequest);
+            
+            if(!authenticationResponse.IsSuccess)
             {
-            await authService.SignUp(registerDto);
-            }catch(Exception ex)
-            {
-                return BadRequest(new {Error = ex.InnerException.ToString()});
+                return BadRequest(authenticationResponse);
             }
-             return Ok("Registered Successfully");
+
+            return Ok(authenticationResponse);
         }
 
 
 
         [HttpPost]
         [Route("signin")]
-        public async Task<ActionResult> Login([FromBody]LoginDto loginDto)
+        public async Task<ActionResult> Login([FromBody]LoginRequest loginRequest)
         {
-              AuthenticationResponse authenticationResponse = await authService.Signin(loginDto);
-                
-                if(authenticationResponse == null )
-                {
-                    return Unauthorized("Bad Credentials");
-                } 
+            if(ModelState.IsValid)
+            {
 
-                return Ok(authenticationResponse);
+            }
+              var response = await authService.Signin(loginRequest);
+
+              if(response.IsSuccess)
+              {
+                return Ok(response);
+              }
+
+              return Unauthorized(response);
         }
 
 
 
+        //api/auth/confirmemail?userid&token
         [HttpGet]
-        [Route("{token}")]
-        public async Task<ActionResult> verifyEmail(string token)
+        [Route("confirmemail")]
+        public async Task<ActionResult> verifyEmail(string userId,string token)
         {
-            await authService.VerifyEmail(token);
-            return Ok("Email Verfifed") ; 
+            var result = await authService.VerifyEmail(userId,token);
+
+            if(result.IsSuccess)
+            {
+                return Ok("Email Verfifed") ; 
+            }
+
+            return BadRequest();
         }
 
 
