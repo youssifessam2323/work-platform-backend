@@ -23,6 +23,8 @@ namespace work_platform_backend.Models
         public DbSet<TeamsMembers> TeamsMembers { get; set; }
         public DbSet<UserRoomPermission> UserRoomPermissions { get; set; }
         
+        public DbSet<RoomSettings> RoomSettings { get; set; }
+        
         
         
         
@@ -80,6 +82,25 @@ namespace work_platform_backend.Models
 
             modelBuilder.Entity<UserRoomPermission>()
             .HasKey(urp => new {urp.UserId,urp.RoomId} );
+
+
+            modelBuilder.Entity<TeamsMembers>()
+            .HasKey(tm => new {tm.UserId,tm.TeamId});
+
+            modelBuilder.Entity<RoomSettings>()
+            .HasKey(rs => new { rs.RoomId,rs.SettingId});
+
+
+            modelBuilder.Entity<TeamsMembers>()
+            .HasKey(tm => new { tm.UserId,tm.TeamId});
+
+
+            modelBuilder.Entity<Team>()
+            .HasOne(t => t.Creator)
+            .WithMany(u => u.Leads)
+            .HasForeignKey(t => t.CreatorId)
+            .OnDelete(DeleteBehavior.SetNull);
+            
         }
     }
 }

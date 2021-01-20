@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using work_platform_backend.Models;
 
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20210120120721_updatingModels")]
+    partial class updatingModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -429,7 +431,10 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoomId")
+                    b.Property<string>("RoomId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RoomId1")
                         .HasColumnType("int");
 
                     b.Property<int?>("TeamId")
@@ -439,7 +444,7 @@ namespace work_platform_backend.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.HasIndex("RoomId");
+                    b.HasIndex("RoomId1");
 
                     b.HasIndex("TeamId");
 
@@ -692,14 +697,11 @@ namespace work_platform_backend.Migrations
                 {
                     b.HasOne("work_platform_backend.Models.User", "Creator")
                         .WithMany("Leads")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("CreatorId");
 
                     b.HasOne("work_platform_backend.Models.Room", "Room")
                         .WithMany()
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoomId1");
 
                     b.HasOne("work_platform_backend.Models.Team", null)
                         .WithMany("SubTeams")
@@ -709,13 +711,13 @@ namespace work_platform_backend.Migrations
             modelBuilder.Entity("work_platform_backend.Models.TeamsMembers", b =>
                 {
                     b.HasOne("work_platform_backend.Models.Team", "Team")
-                        .WithMany("TeamMembers")
+                        .WithMany()
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("work_platform_backend.Models.User", "User")
-                        .WithMany("TeamMembers")
+                        .WithMany("Teams")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -15,14 +15,9 @@ namespace work_platform_backend.Models
         
         public List<UserRoomPermission> UserPermissionsInRoom { get; set; }
         public List<ProjectManager> Projects { get; set; }
-        public List<TeamsMembers> Teams { get; set; }
-        
         public List<Team> Leads { get; set; }
         public List<RTask> TasksCreatedByMe { get; set; }
-        
-        
-        
-        
+        public List<TeamsMembers> TeamMembers { get; set; }
         
     }
 }

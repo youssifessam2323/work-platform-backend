@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using work_platform_backend.Models;
 
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20210120123843_updatingModels2")]
+    partial class updatingModels2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -692,8 +694,7 @@ namespace work_platform_backend.Migrations
                 {
                     b.HasOne("work_platform_backend.Models.User", "Creator")
                         .WithMany("Leads")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("CreatorId");
 
                     b.HasOne("work_platform_backend.Models.Room", "Room")
                         .WithMany()

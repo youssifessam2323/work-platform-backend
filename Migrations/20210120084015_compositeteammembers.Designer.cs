@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using work_platform_backend.Models;
 
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20210120084015_compositeteammembers")]
+    partial class compositeteammembers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -374,24 +376,6 @@ namespace work_platform_backend.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.RoomSettings", b =>
-                {
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SettingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Setting")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoomId", "SettingId");
-
-                    b.HasIndex("SettingId");
-
-                    b.ToTable("RoomSettings");
-                });
-
             modelBuilder.Entity("work_platform_backend.Models.Setting", b =>
                 {
                     b.Property<int>("Id")
@@ -402,10 +386,15 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("value")
-                        .HasColumnType("bit");
+                    b.Property<int?>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("value")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("Settings");
                 });
@@ -429,7 +418,10 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoomId")
+                    b.Property<string>("RoomId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RoomId1")
                         .HasColumnType("int");
 
                     b.Property<int?>("TeamId")
@@ -439,7 +431,7 @@ namespace work_platform_backend.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.HasIndex("RoomId");
+                    b.HasIndex("RoomId1");
 
                     b.HasIndex("TeamId");
 
@@ -673,33 +665,22 @@ namespace work_platform_backend.Migrations
                         .HasForeignKey("TeamId");
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.RoomSettings", b =>
+            modelBuilder.Entity("work_platform_backend.Models.Setting", b =>
                 {
                     b.HasOne("work_platform_backend.Models.Room", "Room")
-                        .WithMany("RoomSettings")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("work_platform_backend.Models.Setting", null)
-                        .WithMany("RoomSettings")
-                        .HasForeignKey("SettingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("Settings")
+                        .HasForeignKey("RoomId");
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.Team", b =>
                 {
                     b.HasOne("work_platform_backend.Models.User", "Creator")
                         .WithMany("Leads")
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("CreatorId");
 
                     b.HasOne("work_platform_backend.Models.Room", "Room")
                         .WithMany()
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoomId1");
 
                     b.HasOne("work_platform_backend.Models.Team", null)
                         .WithMany("SubTeams")
@@ -709,13 +690,13 @@ namespace work_platform_backend.Migrations
             modelBuilder.Entity("work_platform_backend.Models.TeamsMembers", b =>
                 {
                     b.HasOne("work_platform_backend.Models.Team", "Team")
-                        .WithMany("TeamMembers")
+                        .WithMany()
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("work_platform_backend.Models.User", "User")
-                        .WithMany("TeamMembers")
+                        .WithMany("Teams")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

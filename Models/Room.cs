@@ -16,7 +16,7 @@ namespace work_platform_backend.Models
         public DateTime CreatedAt { get; set; }
         
         public List<Project> Projects { get; set; }
-        public List<Setting> Settings { get; set; }
+        public List<RoomSettings> RoomSettings { get; set; }
         public List<UserRoomPermission> UserPemissionInRoom { get; set; }
         
         
