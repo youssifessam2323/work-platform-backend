@@ -27,7 +27,7 @@ namespace work_platform_backend.Controllers
 
         [HttpGet]
         [Route("get")]
-        [Authorize]
+        //[Authorize]
         public IEnumerable<WeatherForecast> Get(string data)
         {
             _logger.LogDebug (HttpContext.User.Identity.AuthenticationType);

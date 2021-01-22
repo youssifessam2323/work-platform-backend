@@ -18,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using work_platform_backend.Authorization;
 using work_platform_backend.Models;
+using work_platform_backend.Repos;
 using work_platform_backend.Services;
 
 namespace work_platform_backend
@@ -37,6 +38,19 @@ namespace work_platform_backend
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<AuthService>();
+            services.AddScoped<ICheckpointRepository, CheckpointRepo>();
+            services.AddScoped<CheckPointService>();
+            services.AddScoped<ITeamRepository, TeamRepo>();
+            services.AddScoped<TeamService>();
+            services.AddScoped<IPermissionRepository, PermissionRepo>();
+            services.AddScoped<PermissionService>();
+            services.AddScoped<IProjectRepository, ProjectRepo>();
+            services.AddScoped<ProjectService>();
+            services.AddScoped<IAttachmentRepository, AttachmentRepo>();
+            services.AddScoped<AttachmentService>();
+
+
+
             services.AddDbContext<ApplicationContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });         
