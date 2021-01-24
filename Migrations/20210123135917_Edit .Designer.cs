@@ -10,8 +10,8 @@ using work_platform_backend.Models;
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20210120125603_updatingModels3")]
-    partial class updatingModels3
+    [Migration("20210123135917_Edit ")]
+    partial class Edit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -384,9 +384,6 @@ namespace work_platform_backend.Migrations
                     b.Property<int>("SettingId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Setting")
-                        .HasColumnType("int");
-
                     b.HasKey("RoomId", "SettingId");
 
                     b.HasIndex("SettingId");
@@ -683,7 +680,7 @@ namespace work_platform_backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("work_platform_backend.Models.Setting", null)
+                    b.HasOne("work_platform_backend.Models.Setting", "Setting")
                         .WithMany("RoomSettings")
                         .HasForeignKey("SettingId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -382,9 +382,6 @@ namespace work_platform_backend.Migrations
                     b.Property<int>("SettingId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Setting")
-                        .HasColumnType("int");
-
                     b.HasKey("RoomId", "SettingId");
 
                     b.HasIndex("SettingId");
@@ -681,7 +678,7 @@ namespace work_platform_backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("work_platform_backend.Models.Setting", null)
+                    b.HasOne("work_platform_backend.Models.Setting", "Setting")
                         .WithMany("RoomSettings")
                         .HasForeignKey("SettingId")
                         .OnDelete(DeleteBehavior.Cascade)

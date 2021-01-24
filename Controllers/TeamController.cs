@@ -118,12 +118,12 @@ namespace work_platform_backend.Controllers
 
             }
             catch (Exception Ex)
-            {
+             {
 
                 return NotFound(Ex.Message);
             }
 
-            return Ok($"Object with id = {teamId} was  Deleted");
+           return Ok($"Object with id = {teamId} was  Deleted");
         }
 
     }

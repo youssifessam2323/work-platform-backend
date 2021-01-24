@@ -48,6 +48,12 @@ namespace work_platform_backend
             services.AddScoped<ProjectService>();
             services.AddScoped<IAttachmentRepository, AttachmentRepo>();
             services.AddScoped<AttachmentService>();
+            services.AddScoped<IRoomRepository, RoomRepo>();
+            services.AddScoped<RoomService>();
+            services.AddScoped<ISettingRepository, SettingRepo>();
+            services.AddScoped<SettingService>();
+            services.AddScoped<IRTaskRepository, RTaskRepo>();
+            services.AddScoped<TaskService>();
 
 
 

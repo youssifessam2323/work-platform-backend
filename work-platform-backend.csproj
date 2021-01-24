@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20210120125603_updatingModels3.cs" />
+    <Compile Remove="Migrations\20210120125603_updatingModels3.Designer.cs" />
     <Compile Remove="Migrations\20210122115957_Edit Team.cs" />
     <Compile Remove="Migrations\20210122115957_Edit Team.Designer.cs" />
   </ItemGroup>

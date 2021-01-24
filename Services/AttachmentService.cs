@@ -32,12 +32,12 @@ namespace work_platform_backend.Services
 
         public async Task<Attachment> UpdateAttachment(int id, Attachment attachment)
         {
-            Attachment NewAttachmentt = await _attachmentRepo.UpdateAttachmentById(id, attachment);
+            Attachment UpdatedAttachmentt = await _attachmentRepo.UpdateAttachmentById(id, attachment);
 
-            if (NewAttachmentt != null)
+            if (UpdatedAttachmentt != null)
             {
                 await _attachmentRepo.SaveChanges();
-                return NewAttachmentt;
+                return UpdatedAttachmentt;
             }
 
 

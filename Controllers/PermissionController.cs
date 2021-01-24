@@ -111,10 +111,6 @@ namespace work_platform_backend.Controllers
             }
 
             return Ok($"Object with id = {permissionId} was  Deleted");
-
-
-
-
         }
 
        

@@ -15,18 +15,7 @@ namespace work_platform_backend.Repos
         {
             _context = context;
         }
-        public async Task<CheckPoint> DeleteCheckpointById(int checkpointId)
-        {
-            
-            CheckPoint checkPoint = await _context.CheckPoints.FindAsync(checkpointId);
-            if(checkPoint!=null)
-            { 
-               _context.CheckPoints.Remove(checkPoint);
-                
-            }
-            return checkPoint;
-
-        }
+    
 
         public async Task<IEnumerable<CheckPoint>> GetAllCheckpointsByParentTask(int parentTaskId)
         {
@@ -62,6 +51,19 @@ namespace work_platform_backend.Repos
 
             }
             return null;
+
+        }
+
+        public async Task<CheckPoint> DeleteCheckpointById(int checkpointId)
+        {
+
+            CheckPoint checkPoint = await _context.CheckPoints.FindAsync(checkpointId);
+            if (checkPoint != null)
+            {
+                _context.CheckPoints.Remove(checkPoint);
+
+            }
+            return checkPoint;
 
         }
 
