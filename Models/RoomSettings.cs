@@ -5,7 +5,7 @@ namespace work_platform_backend.Models
         public int RoomId { get; set; }
         public Room Room { get; set; }
         public int SettingId { get; set; }
-        public int Setting { get; set; }
+        public Setting Setting { get; set; }
         
         
     }

@@ -8,7 +8,12 @@ namespace work_platform_backend.Models
     public class ApplicationContext : IdentityDbContext<User>
     {
 
-        
+
+        public ApplicationContext(DbContextOptions<ApplicationContext> opt) : base(opt)
+        {
+        }
+
+
         public DbSet<Team> Teams { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RTask> Tasks { get; set; }
@@ -30,10 +35,7 @@ namespace work_platform_backend.Models
         
         
        
-        public ApplicationContext(DbContextOptions<ApplicationContext> opt) : base(opt)
-        {
-        }
-
+        
       
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

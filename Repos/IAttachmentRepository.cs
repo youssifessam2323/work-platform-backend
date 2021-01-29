@@ -6,10 +6,12 @@ namespace work_platform_backend.Repos
 {
     public interface IAttachmentRepository
     {
-        Task<IEnumerable<Attachment>> GetAttachmentByTask(string taskId);
+        Task<IEnumerable<Attachment>> GetAttachmentByTask(int taskId);
         Task SaveAttachment(Attachment attachment);
-        Task UpdateAttachmentById(int attachmentId,Attachment attachment);
-        Task DeleteAttachmentById(int attachmentId);  
-       
+        Task <Attachment>UpdateAttachmentById(int attachmentId,Attachment attachment);
+        Task <Attachment>DeleteAttachmentById(int attachmentId);
+        Task<bool> SaveChanges();
+
+
     }
 }

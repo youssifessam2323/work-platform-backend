@@ -13,8 +13,11 @@ namespace work_platform_backend.Dtos
         [Required]
         [MinLength(5)]
         public string Password { get; set; }
-        
-        
-    
+      
+
+
+
+
+
     }
 }

@@ -81,7 +81,7 @@ namespace work_platform_backend.Services
 
         private async Task SendConfirmationMail(string id ,string email,string token)
         {
-            string confimationUrl = "http://localhost:5000/api/v1/auth/confirmemail?userid="+id+"&token="+token; 
+            string confimationUrl = "http://localhost:5001/api/v1/auth/confirmemail?userid="+id+"&token="+token; 
             Message message 
             = new Message(email, "Email Confirmation","Welcome to our Platform Please Click in the Link to Verify Your Email.", confimationUrl);
            
@@ -131,15 +131,27 @@ namespace work_platform_backend.Services
         {
             User user = await userManager.FindByEmailAsync(loginRequest.Email);
 
-
-            if(user == null)
+            if (user == null)
             {
+              
                 return new AuthenticationResponse
                 {
                     Message = "User is not Exist...",
                     IsSuccess = false
-                } ;                 
+                } ;  
+                
+
             }
+
+            if (!user.EmailConfirmed)
+            {
+                return new AuthenticationResponse
+                {
+                    Message = "cred is right but email is not verified..",
+                    IsSuccess = false
+                };
+            }
+
 
             var result =await userManager.CheckPasswordAsync(user,loginRequest.Password);
 
@@ -151,6 +163,7 @@ namespace work_platform_backend.Services
                     IsSuccess = false,
                 };
             }
+             
             
             var token = CreateJWTToken(user); 
             return new AuthenticationResponse
@@ -173,6 +186,7 @@ namespace work_platform_backend.Services
                 issuer:configuration["Jwt:Issuer"],
                 audience:configuration["Jwt:Audience"],
                 claims:claims,
+                expires: DateTime.Now.AddDays(10),
                 signingCredentials: new SigningCredentials(key,SecurityAlgorithms.HmacSha256)
             );
 
@@ -180,30 +194,6 @@ namespace work_platform_backend.Services
             return tokenAsString;
         }
 
-
-        private string  GenerateJwtToken(User user)
-        {
-            var securityKey =
-             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"])); 
-            
-            var credentials = new SigningCredentials(securityKey,SecurityAlgorithms.HmacSha256);
-            
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Email , user.Email),
-                new Claim("role" , Policies.LEADER),
-                new Claim(JwtRegisteredClaimNames.Jti , Guid.NewGuid().ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer : configuration["Jwt:Issuer"],
-                audience : configuration["Jwt:Audience"],
-                claims : claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials
-            );
-            return new JwtSecurityTokenHandler().WriteToken(token) ; 
-        }
 
 
        

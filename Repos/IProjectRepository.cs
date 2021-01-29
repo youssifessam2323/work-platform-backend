@@ -9,8 +9,9 @@ namespace work_platform_backend.Repos
          Task<IEnumerable<Project>> GetAllProjectsByRoom(int roomId);
          Task<Project> GetProjectById(int projectId);
          Task SaveProject(Project project);
-         Task UpdateProjectById(int projectId,Project project);
-         Task DeleteProjectById(int projectId);
-         
+         Task<Project> UpdateProjectById(int projectId,Project project);
+         Task <Project>DeleteProjectById(int projectId);
+        Task<bool> SaveChanges();
+
     }
 }
