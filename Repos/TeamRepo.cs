@@ -43,9 +43,13 @@ namespace work_platform_backend.Repos
 
         }
 
+
         public async Task<IEnumerable<Team>> GetAllTeamsByRoom(int roomId)
         {
-           return(await _context.Teams.Where(T => T.RoomId == roomId).ToListAsync());
+           return( await _context.Teams.Where(T => T.RoomId == roomId).Include(T=>T.Tasks).ToListAsync());
+
+   
+
         }
 
         public async Task<Team> GetTeamById(int teamId)
@@ -88,5 +92,7 @@ namespace work_platform_backend.Repos
             }
             return team;
         }
+
+      
     }
 }

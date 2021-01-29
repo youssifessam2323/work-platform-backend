@@ -1,7 +1,9 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -10,11 +12,12 @@ namespace work_platform_backend.Services
     public class ProjectService
     {
         private readonly IProjectRepository _ProjectRepo;
+        private readonly IMapper _mapper;
 
-
-        public ProjectService(IProjectRepository projectRepository)
+        public ProjectService(IProjectRepository projectRepository,  IMapper mapper)
         {
             _ProjectRepo = projectRepository;
+            _mapper = mapper;
 
         }
 
@@ -63,7 +66,7 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<IEnumerable<Project>> GetProjectsByRoom(int roomId)
+        public async Task<IEnumerable<ResponseProjectDto>> GetProjectsByRoom(int roomId)
         {
             var Projects = await _ProjectRepo.GetAllProjectsByRoom(roomId);
 
@@ -72,8 +75,9 @@ namespace work_platform_backend.Services
                 return null;
 
             }
+            var ProjectsResponse = _mapper.Map<IEnumerable<ResponseProjectDto>>(Projects);
 
-            return Projects;
+            return ProjectsResponse;
 
         }
 

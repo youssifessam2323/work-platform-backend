@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace work_platform_backend.Models
 {
@@ -19,7 +20,6 @@ namespace work_platform_backend.Models
         public DateTime ActualEndDate { get; set; }
         
         public bool IsFinished { get; set; }
-        
 
         public Team Team { get; set; }
         
@@ -35,7 +35,7 @@ namespace work_platform_backend.Models
         
         public List<DependOn> DependOnThem { get; set; }
 
-        public int ParentCheckPointId { get; set; }
+        public int? ParentCheckPointId { get; set; }
         
         
         public CheckPoint ParentCheckPoint { get; set; }

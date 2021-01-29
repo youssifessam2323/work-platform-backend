@@ -1,7 +1,9 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -10,10 +12,12 @@ namespace work_platform_backend.Services
     public class TaskService
     {
         private readonly IRTaskRepository _RTaskRepository;
+        private readonly IMapper _mapper;
 
-        public TaskService(IRTaskRepository RTaskRepository)
+        public TaskService(IRTaskRepository RTaskRepository,IMapper mapper)
         {
             _RTaskRepository = RTaskRepository;
+            _mapper = mapper;
         }
 
 
@@ -88,7 +92,7 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<IEnumerable<RTask>> GetTaskByTeam(int TeamId)
+        public async Task<IEnumerable<RTask>> GetTasksByTeam(int TeamId)
         {
             var Tasks = await _RTaskRepository.GetAllTasksByTeam(TeamId);
 
@@ -103,7 +107,7 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<IEnumerable<RTask>> GetTaskByProject(int ProjectId)
+        public async Task<IEnumerable<ResponseProjectTasksDto>> GetTasksByProject(int ProjectId)
         {
             var Tasks = await _RTaskRepository.GetAllTasksByProject(ProjectId);
 
@@ -112,8 +116,9 @@ namespace work_platform_backend.Services
                 return null;
 
             }
+            var TaskInProjectsResponse = _mapper.Map< IEnumerable<ResponseProjectTasksDto>>(Tasks);
 
-            return Tasks;
+            return TaskInProjectsResponse;
 
         }
 

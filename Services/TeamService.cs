@@ -1,7 +1,9 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -10,19 +12,23 @@ namespace work_platform_backend.Services
     public class TeamService
     {
         private readonly ITeamRepository _TeamRepo;
-        
+        private readonly IMapper _mapper;
 
-        public TeamService(ITeamRepository teamRepository )
+        public TeamService(ITeamRepository teamRepository,IMapper mapper)
         {
             _TeamRepo = teamRepository;
+            _mapper = mapper;
           
         }
 
 
-        public async Task<Team> AddTeam(Team newTeam)
+        public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId)
         {
             if (newTeam != null)
             {
+                newTeam.RoomId = roomId;
+                newTeam.CreatorId = creatorId;
+                newTeam.CreatedAt = DateTime.Now;
                 await _TeamRepo.SaveTeam(newTeam);
                 await _TeamRepo.SaveChanges();
                 return newTeam;
@@ -93,17 +99,25 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<IEnumerable<Team>> GetTeamsByRoom(int RoomId)
+        public async Task<IEnumerable<ResponseTeamDto>> GetTeamsByRoom(int RoomId)
         {
             var Teams = await _TeamRepo.GetAllTeamsByRoom(RoomId);
 
             if (Teams.Count().Equals(0))
             {
+
                 return null;
 
-            }
 
-            return Teams;
+
+                
+            }
+            var TeamResponse = _mapper.Map<IEnumerable<ResponseTeamDto>>(Teams);
+            
+
+
+
+            return TeamResponse;
 
         }
 

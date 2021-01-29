@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
@@ -14,10 +15,15 @@ namespace work_platform_backend.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly ProjectService _projectService;
+        private readonly TaskService _taskService;
+       
 
-        public ProjectController(ProjectService projectService)
+
+        public ProjectController(ProjectService projectService, TaskService taskService)
         {
             _projectService = projectService;
+            _taskService = taskService;
+            
 
         }
         [HttpGet]
@@ -25,13 +31,13 @@ namespace work_platform_backend.Controllers
         public async Task<IActionResult> GetSingleProject(int projectId)
         {
 
-            var Team = await _projectService.GetProject(projectId);
-            if (Team == null)
+            var project = await _projectService.GetProject(projectId);
+            if (project == null)
             {
                 return NotFound();
 
             }
-            return Ok(Team);
+            return Ok(project);
 
         }
 
@@ -40,13 +46,21 @@ namespace work_platform_backend.Controllers
         public async Task<IActionResult> GetProjectsInRoom(int RoomId)
         {
 
-            var Team = await _projectService.GetProjectsByRoom(RoomId);
-            if (Team == null)
-            {
-                return NotFound();
+            var Projects = await _projectService.GetProjectsByRoom(RoomId);
+            if (Projects != null)
+            { 
+            //     List<List<ResponseProjectTasksDto>> ListOfTasksinProject = new List<List<ResponseProjectTasksDto>>();
+            //    foreach (var P in Projects)
+            //    {
+
+            //        ListOfTasksinProject.Add(await _taskService.GetTasksByProject(P.Id));
+
+            //    }
+
+                return Ok(Projects );
 
             }
-            return Ok(Team);
+            return Ok( new List<Project>());
 
         }
 

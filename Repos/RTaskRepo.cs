@@ -38,7 +38,7 @@ namespace work_platform_backend.Repos
 
         public async Task<IEnumerable<RTask>> GetAllTasksByProject(int projectId)
         {
-            return (await _context.Tasks.Where(T => T.Project.Id == projectId).ToListAsync());
+            return (await _context.Tasks.Include(T=>T.Team).Where(T => T.Project.Id == projectId).ToListAsync());
         }
 
         public async Task<IEnumerable<RTask>> GetAllTasksByTeam(int teamId)

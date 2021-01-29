@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,8 @@ namespace work_platform_backend
             services.AddScoped<SettingService>();
             services.AddScoped<IRTaskRepository, RTaskRepo>();
             services.AddScoped<TaskService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<UserService>();
 
 
 
@@ -112,6 +115,7 @@ namespace work_platform_backend
             app.UseHttpsRedirection();
 
             app.UseRouting();
+          
 
             app.UseAuthentication();
 

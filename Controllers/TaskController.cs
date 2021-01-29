@@ -37,11 +37,11 @@ namespace work_platform_backend.Controllers
         }
 
         [HttpGet]
-        [Route("GetTaskOfTeam/{TeamId}")]
-        public async Task<IActionResult> GetTaskOfTeam(int TeamId)
+        [Route("GetTasksOfTeam/{TeamId}")]
+        public async Task<IActionResult> GetTasksOfTeam(int TeamId)
         {
 
-            var TasksByTeam = await _taskService.GetTaskByTeam(TeamId);
+            var TasksByTeam = await _taskService.GetTasksByTeam(TeamId);
             if (TasksByTeam == null)
             {
                 return NotFound();
@@ -56,7 +56,7 @@ namespace work_platform_backend.Controllers
         public async Task<IActionResult> GetTasksOfProject(int ProjectId)
         {
 
-            var TasksByProject = await _taskService.GetTaskByProject(ProjectId);
+            var TasksByProject = await _taskService.GetTasksByProject(ProjectId);
             if (TasksByProject == null)
             {
                 return NotFound();

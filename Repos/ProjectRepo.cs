@@ -17,7 +17,8 @@ namespace work_platform_backend.Repos
         }
         public async Task<IEnumerable<Project>> GetAllProjectsByRoom(int roomId)
         {
-            return (await _context.Projects.Where(P => P.Room.Id == roomId).ToListAsync());
+            return (await _context.Projects.Include(P=>P.Tasks).ThenInclude(t => t.Team)
+                .Where(P => P.Room.Id == roomId).ToListAsync());
         }
 
         public async Task<Project> GetProjectById(int projectId)

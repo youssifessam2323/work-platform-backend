@@ -9,9 +9,23 @@ namespace work_platform_backend.mapper
 
         public UserProfile()
         {
+            //Source=>Target
 
             CreateMap<RegisterRequest,User>();
             CreateMap<User,RegisterRequest>();
+
+            CreateMap<RequestRoomDto, Room>();
+            CreateMap<Room, ResponseRoomDto>();
+            CreateMap<ResponseRoomDto, Room>();
+
+            CreateMap<Team, ResponseTeamDto>();
+
+            CreateMap<Project, ResponseProjectDto>();
+            CreateMap<ProjectManager, ResponseProjectManagersDto>();
+
+            CreateMap<RTask,ResponseTeamRTaskDto >();
+            CreateMap<RTask, ResponseProjectTasksDto>();
+            CreateMap<User, ResponseRoomCreatorDto>();
         }
 
 

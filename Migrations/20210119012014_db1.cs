@@ -365,7 +365,7 @@ namespace work_platform_backend.Migrations
                     TeamId = table.Column<int>(nullable: true),
                     CreatorId = table.Column<string>(nullable: true),
                     ProjectId = table.Column<int>(nullable: true),
-                    ParentCheckPointId = table.Column<int>(nullable: false)
+                    ParentCheckPointId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {

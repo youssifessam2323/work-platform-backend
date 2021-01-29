@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
@@ -14,39 +16,43 @@ namespace work_platform_backend.Controllers
     public class TeamController : ControllerBase
     {
         private readonly TeamService _teamService;
+        private readonly UserService UserService;
 
-        public TeamController(TeamService teamService)
+        public TeamController(TeamService teamService,UserService getuserService)
         {
             _teamService = teamService;
+            UserService = getuserService;
         }
 
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
-        [Route("GetTeamsCreator/{TeamCreatorId}")]
-        public async Task<IActionResult> GetTeamsCreator(string TeamCreatorId)
+        [Route("GetTeamsCreator")]
+        public async Task<IActionResult> GetTeamsCreator()
         {
+          string TeamCreatorId = UserService.GetUserId();
 
             var GetTeamsByCreator = await _teamService.GetTeamsByCreator(TeamCreatorId);
             if (GetTeamsByCreator == null)
             {
-                return NotFound();
+                return Ok(new List<Team>());
 
             }
             return Ok(GetTeamsByCreator);
 
         }
 
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
-        [Route("GetTeamsMember/{userId}")]
+        [Route("GetTeamsMember")]
 
-        public async Task<IActionResult> GetTeamsOfMember(string userId)
+        public async Task<IActionResult> GetTeamsOfMember()
         {
-
-            var GetTeamsMember = await _teamService.GetTeamsByMember(userId);
+            string TeamMemberId = UserService.GetUserId();
+            var GetTeamsMember = await _teamService.GetTeamsByMember(TeamMemberId);
             if (GetTeamsMember == null)
             {
-                return NotFound();
+                return Ok(new List<Team>());
+
 
             }
             return Ok(GetTeamsMember);
@@ -61,7 +67,7 @@ namespace work_platform_backend.Controllers
             var GetTeamsRoom = await _teamService.GetTeamsByRoom(roomId);
             if (GetTeamsRoom == null)
             {
-                return NotFound();
+                return Ok(new List<Team>());
 
             }
             return Ok(GetTeamsRoom);
@@ -83,10 +89,12 @@ namespace work_platform_backend.Controllers
 
         }
 
-        [HttpPost("AddTeam")]
-        public async Task<IActionResult> AddTeam(Team team)
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost("AddTeam/{roomId}")]
+        public async Task<IActionResult> AddTeam(Team team,int roomId)
         {
-            var NewTeam = await _teamService.AddTeam(team);
+            var NewTeam = await _teamService.AddTeam(team,roomId, UserService.GetUserId());
             if (NewTeam != null)
             {
                return Ok(NewTeam);
