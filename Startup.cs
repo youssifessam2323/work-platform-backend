@@ -43,8 +43,6 @@ namespace work_platform_backend
             services.AddScoped<CheckPointService>();
             services.AddScoped<ITeamRepository, TeamRepo>();
             services.AddScoped<TeamService>();
-            services.AddScoped<IPermissionRepository, PermissionRepo>();
-            services.AddScoped<PermissionService>();
             services.AddScoped<IProjectRepository, ProjectRepo>();
             services.AddScoped<ProjectService>();
             services.AddScoped<IAttachmentRepository, AttachmentRepo>();

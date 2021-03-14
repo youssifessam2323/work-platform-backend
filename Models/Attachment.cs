@@ -15,8 +15,12 @@ namespace work_platform_backend.Models
 
         public int TaskId { get; set; }
         
-            
         public RTask Task { get; set; }
+        
+        public string CreatorId { get; set; }
+        public User Creator { get; set; }
+        
+        
         
         
         

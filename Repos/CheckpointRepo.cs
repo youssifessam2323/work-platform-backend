@@ -44,8 +44,8 @@ namespace work_platform_backend.Repos
            var NewCheckpoint = await _context.CheckPoints.FindAsync(checkpointId);
             if(NewCheckpoint!=null)
             {
-                NewCheckpoint.Text = checkPoint.Text;
-                NewCheckpoint.IsChecked = checkPoint.IsChecked;
+                NewCheckpoint.CheckpointText = checkPoint.CheckpointText;
+                NewCheckpoint.Percentage = checkPoint.Percentage;
                 NewCheckpoint.ParentRTaskId = checkPoint.ParentRTaskId;
                 return NewCheckpoint;
 

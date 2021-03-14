@@ -20,13 +20,23 @@ namespace work_platform_backend.Models
         public DateTime ActualEndDate { get; set; }
         
         public bool IsFinished { get; set; }
-        [JsonIgnore]
-        public List<ProjectManager> Managers { get; set; }
+        public DateTime CreatedAt { get; set; }
         
         
+        public string CreatorId { get; set; }
+        
+        public User Creator { get; set; }
+        
+        
+        public int RoomId{ get; set; }
         public Room Room { get; set; }
+        
+
         [JsonIgnore]
         public List<RTask> Tasks { get; set; }
+
+        
+        public List<TeamProject> TeamProjects { get; set; }
         
         
         

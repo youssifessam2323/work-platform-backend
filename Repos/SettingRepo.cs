@@ -49,7 +49,6 @@ namespace work_platform_backend.Repos
             if (NewSetting != null)
             {
                 NewSetting.Name = setting.Name;
-                NewSetting.value = setting.value;
                 return NewSetting;
 
             }

@@ -27,7 +27,7 @@ namespace work_platform_backend.Services
             if (newTeam != null)
             {
                 newTeam.RoomId = roomId;
-                newTeam.CreatorId = creatorId;
+                newTeam.LeaderId = creatorId;
                 newTeam.CreatedAt = DateTime.Now;
                 await _TeamRepo.SaveTeam(newTeam);
                 await _TeamRepo.SaveChanges();

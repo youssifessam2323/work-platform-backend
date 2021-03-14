@@ -20,7 +20,7 @@ namespace work_platform_backend.Repos
 
         public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId)
         {
-            var ListOfUserCreator = await _context.Teams.Where(T => T.CreatorId == userId).ToListAsync();
+            var ListOfUserCreator = await _context.Teams.Where(T => T.LeaderId == userId).ToListAsync();
             return ListOfUserCreator;
         }
 
@@ -75,7 +75,7 @@ namespace work_platform_backend.Repos
                 NewTeam.Name = team.Name;
                 NewTeam.Description = team.Description;
                 NewTeam.CreatedAt = team.CreatedAt;
-                NewTeam.CreatorId = team.CreatorId;
+                NewTeam.LeaderId = team.LeaderId;
                 NewTeam.RoomId = team.RoomId;
                 return NewTeam;
             }

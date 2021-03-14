@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace work_platform_backend.Migrations
 {
-    public partial class db1 : Migration
+    public partial class FinishModeling : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -40,8 +40,12 @@ namespace work_platform_backend.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
-                    FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: true),
+                    BirthDate = table.Column<DateTime>(nullable: false),
+                    ImageUrl = table.Column<string>(nullable: true),
+                    JobTitle = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    IsEnabled = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,7 +53,7 @@ namespace work_platform_backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Permissions",
+                name: "Settings",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -58,22 +62,7 @@ namespace work_platform_backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Permissions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Rooms",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    CreatedAt = table.Column<DateTime>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.PrimaryKey("PK_Settings", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -183,6 +172,52 @@ namespace work_platform_backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    CreatorId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectManagers",
+                columns: table => new
+                {
+                    RoomId = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectManagers", x => new { x.UserId, x.RoomId });
+                    table.ForeignKey(
+                        name: "FK_ProjectManagers_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectManagers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
                 {
@@ -195,38 +230,49 @@ namespace work_platform_backend.Migrations
                     ActualStartDate = table.Column<DateTime>(nullable: false),
                     ActualEndDate = table.Column<DateTime>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
-                    RoomId = table.Column<int>(nullable: true)
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    CreatorId = table.Column<string>(nullable: true),
+                    RoomId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Projects", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Projects_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
                         name: "FK_Projects_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Settings",
+                name: "RoomSettings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    value = table.Column<string>(nullable: true),
-                    RoomId = table.Column<int>(nullable: true)
+                    RoomId = table.Column<int>(nullable: false),
+                    SettingId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Settings", x => x.Id);
+                    table.PrimaryKey("PK_RoomSettings", x => new { x.RoomId, x.SettingId });
                     table.ForeignKey(
-                        name: "FK_Settings_Rooms_RoomId",
+                        name: "FK_RoomSettings_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoomSettings_Settings_SettingId",
+                        column: x => x.SettingId,
+                        principalTable: "Settings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -238,26 +284,26 @@ namespace work_platform_backend.Migrations
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    CreatorId = table.Column<string>(nullable: true),
-                    RoomId = table.Column<string>(nullable: true),
-                    RoomId1 = table.Column<int>(nullable: true),
+                    TeamCode = table.Column<Guid>(nullable: false),
+                    LeaderId = table.Column<string>(nullable: true),
+                    RoomId = table.Column<int>(nullable: false),
                     TeamId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Teams", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Teams_AspNetUsers_CreatorId",
-                        column: x => x.CreatorId,
+                        name: "FK_Teams_AspNetUsers_LeaderId",
+                        column: x => x.LeaderId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_Teams_Rooms_RoomId1",
-                        column: x => x.RoomId1,
+                        name: "FK_Teams_Rooms_RoomId",
+                        column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Teams_Teams_TeamId",
                         column: x => x.TeamId,
@@ -267,86 +313,119 @@ namespace work_platform_backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoomPermissions",
+                name: "TeamProjects",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(nullable: false),
-                    RoomId = table.Column<int>(nullable: false),
-                    PermissionId = table.Column<int>(nullable: true)
+                    ProjectId = table.Column<int>(nullable: false),
+                    TeamId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoomPermissions", x => new { x.UserId, x.RoomId });
+                    table.PrimaryKey("PK_TeamProjects", x => new { x.TeamId, x.ProjectId });
                     table.ForeignKey(
-                        name: "FK_UserRoomPermissions_Permissions_PermissionId",
-                        column: x => x.PermissionId,
-                        principalTable: "Permissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_UserRoomPermissions_Rooms_RoomId",
-                        column: x => x.RoomId,
-                        principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserRoomPermissions_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProjectManagers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProjectId = table.Column<int>(nullable: true),
-                    UserId = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProjectManagers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProjectManagers_Projects_ProjectId",
+                        name: "FK_TeamProjects_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectManagers_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
+                        name: "FK_TeamProjects_Teams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "Teams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "TeamsMembers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    userId = table.Column<string>(nullable: true),
-                    teamId = table.Column<int>(nullable: true)
+                    UserId = table.Column<string>(nullable: false),
+                    TeamId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TeamsMembers", x => x.Id);
+                    table.PrimaryKey("PK_TeamsMembers", x => new { x.UserId, x.TeamId });
                     table.ForeignKey(
-                        name: "FK_TeamsMembers_Teams_teamId",
-                        column: x => x.teamId,
+                        name: "FK_TeamsMembers_Teams_TeamId",
+                        column: x => x.TeamId,
                         principalTable: "Teams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TeamsMembers_AspNetUsers_userId",
-                        column: x => x.userId,
+                        name: "FK_TeamsMembers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    Url = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    TaskId = table.Column<int>(nullable: false),
+                    CreatorId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attachments_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    text = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    TaskId = table.Column<int>(nullable: false),
+                    CreatorId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comments_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sessions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StartDate = table.Column<DateTime>(nullable: false),
+                    EndDate = table.Column<DateTime>(nullable: false),
+                    TaskProgress = table.Column<int>(nullable: false),
+                    TaskId = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Sessions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -362,9 +441,10 @@ namespace work_platform_backend.Migrations
                     ActualStartDate = table.Column<DateTime>(nullable: false),
                     ActualEndDate = table.Column<DateTime>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
-                    TeamId = table.Column<int>(nullable: true),
-                    CreatorId = table.Column<string>(nullable: true),
+                    TeamId = table.Column<int>(nullable: false),
+                    CreatorId = table.Column<string>(nullable: false),
                     ProjectId = table.Column<int>(nullable: true),
+                    DependantTaskId = table.Column<int>(nullable: false),
                     ParentCheckPointId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -375,7 +455,13 @@ namespace work_platform_backend.Migrations
                         column: x => x.CreatorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Tasks_Tasks_DependantTaskId",
+                        column: x => x.DependantTaskId,
+                        principalTable: "Tasks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Tasks_Projects_ProjectId",
                         column: x => x.ProjectId,
@@ -387,28 +473,6 @@ namespace work_platform_backend.Migrations
                         column: x => x.TeamId,
                         principalTable: "Teams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Attachments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    Url = table.Column<string>(nullable: true),
-                    CreatedAt = table.Column<DateTime>(nullable: false),
-                    TaskId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Attachments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Attachments_Tasks_TaskId",
-                        column: x => x.TaskId,
-                        principalTable: "Tasks",
-                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -418,8 +482,9 @@ namespace work_platform_backend.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Text = table.Column<string>(nullable: true),
-                    IsChecked = table.Column<bool>(nullable: false),
+                    CheckpointText = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Percentage = table.Column<int>(nullable: false),
                     ParentRTaskId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -430,34 +495,31 @@ namespace work_platform_backend.Migrations
                         column: x => x.ParentRTaskId,
                         principalTable: "Tasks",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "DependOns",
+                name: "UserTasks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RTaskId = table.Column<int>(nullable: false),
-                    RTaskId1 = table.Column<int>(nullable: true),
-                    DependantTaskId = table.Column<int>(nullable: false)
+                    UserId = table.Column<string>(nullable: false),
+                    TaskId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DependOns", x => x.Id);
+                    table.PrimaryKey("PK_UserTasks", x => new { x.UserId, x.TaskId });
                     table.ForeignKey(
-                        name: "FK_DependOns_Tasks_RTaskId",
-                        column: x => x.RTaskId,
+                        name: "FK_UserTasks_Tasks_TaskId",
+                        column: x => x.TaskId,
                         principalTable: "Tasks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DependOns_Tasks_RTaskId1",
-                        column: x => x.RTaskId1,
-                        principalTable: "Tasks",
+                        name: "FK_UserTasks_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -500,6 +562,11 @@ namespace work_platform_backend.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Attachments_CreatorId",
+                table: "Attachments",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Attachments_TaskId",
                 table: "Attachments",
                 column: "TaskId");
@@ -510,24 +577,24 @@ namespace work_platform_backend.Migrations
                 column: "ParentRTaskId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DependOns_RTaskId",
-                table: "DependOns",
-                column: "RTaskId");
+                name: "IX_Comments_CreatorId",
+                table: "Comments",
+                column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DependOns_RTaskId1",
-                table: "DependOns",
-                column: "RTaskId1");
+                name: "IX_Comments_TaskId",
+                table: "Comments",
+                column: "TaskId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectManagers_ProjectId",
+                name: "IX_ProjectManagers_RoomId",
                 table: "ProjectManagers",
-                column: "ProjectId");
+                column: "RoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectManagers_UserId",
-                table: "ProjectManagers",
-                column: "UserId");
+                name: "IX_Projects_CreatorId",
+                table: "Projects",
+                column: "CreatorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_RoomId",
@@ -535,14 +602,41 @@ namespace work_platform_backend.Migrations
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Settings_RoomId",
-                table: "Settings",
-                column: "RoomId");
+                name: "IX_Rooms_CreatorId",
+                table: "Rooms",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_Name",
+                table: "Rooms",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomSettings_SettingId",
+                table: "RoomSettings",
+                column: "SettingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sessions_TaskId",
+                table: "Sessions",
+                column: "TaskId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sessions_UserId",
+                table: "Sessions",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_CreatorId",
                 table: "Tasks",
                 column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_DependantTaskId",
+                table: "Tasks",
+                column: "DependantTaskId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_ParentCheckPointId",
@@ -560,14 +654,19 @@ namespace work_platform_backend.Migrations
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Teams_CreatorId",
-                table: "Teams",
-                column: "CreatorId");
+                name: "IX_TeamProjects_ProjectId",
+                table: "TeamProjects",
+                column: "ProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Teams_RoomId1",
+                name: "IX_Teams_LeaderId",
                 table: "Teams",
-                column: "RoomId1");
+                column: "LeaderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teams_RoomId",
+                table: "Teams",
+                column: "RoomId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Teams_TeamId",
@@ -575,24 +674,38 @@ namespace work_platform_backend.Migrations
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeamsMembers_teamId",
+                name: "IX_TeamsMembers_TeamId",
                 table: "TeamsMembers",
-                column: "teamId");
+                column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeamsMembers_userId",
-                table: "TeamsMembers",
-                column: "userId");
+                name: "IX_UserTasks_TaskId",
+                table: "UserTasks",
+                column: "TaskId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoomPermissions_PermissionId",
-                table: "UserRoomPermissions",
-                column: "PermissionId");
+            migrationBuilder.AddForeignKey(
+                name: "FK_Attachments_Tasks_TaskId",
+                table: "Attachments",
+                column: "TaskId",
+                principalTable: "Tasks",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoomPermissions_RoomId",
-                table: "UserRoomPermissions",
-                column: "RoomId");
+            migrationBuilder.AddForeignKey(
+                name: "FK_Comments_Tasks_TaskId",
+                table: "Comments",
+                column: "TaskId",
+                principalTable: "Tasks",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Sessions_Tasks_TaskId",
+                table: "Sessions",
+                column: "TaskId",
+                principalTable: "Tasks",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Tasks_CheckPoints_ParentCheckPointId",
@@ -606,11 +719,19 @@ namespace work_platform_backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_Projects_AspNetUsers_CreatorId",
+                table: "Projects");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Rooms_AspNetUsers_CreatorId",
+                table: "Rooms");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Tasks_AspNetUsers_CreatorId",
                 table: "Tasks");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Teams_AspNetUsers_CreatorId",
+                name: "FK_Teams_AspNetUsers_LeaderId",
                 table: "Teams");
 
             migrationBuilder.DropForeignKey(
@@ -636,25 +757,31 @@ namespace work_platform_backend.Migrations
                 name: "Attachments");
 
             migrationBuilder.DropTable(
-                name: "DependOns");
+                name: "Comments");
 
             migrationBuilder.DropTable(
                 name: "ProjectManagers");
 
             migrationBuilder.DropTable(
-                name: "Settings");
+                name: "RoomSettings");
+
+            migrationBuilder.DropTable(
+                name: "Sessions");
+
+            migrationBuilder.DropTable(
+                name: "TeamProjects");
 
             migrationBuilder.DropTable(
                 name: "TeamsMembers");
 
             migrationBuilder.DropTable(
-                name: "UserRoomPermissions");
+                name: "UserTasks");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Permissions");
+                name: "Settings");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

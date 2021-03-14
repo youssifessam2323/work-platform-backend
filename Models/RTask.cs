@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+
+
 
 namespace work_platform_backend.Models
 {
@@ -18,22 +17,31 @@ namespace work_platform_backend.Models
         
         public DateTime ActualStartDate { get; set; }
         public DateTime ActualEndDate { get; set; }
-        
+
         public bool IsFinished { get; set; }
 
+        public int TeamId { get; set;}
         public Team Team { get; set; }
         
+
+        public string CreatorId { get; set; }        
         public User Creator { get; set; }
         
         public List<CheckPoint> ChildCheckPoints { get; set; }
         
         public List<Attachment> Attachments { get; set; }
+
         
+        public int? ProjectId { get; set; }
         public Project Project { get; set; }
         
-        public List<DependOn> DependantOnMe { get; set; }
+
         
-        public List<DependOn> DependOnThem { get; set; }
+
+        public int DependantTaskId { get; set; }
+        public RTask DependantTask { get; set; }
+        
+        
 
         public int? ParentCheckPointId { get; set; }
         
@@ -41,6 +49,11 @@ namespace work_platform_backend.Models
         public CheckPoint ParentCheckPoint { get; set; }
         
                
+        public List<UserTask> UserTasks { get; set; }
+        
+        public List<Comment> Comments { get; set; }
+        
+        public List<Session> Sessions { get; set; }
         
         
     }
