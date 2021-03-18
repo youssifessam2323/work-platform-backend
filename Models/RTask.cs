@@ -1,17 +1,20 @@
 using System;
 using System.Collections.Generic;
-
-
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace work_platform_backend.Models
 {
     public class RTask
     {
         public int Id { get; set; }
+        
+        [Required]
         public string Name { get; set; }
         
         public string Description { get; set; }
-        
+
+
         public DateTime PlannedStartDate { get; set; }
         public DateTime PlannedEndDate { get; set; }
         
@@ -26,8 +29,10 @@ namespace work_platform_backend.Models
 
         public string CreatorId { get; set; }        
         public User Creator { get; set; }
+
+
         
-        public List<CheckPoint> ChildCheckPoints { get; set; }
+        // public List<CheckPoint> ChildCheckPoints { get; set; }
         
         public List<Attachment> Attachments { get; set; }
 
@@ -37,9 +42,11 @@ namespace work_platform_backend.Models
         
 
         
+        [ForeignKey("DependantTaskId")]
+        public List<RTask> DependantTasks { get; set; }
+        
+        
 
-        public int DependantTaskId { get; set; }
-        public RTask DependantTask { get; set; }
         
         
 
@@ -54,7 +61,6 @@ namespace work_platform_backend.Models
         public List<Comment> Comments { get; set; }
         
         public List<Session> Sessions { get; set; }
-        
-        
+        public List<CheckPoint> ChildCheckPoints { get; internal set; }
     }
 }

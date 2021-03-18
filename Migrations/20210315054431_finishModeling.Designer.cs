@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using work_platform_backend.Models;
 
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20210315054431_finishModeling")]
+    partial class finishModeling
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,15 +196,10 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ParentRTaskId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Percentage")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ParentRTaskId");
 
                     b.ToTable("CheckPoints");
                 });
@@ -213,9 +210,6 @@ namespace work_platform_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("CommentId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -230,8 +224,6 @@ namespace work_platform_backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CommentId");
 
                     b.HasIndex("CreatorId");
 
@@ -317,9 +309,6 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("CreatorId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("DependantTaskId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -327,7 +316,6 @@ namespace work_platform_backend.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ParentCheckPointId")
@@ -348,8 +336,6 @@ namespace work_platform_backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatorId");
-
-                    b.HasIndex("DependantTaskId");
 
                     b.HasIndex("ParentCheckPointId");
 
@@ -682,21 +668,8 @@ namespace work_platform_backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.CheckPoint", b =>
-                {
-                    b.HasOne("work_platform_backend.Models.RTask", "ParentRTask")
-                        .WithMany("ChildCheckPoints")
-                        .HasForeignKey("ParentRTaskId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("work_platform_backend.Models.Comment", b =>
                 {
-                    b.HasOne("work_platform_backend.Models.Comment", null)
-                        .WithMany("Replies")
-                        .HasForeignKey("CommentId");
-
                     b.HasOne("work_platform_backend.Models.User", "Creator")
                         .WithMany("Comments")
                         .HasForeignKey("CreatorId")
@@ -745,10 +718,6 @@ namespace work_platform_backend.Migrations
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
-
-                    b.HasOne("work_platform_backend.Models.RTask", null)
-                        .WithMany("DependantTasks")
-                        .HasForeignKey("DependantTaskId");
 
                     b.HasOne("work_platform_backend.Models.CheckPoint", "ParentCheckPoint")
                         .WithMany("SubTasks")

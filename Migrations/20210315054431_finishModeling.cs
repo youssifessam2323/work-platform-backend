@@ -1,9 +1,9 @@
-﻿using System;
+﻿    using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace work_platform_backend.Migrations
 {
-    public partial class FinishModeling : Migration
+    public partial class finishModeling : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -50,6 +50,21 @@ namespace work_platform_backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CheckPoints",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CheckpointText = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Percentage = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CheckPoints", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -313,6 +328,53 @@ namespace work_platform_backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tasks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    PlannedStartDate = table.Column<DateTime>(nullable: false),
+                    PlannedEndDate = table.Column<DateTime>(nullable: false),
+                    ActualStartDate = table.Column<DateTime>(nullable: false),
+                    ActualEndDate = table.Column<DateTime>(nullable: false),
+                    IsFinished = table.Column<bool>(nullable: false),
+                    TeamId = table.Column<int>(nullable: false),
+                    CreatorId = table.Column<string>(nullable: true),
+                    ProjectId = table.Column<int>(nullable: true),
+                    ParentCheckPointId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tasks_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Tasks_CheckPoints_ParentCheckPointId",
+                        column: x => x.ParentCheckPointId,
+                        principalTable: "CheckPoints",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tasks_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Tasks_Teams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "Teams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TeamProjects",
                 columns: table => new
                 {
@@ -332,8 +394,7 @@ namespace work_platform_backend.Migrations
                         name: "FK_TeamProjects_Teams_TeamId",
                         column: x => x.TeamId,
                         principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -381,6 +442,12 @@ namespace work_platform_backend.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Attachments_Tasks_TaskId",
+                        column: x => x.TaskId,
+                        principalTable: "Tasks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -403,6 +470,12 @@ namespace work_platform_backend.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comments_Tasks_TaskId",
+                        column: x => x.TaskId,
+                        principalTable: "Tasks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -421,79 +494,15 @@ namespace work_platform_backend.Migrations
                 {
                     table.PrimaryKey("PK_Sessions", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Sessions_Tasks_TaskId",
+                        column: x => x.TaskId,
+                        principalTable: "Tasks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Sessions_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Tasks",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    PlannedStartDate = table.Column<DateTime>(nullable: false),
-                    PlannedEndDate = table.Column<DateTime>(nullable: false),
-                    ActualStartDate = table.Column<DateTime>(nullable: false),
-                    ActualEndDate = table.Column<DateTime>(nullable: false),
-                    IsFinished = table.Column<bool>(nullable: false),
-                    TeamId = table.Column<int>(nullable: false),
-                    CreatorId = table.Column<string>(nullable: false),
-                    ProjectId = table.Column<int>(nullable: true),
-                    DependantTaskId = table.Column<int>(nullable: false),
-                    ParentCheckPointId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tasks", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Tasks_AspNetUsers_CreatorId",
-                        column: x => x.CreatorId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_Tasks_Tasks_DependantTaskId",
-                        column: x => x.DependantTaskId,
-                        principalTable: "Tasks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Tasks_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Tasks_Teams_TeamId",
-                        column: x => x.TeamId,
-                        principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CheckPoints",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CheckpointText = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    Percentage = table.Column<int>(nullable: false),
-                    ParentRTaskId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CheckPoints", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CheckPoints_Tasks_ParentRTaskId",
-                        column: x => x.ParentRTaskId,
-                        principalTable: "Tasks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -572,11 +581,6 @@ namespace work_platform_backend.Migrations
                 column: "TaskId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CheckPoints_ParentRTaskId",
-                table: "CheckPoints",
-                column: "ParentRTaskId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Comments_CreatorId",
                 table: "Comments",
                 column: "CreatorId");
@@ -633,12 +637,6 @@ namespace work_platform_backend.Migrations
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tasks_DependantTaskId",
-                table: "Tasks",
-                column: "DependantTaskId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Tasks_ParentCheckPointId",
                 table: "Tasks",
                 column: "ParentCheckPointId");
@@ -682,62 +680,10 @@ namespace work_platform_backend.Migrations
                 name: "IX_UserTasks_TaskId",
                 table: "UserTasks",
                 column: "TaskId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Attachments_Tasks_TaskId",
-                table: "Attachments",
-                column: "TaskId",
-                principalTable: "Tasks",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Comments_Tasks_TaskId",
-                table: "Comments",
-                column: "TaskId",
-                principalTable: "Tasks",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Sessions_Tasks_TaskId",
-                table: "Sessions",
-                column: "TaskId",
-                principalTable: "Tasks",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Tasks_CheckPoints_ParentCheckPointId",
-                table: "Tasks",
-                column: "ParentCheckPointId",
-                principalTable: "CheckPoints",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Projects_AspNetUsers_CreatorId",
-                table: "Projects");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Rooms_AspNetUsers_CreatorId",
-                table: "Rooms");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Tasks_AspNetUsers_CreatorId",
-                table: "Tasks");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Teams_AspNetUsers_LeaderId",
-                table: "Teams");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_CheckPoints_Tasks_ParentRTaskId",
-                table: "CheckPoints");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -784,9 +730,6 @@ namespace work_platform_backend.Migrations
                 name: "Settings");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Tasks");
 
             migrationBuilder.DropTable(
@@ -800,6 +743,9 @@ namespace work_platform_backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "Rooms");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,19 @@ using work_platform_backend.Services;
 
 namespace work_platform_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/tasks")]
     [ApiController]
     public class TaskController : ControllerBase
     {
         private readonly TaskService _taskService;
+        private readonly AttachmentService AttachmentService;
+        private readonly CommentService commentService;
 
-        public TaskController(TaskService taskService)
+        public TaskController(TaskService taskService, AttachmentService attachmentService,CommentService commentService)
         {
             _taskService = taskService;
+            AttachmentService = attachmentService;
+            this.commentService = commentService;
         }
 
 
@@ -33,6 +38,22 @@ namespace work_platform_backend.Controllers
 
             }
             return Ok(TaskByCreator);
+
+        }
+
+
+        [HttpGet]
+        [Route("{TaskId}/attatchments")]
+        public async Task<IActionResult> GetAttachmentsInTask(int TaskId)
+        {
+
+            var Attachments = await AttachmentService.GetAttachmentsOfTask(TaskId);
+            if (Attachments == null)
+            {
+                return NotFound();
+
+            }
+            return Ok(Attachments);
 
         }
 
@@ -97,7 +118,7 @@ namespace work_platform_backend.Controllers
         }
 
 
-        [HttpPost("AddTask")]
+        [HttpPost()]
         public async Task<IActionResult> AddTask(RTask task)
         {
             var NewTask = await _taskService.AddTask(task);
@@ -138,6 +159,27 @@ namespace work_platform_backend.Controllers
             }
 
             return Ok($"Object with id = {TaskId} was  Deleted");
+        }
+
+        [HttpGet]
+        [Route("{taskId}/comments")]
+        public async Task<IActionResult> GetTaskComments(int taskId)
+        {
+             return Ok(await commentService.GetCommentsByTask(taskId));
+        }
+
+
+        [HttpPost]
+        [Route("{taskId}/comments")]
+        public async Task<IActionResult> AddComment(int taskId,[FromBody]Comment comment)
+        {
+            var newComment = await commentService.CreatNewComment(taskId,comment);
+            
+                if(newComment != null )
+                    return Ok();
+
+                    
+            return BadRequest();
         }
     }
 }

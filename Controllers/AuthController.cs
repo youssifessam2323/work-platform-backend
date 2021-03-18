@@ -6,6 +6,8 @@ using work_platform_backend.Dtos;
 using work_platform_backend.Services;
 
 using System;
+using System.Linq;
+using work_platform_backend.validation;
 
 namespace work_platform_backend.Controllers
 {
@@ -13,6 +15,7 @@ namespace work_platform_backend.Controllers
     [ApiController]
     [AllowAnonymous]
     [Route("/api/v1/auth")]
+    [ValidateModel]
     public class AuthController : ControllerBase
     {
         private readonly AuthService authService;
@@ -26,7 +29,21 @@ namespace work_platform_backend.Controllers
         [Route("signup")]
         public async Task<ActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
+            if(!ModelState.IsValid)
+            {
+                var errors = (from item in ModelState.Values
+                                    from error in item.Errors
+                                    select error.ErrorMessage).ToList();
+
+
+                var response = new AuthenticationResponse
+                {
+                    Message = "One or more validation errors occurred.",
+                    Errors = errors
+                };
+            }
             AuthenticationResponse authenticationResponse = await authService.SignUp(registerRequest);
+            
             
             if(!authenticationResponse.IsSuccess)
             {
@@ -64,7 +81,7 @@ namespace work_platform_backend.Controllers
         public async Task<ActionResult> verifyEmail(string userId,string token)
         {
             var result = await authService.VerifyEmail(userId,token);
-
+                Console.WriteLine("Iaam Hitted Broh...");
             if(result.IsSuccess)
             {
                 return Ok("Email Verfifed") ; 

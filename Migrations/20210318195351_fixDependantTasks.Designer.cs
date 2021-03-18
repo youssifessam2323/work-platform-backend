@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using work_platform_backend.Models;
 
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20210318195351_fixDependantTasks")]
+    partial class fixDependantTasks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,15 +196,10 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ParentRTaskId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Percentage")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ParentRTaskId");
 
                     b.ToTable("CheckPoints");
                 });
@@ -317,9 +314,6 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("CreatorId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("DependantTaskId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -327,7 +321,6 @@ namespace work_platform_backend.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ParentCheckPointId")
@@ -342,6 +335,9 @@ namespace work_platform_backend.Migrations
                     b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RTaskId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TeamId")
                         .HasColumnType("int");
 
@@ -349,11 +345,11 @@ namespace work_platform_backend.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.HasIndex("DependantTaskId");
-
                     b.HasIndex("ParentCheckPointId");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("RTaskId");
 
                     b.HasIndex("TeamId");
 
@@ -682,15 +678,6 @@ namespace work_platform_backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.CheckPoint", b =>
-                {
-                    b.HasOne("work_platform_backend.Models.RTask", "ParentRTask")
-                        .WithMany("ChildCheckPoints")
-                        .HasForeignKey("ParentRTaskId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("work_platform_backend.Models.Comment", b =>
                 {
                     b.HasOne("work_platform_backend.Models.Comment", null)
@@ -746,10 +733,6 @@ namespace work_platform_backend.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
-                    b.HasOne("work_platform_backend.Models.RTask", null)
-                        .WithMany("DependantTasks")
-                        .HasForeignKey("DependantTaskId");
-
                     b.HasOne("work_platform_backend.Models.CheckPoint", "ParentCheckPoint")
                         .WithMany("SubTasks")
                         .HasForeignKey("ParentCheckPointId")
@@ -758,6 +741,10 @@ namespace work_platform_backend.Migrations
                     b.HasOne("work_platform_backend.Models.Project", "Project")
                         .WithMany("Tasks")
                         .HasForeignKey("ProjectId");
+
+                    b.HasOne("work_platform_backend.Models.RTask", null)
+                        .WithMany("DependantTasks")
+                        .HasForeignKey("RTaskId");
 
                     b.HasOne("work_platform_backend.Models.Team", "Team")
                         .WithMany("Tasks")

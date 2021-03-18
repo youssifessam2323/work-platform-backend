@@ -1,12 +1,5 @@
+Todo : 
 
+[x] Fixing the Relation between the parentTask and it's checkpoints 
 
-
-
-
-
-
-Problems : 
-
--> the Reply(one to one unary relationship in comment) is refused due to that this relationship may case cycles or multiple cascade path
-
-
+[] Develop/Refactor the Apis and create the missing

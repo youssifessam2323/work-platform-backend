@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace work_platform_backend.Models
 {
@@ -17,7 +18,9 @@ namespace work_platform_backend.Models
         public string CreatorId { get; set; }
         
         public User Creator { get; set; }
-        
+                
+    
+        public List<Comment> Replies{set;get;}
         
         
     }

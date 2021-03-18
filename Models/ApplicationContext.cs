@@ -47,7 +47,12 @@ namespace work_platform_backend.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-              base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Room>()
+                .HasOne(r => r.Creator)
+                .WithMany(u => u.Rooms)
+                .OnDelete(DeleteBehavior.SetNull);
+
 
 
              modelBuilder.Entity<Comment>()
@@ -64,10 +69,6 @@ namespace work_platform_backend.Models
 
 
                
-            //add the unique constraint in the dependant task foreign key   
-            modelBuilder.Entity<RTask>()
-            .HasIndex(t => t.DependantTaskId)
-            .IsUnique();
 
 
             modelBuilder.Entity<RTask>()
@@ -84,9 +85,15 @@ namespace work_platform_backend.Models
                 .IsRequired()
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<RTask>()
+                .Property(t => t.CreatorId)
+                .IsRequired(false);
 
 
-
+            // modelBuilder.Entity<RTask>()
+                // .HasOne(t => t.DependantTask)
+                // .WithOne()
+                // .OnDelete(DeleteBehavior.SetNull);
 
 
             modelBuilder.Entity<CheckPoint>()
@@ -94,7 +101,7 @@ namespace work_platform_backend.Models
             .WithMany(t => t.ChildCheckPoints)
             .HasForeignKey(c => c.ParentRTaskId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
 
           
@@ -107,15 +114,45 @@ namespace work_platform_backend.Models
 
 
 
+
+
+
+
             modelBuilder.Entity<TeamsMembers>()
             .HasKey(tm => new {tm.UserId,tm.TeamId});
+
+
+            modelBuilder.Entity<TeamsMembers>()
+                .HasOne(tm => tm.User)
+                .WithMany(u => u.TeamMembers)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<TeamsMembers>()
+                .HasOne(tm => tm.Team)
+                .WithMany(t => t.TeamMembers)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+
+
+
 
             modelBuilder.Entity<RoomSettings>()
             .HasKey(rs => new { rs.RoomId,rs.SettingId});
 
+            modelBuilder.Entity<RoomSettings>()
+                .HasOne(rs => rs.Room)
+                .WithMany(r => r.RoomSettings)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<TeamsMembers>()
-            .HasKey(tm => new { tm.UserId,tm.TeamId});
+
+
+
+
+
+
+
 
 
             modelBuilder.Entity<Team>()
@@ -133,12 +170,39 @@ namespace work_platform_backend.Models
             
 
 
+
+
+
+
             modelBuilder.Entity<ProjectManager>()
                 .HasKey(pm => new {pm.UserId,pm.RoomId});
+
+            modelBuilder.Entity<ProjectManager>()
+                .HasOne(pm => pm.User)
+                .WithMany(u => u.ManagedProjects)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProjectManager>()
+                .HasOne(pm => pm.Room)
+                .WithMany(r => r.ProjectManagers)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+
+
+
+
+
+
 
 
             modelBuilder.Entity<TeamProject>()
                 .HasKey(pm => new {pm.TeamId,pm.ProjectId});
+
+
+            modelBuilder.Entity<TeamProject>()
+                .HasOne(tp => tp.Team)
+                .WithMany(t => t.TeamProjects)
+                .OnDelete(DeleteBehavior.NoAction);
 
 
                 modelBuilder.Entity<Room>()
@@ -153,11 +217,36 @@ namespace work_platform_backend.Models
                     .OnDelete(DeleteBehavior.SetNull);
 
 
-                modelBuilder.Entity<UserTask>()
-                    .HasKey(ut => new {ut.UserId,ut.TaskId}); 
 
+
+
+
+
+
+                modelBuilder.Entity<UserTask>()
+                    .HasKey(ut => new {ut.UserId,ut.TaskId});
+
+
+                modelBuilder.Entity<UserTask>()
+                    .HasOne(ut => ut.User)
+                    .WithMany(u => u.UserTasks)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+
+                modelBuilder.Entity<UserTask>()
+                    .HasOne(ut => ut.Task)
+                    .WithMany(t => t.UserTasks)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                
+
+
+
+
+
+
+
+
                 modelBuilder.Entity<Comment>()
                     .HasOne(c => c.Creator)
                     .WithMany(u => u.Comments)
@@ -165,8 +254,7 @@ namespace work_platform_backend.Models
 
                 
          
-                modelBuilder.Entity<RoomSettings>()
-                    .HasKey(rs => new {rs.RoomId,rs.SettingId});
+               
                 
 
 
@@ -181,6 +269,16 @@ namespace work_platform_backend.Models
                     .WithMany(u => u.Sessions)
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.Cascade);
+
+
+
+                    //Reply feature Configuration
+
+
+
+
+
+              base.OnModelCreating(modelBuilder);
 
         }
     }

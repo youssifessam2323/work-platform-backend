@@ -9,11 +9,11 @@ namespace work_platform_backend.Services
 {
     public class AttachmentService
     {
-        private readonly IAttachmentRepository _attachmentRepo;
+        private readonly IAttachmentRepository AttachmentRepository;
 
         public AttachmentService(IAttachmentRepository attachmentRepository)
         {
-            _attachmentRepo = attachmentRepository;
+            AttachmentRepository = attachmentRepository;
 
         }
 
@@ -22,8 +22,8 @@ namespace work_platform_backend.Services
         {
             if (newAttachment != null)
             {
-                await _attachmentRepo.SaveAttachment(newAttachment);
-                await _attachmentRepo.SaveChanges();
+                await AttachmentRepository.SaveAttachment(newAttachment);
+                await AttachmentRepository.SaveChanges();
                 return newAttachment;
             }
             return null;
@@ -32,11 +32,11 @@ namespace work_platform_backend.Services
 
         public async Task<Attachment> UpdateAttachment(int id, Attachment attachment)
         {
-            Attachment UpdatedAttachmentt = await _attachmentRepo.UpdateAttachmentById(id, attachment);
+            Attachment UpdatedAttachmentt = await AttachmentRepository.UpdateAttachmentById(id, attachment);
 
             if (UpdatedAttachmentt != null)
             {
-                await _attachmentRepo.SaveChanges();
+                await AttachmentRepository.SaveChanges();
                 return UpdatedAttachmentt;
             }
 
@@ -48,7 +48,7 @@ namespace work_platform_backend.Services
 
         public async Task DeleteAttachment(int attachmentId)
         {
-            var attachment = await _attachmentRepo.DeleteAttachmentById(attachmentId);
+            var attachment = await AttachmentRepository.DeleteAttachmentById(attachmentId);
             if (attachment == null)
             {
 
@@ -56,7 +56,7 @@ namespace work_platform_backend.Services
 
             }
 
-            await _attachmentRepo.SaveChanges();
+            await AttachmentRepository.SaveChanges();
 
 
         }
@@ -64,16 +64,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<Attachment>> GetAttachmentsOfTask(int taskId)
         {
-            var attachments = await _attachmentRepo.GetAttachmentByTask(taskId);
-
-            if (attachments.Count().Equals(0))
-            {
-                return null;
-
-            }
-
-            return attachments;
-
+            return await AttachmentRepository.GetAttachmentByTask(taskId);
         }
     }
 }

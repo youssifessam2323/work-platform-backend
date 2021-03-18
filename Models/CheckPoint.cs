@@ -16,6 +16,7 @@ namespace work_platform_backend.Models
         
         public int ParentRTaskId { get; set; }        
         public RTask ParentRTask { get; set; }
+
         public List<RTask> SubTasks { get; set; }
         
         
