@@ -76,7 +76,7 @@ namespace work_platform_backend.Controllers
 
         [HttpDelete]
         [Route("DeleteSetting/{settingId}")]
-        public async Task<ActionResult<Permission>> DeletePermission(int settingId)
+        public async Task<ActionResult<Setting>> DeletePermission(int settingId)
         {
             try
             {

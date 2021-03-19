@@ -37,14 +37,14 @@ namespace work_platform_backend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            
             services.AddScoped<AuthService>();
             services.AddScoped<ICheckpointRepository, CheckpointRepo>();
             services.AddScoped<CheckPointService>();
             services.AddScoped<ITeamRepository, TeamRepo>();
             services.AddScoped<TeamService>();
-            services.AddScoped<IPermissionRepository, PermissionRepo>();
-            services.AddScoped<PermissionService>();
             services.AddScoped<IProjectRepository, ProjectRepo>();
             services.AddScoped<ProjectService>();
             services.AddScoped<IAttachmentRepository, AttachmentRepo>();
@@ -57,6 +57,7 @@ namespace work_platform_backend
             services.AddScoped<TaskService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<UserService>();
+            services.AddScoped<CommentService>();
 
 
 

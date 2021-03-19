@@ -7,7 +7,6 @@ namespace work_platform_backend.Models
         public int Id { get; set; }
         
         public string Name { get; set; }
-        public bool value { get; set; }
         public List<RoomSettings> RoomSettings { get; set; }
         
         

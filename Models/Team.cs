@@ -15,12 +15,16 @@ namespace work_platform_backend.Models
         public string Description { get; set; }
         
         public DateTime CreatedAt { get; set; }
-        
 
-        public string CreatorId { get; set; }
+        // under testing 
+        public Guid TeamCode { get; set; }
+        
+                
+
+        public string LeaderId { get; set; }
         
         
-        public User Creator { get; set; }
+        public User Leader { get; set; }
         
         public int RoomId { get; set; }
 
@@ -30,7 +34,13 @@ namespace work_platform_backend.Models
 
         [JsonIgnore]
         public List<RTask> Tasks { get; set; }
+
         public List<TeamsMembers> TeamMembers { get; set; }
+
+        public List<TeamProject> TeamProjects { get; set; }
+
+        
+        
         
         
         

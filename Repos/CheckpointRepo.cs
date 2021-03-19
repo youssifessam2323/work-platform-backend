@@ -15,13 +15,15 @@ namespace work_platform_backend.Repos
         {
             _context = context;
         }
+
     
 
+        
         public async Task<IEnumerable<CheckPoint>> GetAllCheckpointsByParentTask(int parentTaskId)
         {
 
-            return (await _context.CheckPoints.Where(C => C.ParentRTaskId == parentTaskId).ToListAsync());
-            
+            // return (await _context.CheckPoints.Where(C => C.ParentRTaskId == parentTaskId).ToListAsync());
+            return null;
         }
 
         public async Task<CheckPoint> GetCheckPointById(int checkpointId)
@@ -44,9 +46,9 @@ namespace work_platform_backend.Repos
            var NewCheckpoint = await _context.CheckPoints.FindAsync(checkpointId);
             if(NewCheckpoint!=null)
             {
-                NewCheckpoint.Text = checkPoint.Text;
-                NewCheckpoint.IsChecked = checkPoint.IsChecked;
-                NewCheckpoint.ParentRTaskId = checkPoint.ParentRTaskId;
+                NewCheckpoint.CheckpointText = checkPoint.CheckpointText;
+                NewCheckpoint.Percentage = checkPoint.Percentage;
+                // NewCheckpoint.ParentRTaskId = checkPoint.ParentRTaskId;
                 return NewCheckpoint;
 
             }

@@ -1,46 +1,34 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
+
 namespace work_platform_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/attachments")]
     [ApiController]
     public class AttachmentController : ControllerBase
     {
-        private readonly AttachmentService _attachmentService;
+        private readonly AttachmentService AttachmentService;
+        private  readonly ILogger Logger ; 
 
-        public AttachmentController(AttachmentService attachmentService)
+        public AttachmentController(AttachmentService attachmentService,ILogger<AttachmentController> logger)
         {
-            _attachmentService = attachmentService;
+            AttachmentService = attachmentService;
+            Logger = logger;
 
         }
 
-        [HttpGet]
-        [Route("GetAttachmentsInTask/{TaskId}")]
-        public async Task<IActionResult> GetAttachmentsInTask(int TaskId)
-        {
-
-            var Attachments = await _attachmentService.GetAttachmentsOfTask(TaskId);
-            if (Attachments == null)
-            {
-                return NotFound();
-
-            }
-            return Ok(Attachments);
-
-        }
+        
 
 
-        [HttpPost("AddAttachment")]
+        [HttpPost()]
         public async Task<IActionResult> AddAttachment(Attachment attachment)
         {
-            var NewAttachment = await _attachmentService.AddAttachment(attachment);
+            var NewAttachment = await AttachmentService.AddAttachment(attachment);
             if (NewAttachment != null)
             {
                 return Ok(NewAttachment);
@@ -51,10 +39,10 @@ namespace work_platform_backend.Controllers
         [HttpPut("{AttachmentId}")]
         public async Task<IActionResult> UpdateProject(int AttachmentId, Attachment attachment)
         {
-            Attachment UpdatedAttachment = await _attachmentService.UpdateAttachment(AttachmentId, attachment);
+            Attachment UpdatedAttachment = await AttachmentService.UpdateAttachment(AttachmentId, attachment);
             if (UpdatedAttachment == null)
             {
-                return NotFound();
+                return NotFound("There is no attachment with id = " + AttachmentId);
             }
             return Ok(UpdatedAttachment);
 
@@ -62,12 +50,12 @@ namespace work_platform_backend.Controllers
 
 
         [HttpDelete]
-        [Route("delete/{attachmentId}")]
+        [Route("{attachmentId}")]
         public async Task<IActionResult> DeletProject(int attachmentId)
         {
             try
             {
-                await _attachmentService.DeleteAttachment(attachmentId);
+                await AttachmentService.DeleteAttachment(attachmentId);
 
 
             }

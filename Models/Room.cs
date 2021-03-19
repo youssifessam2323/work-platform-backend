@@ -14,18 +14,27 @@ namespace work_platform_backend.Models
         public string Name { get; set; }
         public string Description { get; set; }
         
+
         public DateTime CreatedAt { get; set; }
 
-        [ForeignKey("Creator")]
+
+
         public string CreatorId { get; set; }
+        public User Creator { get; set; }
+
 
         public List<Project> Projects { get; set; }
-        public List<RoomSettings> RoomSettings { get; set; }
-        public List<UserRoomPermission> UserPemissionInRoom { get; set; }
         
-        public virtual User Creator { get; set; }
 
+        public List<RoomSettings> RoomSettings { get; set; }
+        
 
+        public List<Team> Teams { get; set; }
+        public List<ProjectManager> ProjectManagers { get; set; }
+        
+        
+        
+        
 
 
 

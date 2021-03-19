@@ -44,7 +44,8 @@ namespace work_platform_backend.Services
 
             var newUser = mapper.Map<User>(registerRequest);
             var isCreated = await userManager.CreateAsync(newUser,registerRequest.Password);
-            
+
+
             if(isCreated.Succeeded)
             {
                 var userId = newUser.Id;
@@ -81,11 +82,12 @@ namespace work_platform_backend.Services
 
         private async Task SendConfirmationMail(string id ,string email,string token)
         {
-            string confimationUrl = "http://localhost:5001/api/v1/auth/confirmemail?userid="+id+"&token="+token; 
+            string confimationUrl = "http://localhost:5000/api/v1/auth/confirmemail?userid="+id+"&token="+token; 
             Message message 
             = new Message(email, "Email Confirmation","Welcome to our Platform Please Click in the Link to Verify Your Email.", confimationUrl);
            
-            await emailService.SendEmailAsync(message);
+           
+                await emailService.SendEmailAsync(message);
         }
 
         internal async Task<AuthenticationResponse> VerifyEmail(string userId,string token)

@@ -9,7 +9,6 @@ namespace work_platform_backend.Dtos
          public string Username { get; set; }
         
         [Required]
-        [EmailAddress(ErrorMessage = "Email is not Valid.")]
          public string Email { get; set; }
         
         [Required]

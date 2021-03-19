@@ -10,8 +10,8 @@ using work_platform_backend.Models;
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20210123135917_Edit ")]
-    partial class Edit
+    [Migration("20210317185952_tryFixReplyError")]
+    partial class tryFixReplyError
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -162,6 +162,9 @@ namespace work_platform_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -172,6 +175,8 @@ namespace work_platform_backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("TaskId");
 
@@ -185,60 +190,51 @@ namespace work_platform_backend.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("IsChecked")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ParentRTaskId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
+                    b.Property<string>("CheckpointText")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("ParentRTaskId");
+                    b.Property<int>("Percentage")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.ToTable("CheckPoints");
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.DependOn", b =>
+            modelBuilder.Entity("work_platform_backend.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("DependantTaskId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("ReplyId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RTaskId")
+                    b.Property<int>("TaskId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RTaskId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RTaskId");
-
-                    b.HasIndex("RTaskId1");
-
-                    b.ToTable("DependOns");
-                });
-
-            modelBuilder.Entity("work_platform_backend.Models.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
+                    b.Property<string>("text")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions");
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("ReplyId");
+
+                    b.HasIndex("TaskId");
+
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.Project", b =>
@@ -253,6 +249,12 @@ namespace work_platform_backend.Migrations
 
                     b.Property<DateTime>("ActualStartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -269,10 +271,12 @@ namespace work_platform_backend.Migrations
                     b.Property<DateTime>("PlannedStartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("RoomId")
+                    b.Property<int>("RoomId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("RoomId");
 
@@ -281,22 +285,15 @@ namespace work_platform_backend.Migrations
 
             modelBuilder.Entity("work_platform_backend.Models.ProjectManager", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("ProjectId");
+                    b.HasKey("UserId", "RoomId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("RoomId");
 
                     b.ToTable("ProjectManagers");
                 });
@@ -326,7 +323,7 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ParentCheckPointId")
+                    b.Property<int?>("ParentCheckPointId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PlannedEndDate")
@@ -338,7 +335,7 @@ namespace work_platform_backend.Migrations
                     b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TeamId")
+                    b.Property<int>("TeamId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -364,14 +361,22 @@ namespace work_platform_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Rooms");
                 });
@@ -391,6 +396,37 @@ namespace work_platform_backend.Migrations
                     b.ToTable("RoomSettings");
                 });
 
+            modelBuilder.Entity("work_platform_backend.Models.Session", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TaskProgress")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Sessions");
+                });
+
             modelBuilder.Entity("work_platform_backend.Models.Setting", b =>
                 {
                     b.Property<int>("Id")
@@ -400,9 +436,6 @@ namespace work_platform_backend.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("value")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -419,11 +452,11 @@ namespace work_platform_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatorId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LeaderId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -431,18 +464,36 @@ namespace work_platform_backend.Migrations
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("TeamCode")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("TeamId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatorId");
+                    b.HasIndex("LeaderId");
 
                     b.HasIndex("RoomId");
 
                     b.HasIndex("TeamId");
 
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("work_platform_backend.Models.TeamProject", b =>
+                {
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TeamId", "ProjectId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("TeamProjects");
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.TeamsMembers", b =>
@@ -468,9 +519,15 @@ namespace work_platform_backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(256)")
@@ -479,10 +536,13 @@ namespace work_platform_backend.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastName")
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JobTitle")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -490,6 +550,9 @@ namespace work_platform_backend.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasColumnType("nvarchar(256)")
@@ -531,24 +594,19 @@ namespace work_platform_backend.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.UserRoomPermission", b =>
+            modelBuilder.Entity("work_platform_backend.Models.UserTask", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("RoomId")
+                    b.Property<int>("TaskId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PermissionId")
-                        .HasColumnType("int");
+                    b.HasKey("UserId", "TaskId");
 
-                    b.HasKey("UserId", "RoomId");
+                    b.HasIndex("TaskId");
 
-                    b.HasIndex("PermissionId");
-
-                    b.HasIndex("RoomId");
-
-                    b.ToTable("UserRoomPermissions");
+                    b.ToTable("UserTasks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -604,6 +662,10 @@ namespace work_platform_backend.Migrations
 
             modelBuilder.Entity("work_platform_backend.Models.Attachment", b =>
                 {
+                    b.HasOne("work_platform_backend.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId");
+
                     b.HasOne("work_platform_backend.Models.RTask", "Task")
                         .WithMany("Attachments")
                         .HasForeignKey("TaskId")
@@ -611,57 +673,65 @@ namespace work_platform_backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.CheckPoint", b =>
+            modelBuilder.Entity("work_platform_backend.Models.Comment", b =>
                 {
-                    b.HasOne("work_platform_backend.Models.RTask", "ParentRTask")
-                        .WithMany("ChildCheckPoints")
-                        .HasForeignKey("ParentRTaskId")
+                    b.HasOne("work_platform_backend.Models.User", "Creator")
+                        .WithMany("Comments")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("work_platform_backend.Models.Comment", "Reply")
+                        .WithMany()
+                        .HasForeignKey("ReplyId");
+
+                    b.HasOne("work_platform_backend.Models.RTask", "Task")
+                        .WithMany("Comments")
+                        .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("work_platform_backend.Models.DependOn", b =>
-                {
-                    b.HasOne("work_platform_backend.Models.RTask", "DependantTask")
-                        .WithMany("DependOnThem")
-                        .HasForeignKey("RTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("work_platform_backend.Models.RTask", "RTask")
-                        .WithMany("DependantOnMe")
-                        .HasForeignKey("RTaskId1");
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.Project", b =>
                 {
+                    b.HasOne("work_platform_backend.Models.User", "Creator")
+                        .WithMany("OwnedProjects")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("work_platform_backend.Models.Room", "Room")
                         .WithMany("Projects")
-                        .HasForeignKey("RoomId");
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.ProjectManager", b =>
                 {
-                    b.HasOne("work_platform_backend.Models.Project", "Project")
-                        .WithMany("Managers")
-                        .HasForeignKey("ProjectId");
+                    b.HasOne("work_platform_backend.Models.Room", "Room")
+                        .WithMany("ProjectManagers")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("work_platform_backend.Models.User", "User")
-                        .WithMany("Projects")
-                        .HasForeignKey("UserId");
+                        .WithMany("ManagedProjects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.RTask", b =>
                 {
                     b.HasOne("work_platform_backend.Models.User", "Creator")
-                        .WithMany("TasksCreatedByMe")
-                        .HasForeignKey("CreatorId");
+                        .WithMany("OwnedTasks")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.HasOne("work_platform_backend.Models.CheckPoint", "ParentCheckPoint")
                         .WithMany("SubTasks")
                         .HasForeignKey("ParentCheckPointId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("work_platform_backend.Models.Project", "Project")
                         .WithMany("Tasks")
@@ -669,7 +739,17 @@ namespace work_platform_backend.Migrations
 
                     b.HasOne("work_platform_backend.Models.Team", "Team")
                         .WithMany("Tasks")
-                        .HasForeignKey("TeamId");
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("work_platform_backend.Models.Room", b =>
+                {
+                    b.HasOne("work_platform_backend.Models.User", "Creator")
+                        .WithMany("Rooms")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.RoomSettings", b =>
@@ -687,15 +767,28 @@ namespace work_platform_backend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("work_platform_backend.Models.Session", b =>
+                {
+                    b.HasOne("work_platform_backend.Models.RTask", "Task")
+                        .WithMany("Sessions")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("work_platform_backend.Models.User", "User")
+                        .WithMany("Sessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("work_platform_backend.Models.Team", b =>
                 {
-                    b.HasOne("work_platform_backend.Models.User", "Creator")
+                    b.HasOne("work_platform_backend.Models.User", "Leader")
                         .WithMany("Leads")
-                        .HasForeignKey("CreatorId")
+                        .HasForeignKey("LeaderId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("work_platform_backend.Models.Room", "Room")
-                        .WithMany()
+                        .WithMany("Teams")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -703,6 +796,21 @@ namespace work_platform_backend.Migrations
                     b.HasOne("work_platform_backend.Models.Team", null)
                         .WithMany("SubTeams")
                         .HasForeignKey("TeamId");
+                });
+
+            modelBuilder.Entity("work_platform_backend.Models.TeamProject", b =>
+                {
+                    b.HasOne("work_platform_backend.Models.Project", "Project")
+                        .WithMany("TeamProjects")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("work_platform_backend.Models.Team", "Team")
+                        .WithMany("TeamProjects")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.TeamsMembers", b =>
@@ -720,20 +828,16 @@ namespace work_platform_backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("work_platform_backend.Models.UserRoomPermission", b =>
+            modelBuilder.Entity("work_platform_backend.Models.UserTask", b =>
                 {
-                    b.HasOne("work_platform_backend.Models.Permission", "Permission")
-                        .WithMany("UserPermissionInRoom")
-                        .HasForeignKey("PermissionId");
-
-                    b.HasOne("work_platform_backend.Models.Room", "Room")
-                        .WithMany("UserPemissionInRoom")
-                        .HasForeignKey("RoomId")
+                    b.HasOne("work_platform_backend.Models.RTask", "Task")
+                        .WithMany("UserTasks")
+                        .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("work_platform_backend.Models.User", "User")
-                        .WithMany("UserPermissionsInRoom")
+                        .WithMany("UserTasks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

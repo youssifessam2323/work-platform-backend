@@ -21,14 +21,21 @@ namespace work_platform_backend.Models
         
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<DependOn> DependOns { get; set; }
-        public DbSet<Permission> Permissions { get; set; }
         public DbSet<ProjectManager> ProjectManagers { get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<TeamsMembers> TeamsMembers { get; set; }
-        public DbSet<UserRoomPermission> UserRoomPermissions { get; set; }
         
         public DbSet<RoomSettings> RoomSettings { get; set; }
+        public DbSet<TeamProject> TeamProjects { get; set; }
+        public DbSet<UserTask> UserTasks { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Session> Sessions { get; set; }
+        
+        
+        
+        
+        
+        
         
         
         
@@ -40,23 +47,53 @@ namespace work_platform_backend.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-              base.OnModelCreating(modelBuilder);
 
-              modelBuilder.Entity<DependOn>()
-              .HasOne( d => d.RTask)
-              .WithMany(t => t.DependantOnMe)
-              .HasForeignKey(d => d.RTaskId);
-
-
-             modelBuilder.Entity<DependOn>()
-              .HasOne( d => d.DependantTask)
-              .WithMany(t => t.DependOnThem)
-              .HasForeignKey(d => d.RTaskId);   
+            modelBuilder.Entity<Room>()
+                .HasOne(r => r.Creator)
+                .WithMany(u => u.Rooms)
+                .OnDelete(DeleteBehavior.SetNull);
 
 
+
+             modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Task)
+                    .WithMany(t => t.Comments)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+           
             modelBuilder.Entity<Project>()
-            .HasMany(p => p.Managers)
-            .WithOne(pm => pm.Project);
+                .HasOne(p => p.Creator)
+                .WithMany(u => u.OwnedProjects)
+                .HasForeignKey(p => p.CreatorId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+
+               
+
+
+            modelBuilder.Entity<RTask>()
+                .HasOne(t => t.ParentCheckPoint)
+                .WithMany(c => c.SubTasks)
+                .HasForeignKey(t => t.ParentCheckPointId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<RTask>()
+                .HasOne(t => t.Creator)
+                .WithMany(u => u.OwnedTasks)
+                .HasForeignKey(u => u.CreatorId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<RTask>()
+                .Property(t => t.CreatorId)
+                .IsRequired(false);
+
+
+            // modelBuilder.Entity<RTask>()
+                // .HasOne(t => t.DependantTask)
+                // .WithOne()
+                // .OnDelete(DeleteBehavior.SetNull);
 
 
             modelBuilder.Entity<CheckPoint>()
@@ -64,16 +101,10 @@ namespace work_platform_backend.Models
             .WithMany(t => t.ChildCheckPoints)
             .HasForeignKey(c => c.ParentRTaskId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
 
-            modelBuilder.Entity<RTask>()
-            .HasOne(t => t.ParentCheckPoint)
-            .WithMany(c => c.SubTasks)
-            .HasForeignKey(t => t.ParentCheckPointId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-
+          
 
             modelBuilder.Entity<Attachment>()
             .HasOne(a => a.Task)
@@ -82,27 +113,173 @@ namespace work_platform_backend.Models
             .OnDelete(DeleteBehavior.Cascade);
 
 
-            modelBuilder.Entity<UserRoomPermission>()
-            .HasKey(urp => new {urp.UserId,urp.RoomId} );
+
+
+
 
 
             modelBuilder.Entity<TeamsMembers>()
             .HasKey(tm => new {tm.UserId,tm.TeamId});
 
-            modelBuilder.Entity<RoomSettings>()
-            .HasKey(rs => new { rs.RoomId,rs.SettingId});
+
+            modelBuilder.Entity<TeamsMembers>()
+                .HasOne(tm => tm.User)
+                .WithMany(u => u.TeamMembers)
+                .OnDelete(DeleteBehavior.Cascade);
 
 
             modelBuilder.Entity<TeamsMembers>()
-            .HasKey(tm => new { tm.UserId,tm.TeamId});
+                .HasOne(tm => tm.Team)
+                .WithMany(t => t.TeamMembers)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+
+
+
+
+            modelBuilder.Entity<RoomSettings>()
+            .HasKey(rs => new { rs.RoomId,rs.SettingId});
+
+            modelBuilder.Entity<RoomSettings>()
+                .HasOne(rs => rs.Room)
+                .WithMany(r => r.RoomSettings)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+
+
+
+
+
+
 
 
             modelBuilder.Entity<Team>()
-            .HasOne(t => t.Creator)
+            .HasOne(t => t.Leader)
             .WithMany(u => u.Leads)
-            .HasForeignKey(t => t.CreatorId)
+            .HasForeignKey(t => t.LeaderId)
             .OnDelete(DeleteBehavior.SetNull);
             
+            
+            modelBuilder.Entity<Team>()
+                .HasOne(t => t.Room)
+                .WithMany(r => r.Teams)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            
+
+
+
+
+
+
+            modelBuilder.Entity<ProjectManager>()
+                .HasKey(pm => new {pm.UserId,pm.RoomId});
+
+            modelBuilder.Entity<ProjectManager>()
+                .HasOne(pm => pm.User)
+                .WithMany(u => u.ManagedProjects)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProjectManager>()
+                .HasOne(pm => pm.Room)
+                .WithMany(r => r.ProjectManagers)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+
+
+
+
+
+
+
+
+            modelBuilder.Entity<TeamProject>()
+                .HasKey(pm => new {pm.TeamId,pm.ProjectId});
+
+
+            modelBuilder.Entity<TeamProject>()
+                .HasOne(tp => tp.Team)
+                .WithMany(t => t.TeamProjects)
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+                modelBuilder.Entity<Room>()
+                    .HasIndex(r => r.Name)
+                    .IsUnique();
+
+                    
+                modelBuilder.Entity<Room>()
+                    .HasOne(r => r.Creator)
+                    .WithMany(u => u.Rooms)
+                    .HasForeignKey(p => p.CreatorId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+
+
+
+
+
+
+
+                modelBuilder.Entity<UserTask>()
+                    .HasKey(ut => new {ut.UserId,ut.TaskId});
+
+
+                modelBuilder.Entity<UserTask>()
+                    .HasOne(ut => ut.User)
+                    .WithMany(u => u.UserTasks)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+
+                modelBuilder.Entity<UserTask>()
+                    .HasOne(ut => ut.Task)
+                    .WithMany(t => t.UserTasks)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+               
+
+
+
+
+
+
+
+
+                modelBuilder.Entity<Comment>()
+                    .HasOne(c => c.Creator)
+                    .WithMany(u => u.Comments)
+                    .OnDelete(DeleteBehavior.Cascade);    
+
+                
+         
+               
+                
+
+
+                modelBuilder.Entity<Session>()
+                    .HasOne(s => s.Task)
+                    .WithMany(t => t.Sessions)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                modelBuilder.Entity<Session>()
+                    .HasOne(s => s.User)
+                    .WithMany(u => u.Sessions)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+
+
+                    //Reply feature Configuration
+
+
+
+
+
+              base.OnModelCreating(modelBuilder);
+
         }
     }
 }
