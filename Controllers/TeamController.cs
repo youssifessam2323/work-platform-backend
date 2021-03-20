@@ -11,7 +11,7 @@ using work_platform_backend.Services;
 
 namespace work_platform_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/teams")]
     [ApiController]
     public class TeamController : ControllerBase
     {

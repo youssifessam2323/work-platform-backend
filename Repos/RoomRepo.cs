@@ -22,7 +22,7 @@ namespace work_platform_backend.Repos
 
         public async Task<Room> GetRoomById(int roomId)
         {
-          return ( await _context.Rooms.Include(R=>R.Creator).FirstOrDefaultAsync(R=>R.Id==roomId));
+          return ( await _context.Rooms.FirstOrDefaultAsync(R=>R.Id==roomId));
         }
 
         public async Task<IEnumerable<Room>> GetAllRooms()
