@@ -41,6 +41,10 @@ namespace work_platform_backend.Models
 
         
         
+        public override string ToString()
+        {
+            return "Id = " + Id + " Name = " + Name ; 
+        }
         
         
         

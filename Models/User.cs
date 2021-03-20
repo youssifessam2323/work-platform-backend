@@ -31,7 +31,6 @@ namespace work_platform_backend.Models
         public List<RTask> OwnedTasks { get; set; }
   
         public List<TeamsMembers> TeamMembers { get; set; }
-        [JsonIgnore]
   
         public List<Room> Rooms { get; set; }
 

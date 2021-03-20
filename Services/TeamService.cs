@@ -29,6 +29,7 @@ namespace work_platform_backend.Services
                 newTeam.RoomId = roomId;
                 newTeam.LeaderId = creatorId;
                 newTeam.CreatedAt = DateTime.Now;
+                newTeam.TeamCode = Guid.NewGuid();
                 await _TeamRepo.SaveTeam(newTeam);
                 await _TeamRepo.SaveChanges();
                 return newTeam;
@@ -89,11 +90,6 @@ namespace work_platform_backend.Services
         {
             var Teams = await _TeamRepo.GetAllTeamsByMember(UserId);
 
-            if (Teams.Count().Equals(0))
-            {
-                return null;
-
-            }
 
             return Teams;
 

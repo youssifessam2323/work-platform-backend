@@ -36,7 +36,8 @@ namespace work_platform_backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             
@@ -58,7 +59,7 @@ namespace work_platform_backend
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<UserService>();
             services.AddScoped<CommentService>();
-
+            services.AddScoped<IUserRepository,UserRepository>();
 
 
             services.AddDbContext<ApplicationContext>(options => {

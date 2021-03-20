@@ -11,16 +11,16 @@ namespace work_platform_backend.Repos
     {
 
 
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext context;
 
         public TeamRepo(ApplicationContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId)
         {
-            var ListOfUserCreator = await _context.Teams.Where(T => T.LeaderId == userId).ToListAsync();
+            var ListOfUserCreator = await context.Teams.Where(T => T.LeaderId == userId).ToListAsync();
             return ListOfUserCreator;
         }
 
@@ -29,16 +29,15 @@ namespace work_platform_backend.Repos
         public async Task<IEnumerable<Team>> GetAllTeamsByMember(string userId)
         {
 
-            var teamsOfMember = (from Team in _context.Teams
-                                 join Member in _context.TeamsMembers
+            var teamsOfMember = (from Team in context.Teams
+                                 join Member in context.TeamsMembers
                                  on Team.Id equals Member.TeamId
-                                 join U in _context.Users
+                                 join U in context.Users
                                  on Member.UserId equals U.Id
 
                                  where Member.UserId == userId
                                  select Team
                       ).ToListAsync();
-
             return await teamsOfMember;
 
         }
@@ -46,7 +45,7 @@ namespace work_platform_backend.Repos
 
         public async Task<IEnumerable<Team>> GetAllTeamsByRoom(int roomId)
         {
-           return( await _context.Teams.Where(T => T.RoomId == roomId).Include(T=>T.Tasks).ToListAsync());
+           return( await context.Teams.Where(T => T.RoomId == roomId).Include(T=>T.Tasks).ToListAsync());
 
    
 
@@ -54,22 +53,22 @@ namespace work_platform_backend.Repos
 
         public async Task<Team> GetTeamById(int teamId)
         {
-           return( await _context.Teams.FirstOrDefaultAsync(T => T.Id == teamId));
+           return( await context.Teams.FirstOrDefaultAsync(T => T.Id == teamId));
         }
 
         public async Task<bool> SaveChanges()
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            return (await context.SaveChangesAsync() >= 0);
         }
 
         public async Task SaveTeam(Team team)
         {
-            await _context.Teams.AddAsync(team);
+            await context.Teams.AddAsync(team);
         }
 
         public async Task<Team> UpdateTeamById(int teamId,Team team)
         {
-            var NewTeam =  await _context.Teams.FindAsync(teamId);
+            var NewTeam =  await context.Teams.FindAsync(teamId);
             if( NewTeam!=null)
             {
                 NewTeam.Name = team.Name;
@@ -85,14 +84,19 @@ namespace work_platform_backend.Repos
 
         public async Task<Team> DeleteTeamById(int teamId)
         {
-            Team team = await _context.Teams.FindAsync(teamId);
+            Team team = await context.Teams.FindAsync(teamId);
             if (team != null)
             {
-                _context.Teams.Remove(team);
+                context.Teams.Remove(team);
             }
             return team;
         }
 
-      
+        public async Task<Team> GetTeamByTeamCode(string teamCode)
+        {
+            Console.WriteLine("Inserted team code =  " + teamCode);
+            Guid insertedTeamCode = new Guid(teamCode);
+            return await context.Teams.Where(t => t.TeamCode == insertedTeamCode).FirstAsync();    
+        }
     }
 }
