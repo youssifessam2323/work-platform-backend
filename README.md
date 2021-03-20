@@ -130,4 +130,4 @@
 
 - [PUT] update a checkpoint by Id [UNDONE]
 
-- [DELETE] delete a checkpoint by Id [UNDO]
+- [DELETE] delete a checkpoint by Id [UNDONE]
