@@ -49,6 +49,7 @@ namespace work_platform_backend
             services.AddScoped<IProjectRepository, ProjectRepo>();
             services.AddScoped<ProjectService>();
             services.AddScoped<IAttachmentRepository, AttachmentRepo>();
+            services.AddScoped<ICommentRepository,CommentRepository>();
             services.AddScoped<AttachmentService>();
             services.AddScoped<IRoomRepository, RoomRepo>();
             services.AddScoped<RoomService>();
@@ -58,13 +59,16 @@ namespace work_platform_backend
             services.AddScoped<TaskService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<UserService>();
+            services.AddScoped<ProjectManagerService>();
             services.AddScoped<CommentService>();
+            services.AddScoped<SessionService>();
             services.AddScoped<IUserRepository,UserRepository>();
+            services.AddScoped<ISessionRepository,SessionRepository>();
 
 
             services.AddDbContext<ApplicationContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            });         
+            },ServiceLifetime.Transient);         
 
             var emailConfig = Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
             services.AddSingleton(emailConfig);

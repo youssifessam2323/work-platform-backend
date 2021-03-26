@@ -9,33 +9,33 @@ namespace work_platform_backend.Repos
 {
     public class ProjectRepo : IProjectRepository
     {
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext context;
 
         public ProjectRepo(ApplicationContext context)
         {
-            _context = context;
+            this.context = context;
         }
         public async Task<IEnumerable<Project>> GetAllProjectsByRoom(int roomId)
         {
-            return (await _context.Projects.Include(P=>P.Tasks).ThenInclude(t => t.Team)
+            return (await context.Projects.Include(P=>P.Tasks).ThenInclude(t => t.Team).Include(p => p.Creator)
                 .Where(P => P.Room.Id == roomId).ToListAsync());
         }
 
         public async Task<Project> GetProjectById(int projectId)
         {
-          return( await _context.Projects.FirstOrDefaultAsync(P => P.Id == projectId));
+          return( await context.Projects.FirstOrDefaultAsync(P => P.Id == projectId));
         }
 
         
 
         public async Task SaveProject(Project project)
         {
-           await _context.Projects.AddAsync(project);
+           await context.Projects.AddAsync(project);
         }
 
         public async Task<Project> UpdateProjectById(int projectId, Project project)
         {
-            var NewProject = await _context.Projects.FindAsync(projectId);
+            var NewProject = await context.Projects.FindAsync(projectId);
             if (NewProject != null)
             {
                 NewProject.Name = project.Name;
@@ -53,18 +53,35 @@ namespace work_platform_backend.Repos
 
         public async Task<Project> DeleteProjectById(int projectId)
         {
-            Project project = await _context.Projects.FindAsync(projectId);
+            Project project = await context.Projects.FindAsync(projectId);
             if (project != null)
             {
-                _context.Projects.Remove(project);
+                context.Projects.Remove(project);
             }
             return project;
         }
 
         public async Task<bool> SaveChanges()
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            return (await context.SaveChangesAsync() >= 0);
         }
 
+        public async Task<List<Project>> GetProjectByTeam(int teamId)
+        {
+            List<TeamProject> teamProjects = await context.TeamProjects.Include(tp => tp.Project).Where(tp => tp.TeamId == teamId ).ToListAsync();
+            List<Project> projects = new List<Project>();
+
+            teamProjects.ForEach(tp => projects.Add(tp.Project));
+            return projects;
+        }
+
+        public async Task AddTeamToProject(int projectId, int teamId)
+        {
+            TeamProject teamProject = new TeamProject();
+            teamProject.TeamId = teamId;
+            teamProject.ProjectId = projectId;
+            await context.TeamProjects.AddAsync(teamProject);
+            
+        }
     }
 }

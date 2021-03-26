@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +12,13 @@ namespace work_platform_backend.Services
 {
     public class ProjectService
     {
-        private readonly IProjectRepository _ProjectRepo;
+        private readonly IProjectRepository projectRepository;
         private readonly IMapper _mapper;
+
 
         public ProjectService(IProjectRepository projectRepository,  IMapper mapper)
         {
-            _ProjectRepo = projectRepository;
+            this.projectRepository = projectRepository;
             _mapper = mapper;
 
         }
@@ -26,8 +28,8 @@ namespace work_platform_backend.Services
         {
             if (newProject != null)
             {
-                await _ProjectRepo.SaveProject(newProject);
-                await _ProjectRepo.SaveChanges();
+                await projectRepository.SaveProject(newProject);
+                await projectRepository.SaveChanges();
                 return newProject;
             }
             return null;
@@ -36,11 +38,11 @@ namespace work_platform_backend.Services
 
         public async Task<Project> UpdateProject(int id, Project project)
         {
-            Project NewProject = await _ProjectRepo.UpdateProjectById(id, project);
+            Project NewProject = await projectRepository.UpdateProjectById(id, project);
 
             if (NewProject != null)
             {
-                await _ProjectRepo.SaveChanges();
+                await projectRepository.SaveChanges();
                 return NewProject;
             }
 
@@ -49,10 +51,15 @@ namespace work_platform_backend.Services
 
         }
 
+        public async Task AddTeamToProject(int projectId, int teamId)
+        {
+            await projectRepository.AddTeamToProject(projectId,teamId);
+            await projectRepository.SaveChanges();
+        }
 
         public async Task DeleteProject(int projectId)
         {
-            var Team = await _ProjectRepo.DeleteProjectById(projectId);
+            var Team = await projectRepository.DeleteProjectById(projectId);
             if (Team == null)
             {
 
@@ -60,7 +67,7 @@ namespace work_platform_backend.Services
 
             }
 
-            await _ProjectRepo.SaveChanges();
+            await projectRepository.SaveChanges();
 
 
         }
@@ -68,7 +75,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<ResponseProjectDto>> GetProjectsByRoom(int roomId)
         {
-            var Projects = await _ProjectRepo.GetAllProjectsByRoom(roomId);
+            var Projects = await projectRepository.GetAllProjectsByRoom(roomId);
 
             if (Projects.Count().Equals(0))
             {
@@ -83,7 +90,7 @@ namespace work_platform_backend.Services
 
         public async Task<Project> GetProject(int projectId)
         {
-            var Project = await _ProjectRepo.GetProjectById(projectId);
+            var Project = await projectRepository.GetProjectById(projectId);
 
             if (Project==null)
             {
@@ -95,5 +102,13 @@ namespace work_platform_backend.Services
 
         }
 
+        public async Task<Project> AddNewProjectToRoom(string userId, int roomId, Project project)
+        {
+            project.CreatorId = userId;
+            project.RoomId = roomId;
+            await projectRepository.SaveProject(project);
+            await projectRepository.SaveChanges();
+            return project;
+        }
     }
 }

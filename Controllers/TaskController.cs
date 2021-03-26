@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using work_platform_backend.Exceptions;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
@@ -14,16 +16,24 @@ namespace work_platform_backend.Controllers
     [ApiController]
     public class TaskController : ControllerBase
     {
-        private readonly TaskService _taskService;
+        private readonly TaskService taskService;
         private readonly AttachmentService AttachmentService;
         private readonly CommentService commentService;
+        private readonly UserService userService;
+        private readonly CheckPointService checkPointService;
+        private readonly SessionService sessionService;
 
-        public TaskController(TaskService taskService, AttachmentService attachmentService,CommentService commentService)
+        public TaskController(TaskService taskService, AttachmentService attachmentService, CommentService commentService, UserService userService, CheckPointService checkPointService, SessionService sessionService)
         {
-            _taskService = taskService;
+            this.taskService = taskService;
             AttachmentService = attachmentService;
             this.commentService = commentService;
+            this.userService = userService;
+            this.checkPointService = checkPointService;
+            this.sessionService = sessionService;
         }
+
+
 
 
         [HttpGet]
@@ -31,7 +41,7 @@ namespace work_platform_backend.Controllers
         public async Task<IActionResult> GetTasksOfCreator(string TaskCreatorId)
         {
 
-            var TaskByCreator = await _taskService.GetTaskByCreator(TaskCreatorId);
+            var TaskByCreator = await taskService.GetTaskByCreator(TaskCreatorId);
             if (TaskByCreator == null)
             {
                 return NotFound();
@@ -43,14 +53,14 @@ namespace work_platform_backend.Controllers
 
 
         [HttpGet]
-        [Route("{TaskId}/attatchments")]
+        [Route("{TaskId}/attachments")]
         public async Task<IActionResult> GetAttachmentsInTask(int TaskId)
         {
 
             var Attachments = await AttachmentService.GetAttachmentsOfTask(TaskId);
             if (Attachments == null)
             {
-                return NotFound();
+                return Ok();
 
             }
             return Ok(Attachments);
@@ -62,7 +72,7 @@ namespace work_platform_backend.Controllers
         public async Task<IActionResult> GetTasksOfTeam(int TeamId)
         {
 
-            var TasksByTeam = await _taskService.GetTasksByTeam(TeamId);
+            var TasksByTeam = await taskService.GetTasksByTeam(TeamId);
             if (TasksByTeam == null)
             {
                 return NotFound();
@@ -77,7 +87,7 @@ namespace work_platform_backend.Controllers
         public async Task<IActionResult> GetTasksOfProject(int ProjectId)
         {
 
-            var TasksByProject = await _taskService.GetTasksByProject(ProjectId);
+            var TasksByProject = await taskService.GetTasksByProject(ProjectId);
             if (TasksByProject == null)
             {
                 return NotFound();
@@ -92,7 +102,7 @@ namespace work_platform_backend.Controllers
         public async Task<IActionResult> GetSubTasksOfParentCheckPoint(int CheckPointId)
         {
 
-            var TasksByParentCheckpoint = await _taskService.GetSubTasksByParentCheckPoint(CheckPointId);
+            var TasksByParentCheckpoint = await taskService.GetSubTasksByParentCheckPoint(CheckPointId);
             if (TasksByParentCheckpoint == null)
             {
                 return NotFound();
@@ -102,12 +112,28 @@ namespace work_platform_backend.Controllers
 
         }
 
+  
+
+
         [HttpGet]
-        [Route("GetTask/{TaskId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Route("{TaskId}/dependants")]
+        public async Task<IActionResult> GetTaskDependantTasks(int TaskId)
+        {
+
+            var dependantTasks = await taskService.GetTaskDependantTasks(TaskId);
+            return Ok(dependantTasks);
+
+        }
+
+
+        [HttpGet]
+        [Route("{TaskId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetSingleTask(int TaskId)
         {
 
-            var task = await _taskService.GetTask(TaskId);
+            var task = await taskService.GetTask(TaskId);
             if (task == null)
             {
                 return NotFound();
@@ -118,21 +144,15 @@ namespace work_platform_backend.Controllers
         }
 
 
-        [HttpPost()]
-        public async Task<IActionResult> AddTask(RTask task)
-        {
-            var NewTask = await _taskService.AddTask(task);
-            if (NewTask != null)
-            {
-                return Ok(NewTask);
-            }
-            return BadRequest();
-        }
+
+
+
 
         [HttpPut("{TaskId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> UpdateTask(int TaskId, RTask task)
         {
-            RTask UpdatedTask = await _taskService.UpdateTask(TaskId, task);
+            RTask UpdatedTask = await taskService.UpdateTask(TaskId, task);
             if (UpdatedTask == null)
             {
                 return NotFound();
@@ -142,15 +162,16 @@ namespace work_platform_backend.Controllers
         }
 
 
+
+        //not working
         [HttpDelete]
-        [Route("delete/{TaskId}")]
+        [Route("{TaskId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> DeletTask(int TaskId)
         {
             try
             {
-                await _taskService.DeleteTask(TaskId);
-
-
+                await taskService.DeleteTask(TaskId);
             }
             catch (Exception Ex)
             {
@@ -161,25 +182,51 @@ namespace work_platform_backend.Controllers
             return Ok($"Object with id = {TaskId} was  Deleted");
         }
 
-        [HttpGet]
-        [Route("{taskId}/comments")]
-        public async Task<IActionResult> GetTaskComments(int taskId)
-        {
-             return Ok(await commentService.GetCommentsByTask(taskId));
-        }
-
-
         [HttpPost]
         [Route("{taskId}/comments")]
-        public async Task<IActionResult> AddComment(int taskId,[FromBody]Comment comment)
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> SaveNewCheckpointInTask(int taskId,Comment comment)
         {
-            var newComment = await commentService.CreatNewComment(taskId,comment);
-            
-                if(newComment != null )
-                    return Ok();
-
-                    
-            return BadRequest();
+            return Ok(await commentService.AddNewCommentInTask(userService.GetUserId(),taskId,comment));
         }
+
+
+        [HttpGet]
+        [Route("{taskId}/comments")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetTaskComments(int taskId)
+        {
+            return Ok(await commentService.GetCommentsByTask(taskId));
+        }
+
+
+
+    
+        [HttpGet]
+        [Route("{taskId}/checkpoints")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetTaskCheckpoints(int taskId)
+        {
+            return Ok(await checkPointService.GetCheckpointsByTask(taskId));
+        }
+
+        [HttpPost]
+        [Route("{taskId}/checkpoints")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> SaveNewCheckpointInTask(int taskId,CheckPoint checkPoint)
+        {
+            return Ok(await checkPointService.SaveNewCheckpointInTask(taskId,checkPoint));
+        }
+
+
+        [HttpGet]
+        [Route("{taskId}/authuser/sessions")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetTaskAuthUserSessions(int taskId)
+        {
+            return Ok(await sessionService.GetSessionsByTaskAndUser(userService.GetUserId(),taskId));
+        }
+
+       
     }
 }

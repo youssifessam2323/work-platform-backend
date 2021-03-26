@@ -11,8 +11,10 @@ namespace work_platform_backend.Repos
         Task<IEnumerable<Room>> GetRoomsByCreator(string creatorId);
         Task<IEnumerable<Room>> GetAllRooms();
          Task SaveRoom(Room room );
-         Task<Room> UpdateRoomById(int roomId, RequestRoomDto room);
+         Task<Room> UpdateRoomById(int roomId, RoomRequest roomRequest);
          Task<Room> DeleteRoomById(int roomId);
          Task<bool> SaveChanges();
+        Task AddNewProjectManager(ProjectManager projectManager);
+        Task<List<User>> GetRoomPorjectManagersByRoomId(int roomId);
     }
 }

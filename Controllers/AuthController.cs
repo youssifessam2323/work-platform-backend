@@ -8,6 +8,7 @@ using work_platform_backend.Services;
 using System;
 using System.Linq;
 using work_platform_backend.validation;
+using work_platform_backend.Dtos.Auth;
 
 namespace work_platform_backend.Controllers
 {
@@ -19,9 +20,12 @@ namespace work_platform_backend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService authService;
-        public AuthController(AuthService authService)
+        private readonly UserService userService;
+
+        public AuthController(AuthService authService, UserService userService = null)
         {
-            this.authService = authService ; 
+            this.authService = authService;
+            this.userService = userService;
         }
 
 
@@ -90,6 +94,23 @@ namespace work_platform_backend.Controllers
             return BadRequest();
         }
 
+         //api/auth/confirmemail?userid&token
+        [HttpGet]
+        [Route("password/change")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ActionResult> ChangePassword([FromBody] PasswordChangeRequest passwordRequest)
+        {
+            
+          
+            return Ok(await authService
+                    .ChangePassword
+                    (
+                        userService.GetUserId()
+                        ,passwordRequest.CurrentPassword
+                        ,passwordRequest.NewPassword
+                    ));
+        }
+    
 
 
 

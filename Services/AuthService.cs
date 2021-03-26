@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using work_platform_backend.Authorization;
 using work_platform_backend.Dtos;
 using work_platform_backend.Models;
+using work_platform_backend.Repos;
 
 namespace work_platform_backend.Services
 {
@@ -22,14 +23,16 @@ namespace work_platform_backend.Services
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
         private readonly IEmailService emailService;
+        private readonly IUserRepository userRepository;
         private UserManager<User> userManager;
 
-        public AuthService(IMapper mapper , IConfiguration configuration , IEmailService emailService, UserManager<User> userManager )
+        public AuthService(IMapper mapper, IConfiguration configuration, IEmailService emailService, UserManager<User> userManager,IUserRepository userRepository = null)
         {
             this.mapper = mapper;
-            this.configuration = configuration ; 
-            this.emailService = emailService ;
-            this.userManager = userManager; 
+            this.configuration = configuration;
+            this.emailService = emailService;
+            this.userManager = userManager;
+            this.userRepository = userRepository;
         }
         public async Task<AuthenticationResponse> SignUp(RegisterRequest registerRequest)
         {
@@ -79,6 +82,13 @@ namespace work_platform_backend.Services
             return WebEncoders.Base64UrlEncode(encodedToken);
         }
 
+        public async Task<bool> ChangePassword(string userId,string currentPassword,string newPassword)
+        {
+            User user = await userRepository.GetUserById(userId);
+            var task = await userManager.ChangePasswordAsync(user,currentPassword,newPassword);
+            
+            return task.Succeeded;
+        }
 
         private async Task SendConfirmationMail(string id ,string email,string token)
         {

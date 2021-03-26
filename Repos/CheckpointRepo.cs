@@ -9,41 +9,38 @@ namespace work_platform_backend.Repos
 {
     public class CheckpointRepo : ICheckpointRepository
     {
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext context;
 
         public CheckpointRepo(ApplicationContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
     
 
         
-        public async Task<IEnumerable<CheckPoint>> GetAllCheckpointsByParentTask(int parentTaskId)
+        public async Task<IEnumerable<CheckPoint>> GetAllCheckpointsByParentTaskId(int parentTaskId)
         {
-
-            // return (await _context.CheckPoints.Where(C => C.ParentRTaskId == parentTaskId).ToListAsync());
-            return null;
+            return await context.CheckPoints.Include(c => c.SubTasks).Where(c => c.ParentRTaskId == parentTaskId).ToListAsync();
         }
 
         public async Task<CheckPoint> GetCheckPointById(int checkpointId)
         {
-            return (await _context.CheckPoints.FirstOrDefaultAsync(C => C.Id == checkpointId));
+            return (await context.CheckPoints.FirstOrDefaultAsync(C => C.Id == checkpointId));
         }
 
 
 
 
-        public async Task SaveCheckPoint(CheckPoint checkpoint)
+        public async Task SaveCheckPoint(int taskId, CheckPoint checkpoint)
         {
-            await _context.CheckPoints.AddAsync(checkpoint);
-          
-
+            checkpoint.ParentRTaskId = taskId;
+            await context.CheckPoints.AddAsync(checkpoint);
         }
 
         public async Task<CheckPoint> UpdateCheckpointById(int checkpointId,CheckPoint checkPoint)
         {
-           var NewCheckpoint = await _context.CheckPoints.FindAsync(checkpointId);
+           var NewCheckpoint = await context.CheckPoints.FindAsync(checkpointId);
             if(NewCheckpoint!=null)
             {
                 NewCheckpoint.CheckpointText = checkPoint.CheckpointText;
@@ -59,10 +56,10 @@ namespace work_platform_backend.Repos
         public async Task<CheckPoint> DeleteCheckpointById(int checkpointId)
         {
 
-            CheckPoint checkPoint = await _context.CheckPoints.FindAsync(checkpointId);
+            CheckPoint checkPoint = await context.CheckPoints.FindAsync(checkpointId);
             if (checkPoint != null)
             {
-                _context.CheckPoints.Remove(checkPoint);
+                context.CheckPoints.Remove(checkPoint);
 
             }
             return checkPoint;
@@ -71,7 +68,7 @@ namespace work_platform_backend.Repos
 
         public async Task<bool> SaveChanges()
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            return (await context.SaveChangesAsync() >= 0);
         }
 
        

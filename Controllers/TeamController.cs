@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using work_platform_backend.Exceptions;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
@@ -15,13 +18,15 @@ namespace work_platform_backend.Controllers
     [ApiController]
     public class TeamController : ControllerBase
     {
-        private readonly TeamService _teamService;
-        private readonly UserService UserService;
+        private readonly TeamService teamService;
+        private readonly UserService userService;
+        private readonly TaskService taskService;
 
-        public TeamController(TeamService teamService,UserService getuserService)
+        public TeamController(TeamService teamService, UserService userService, TaskService taskService)
         {
-            _teamService = teamService;
-            UserService = getuserService;
+            this.teamService = teamService;
+            this.userService = userService;
+            this.taskService = taskService;
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -29,9 +34,9 @@ namespace work_platform_backend.Controllers
         [Route("GetTeamsCreator")]
         public async Task<IActionResult> GetTeamsCreator()
         {
-          string TeamCreatorId = UserService.GetUserId();
+            string teamCreatorId = userService.GetUserId();
 
-            var GetTeamsByCreator = await _teamService.GetTeamsByCreator(TeamCreatorId);
+            var GetTeamsByCreator = await teamService.GetTeamsByCreator(teamCreatorId);
             if (GetTeamsByCreator == null)
             {
                 return Ok(new List<Team>());
@@ -47,8 +52,8 @@ namespace work_platform_backend.Controllers
 
         public async Task<IActionResult> GetTeamsOfMember()
         {
-            string TeamMemberId = UserService.GetUserId();
-            var GetTeamsMember = await _teamService.GetTeamsByMember(TeamMemberId);
+            string TeamMemberId = userService.GetUserId();
+            var GetTeamsMember = await teamService.GetTeamsByMember(TeamMemberId);
             if (GetTeamsMember == null)
             {
                 return Ok(new List<Team>());
@@ -59,30 +64,17 @@ namespace work_platform_backend.Controllers
 
         }
 
-        [HttpGet]
-        [Route("GetTeamsRoom/{roomId}")]
-        public async Task<IActionResult> GetTeamsInRoom(int roomId)
-        {
 
-            var GetTeamsRoom = await _teamService.GetTeamsByRoom(roomId);
-            if (GetTeamsRoom == null)
-            {
-                return Ok(new List<Team>());
-
-            }
-            return Ok(GetTeamsRoom);
-
-        }
 
         [HttpGet]
-        [Route("GetTeam/{teamId}")]
-        public async Task<IActionResult> GetSingleTeam(int teamId)
+        [Route("{teamId}")]
+        public async Task<IActionResult> GetTeamById(int teamId)
         {
 
-            var Team = await _teamService.GetTeam(teamId);
+            var Team = await teamService.GetTeam(teamId);
             if (Team == null)
             {
-                return NotFound();
+                return NotFound(string.Format("No Team Found with this Id = {0} ",teamId));
 
             }
             return Ok(Team);
@@ -90,22 +82,76 @@ namespace work_platform_backend.Controllers
         }
 
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpPost("AddTeam/{roomId}")]
-        public async Task<IActionResult> AddTeam(Team team,int roomId)
+        [HttpGet]
+        [Route("{teamId}/subteams")]
+        public async Task<IActionResult> GetTeamSubTeams(int teamId)
         {
-            var NewTeam = await _teamService.AddTeam(team,roomId, UserService.GetUserId());
-            if (NewTeam != null)
+
+            var Team = await teamService.GetTeamSubTeams(teamId);
+            if (Team.Count == 0)
             {
-               return Ok(NewTeam);
+                return Ok(new List<Team>());
             }
-            return BadRequest();
+            return Ok(Team);
+
+        }
+
+        [HttpGet]
+        [Route("{teamId}/members")]
+        public async Task<IActionResult> GetTeamMembers(int teamId)
+        {
+
+            var members = await teamService.GetMembersOfTeam(teamId);
+            return Ok(members);
+
+        }
+
+        [HttpGet]
+        [Route("{teamId}/projects")]
+        public async Task<IActionResult> GetTeamProjects(int teamId)
+        {
+
+            var projects = await teamService.GetProjectsOfTeam(teamId);
+            return Ok(projects);
+
+        }
+
+        [HttpGet]
+        [Route("{teamId}/tasks")]
+        public async Task<IActionResult> GetTeamTasks(int teamId)
+        {
+
+            var projects = await teamService.GetTasksOfTeam(teamId);
+            return Ok(projects);
+
+        }
+
+
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost("{roomId}")]
+        public async Task<IActionResult> AddTeam(Team team, int roomId)
+        {
+            try
+            {
+                var newTeam = await teamService.AddTeam(team, roomId, userService.GetUserId());
+                if (newTeam != null)
+                {
+                    return Ok(newTeam);
+                }
+                return BadRequest();
+            }
+            catch (DbUpdateException e)
+            {
+                return BadRequest(string.Format("No Room with ID = {0}", roomId));
+            }
+
         }
 
         [HttpPut("{TeamId}")]
         public async Task<IActionResult> UpdateTeam(int TeamId, Team team)
         {
-            Team UpdatedTeam = await _teamService.UpdateTeam(TeamId, team);
+            Team UpdatedTeam = await teamService.UpdateTeam(TeamId, team);
             if (UpdatedTeam == null)
             {
                 return NotFound();
@@ -116,25 +162,46 @@ namespace work_platform_backend.Controllers
 
 
         [HttpDelete]
-        [Route("delete/{teamId}")]
-       public async Task<IActionResult> DeletTeam(int teamId)
+        [Route("{teamId}")]
+        public async Task<IActionResult> DeletTeam(int teamId)
         {
             try
             {
-                await _teamService.DeleteTeam(teamId);
-
-
+                await teamService.DeleteTeam(teamId);
             }
-            catch (Exception Ex)
-             {
-
-                return NotFound(Ex.Message);
+            catch (DbUpdateException ex)
+            {
+                
+                return NotFound("You cannot delete this team because it has subteams, go and delete subteams before deleting it.");
             }
 
-           return Ok($"Object with id = {teamId} was  Deleted");
+            return Ok($"Object with id = {teamId} was  Deleted");
+        }
+
+
+        [HttpPost("{teamId}/tasks")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> AddTaskInTeam(int teamId, RTask task)
+        {
+            try
+            {
+                var newTask = await taskService.AddTaskInTeam(userService.GetUserId(), teamId, task);
+
+                if (newTask != null)
+                {
+                    return Ok(newTask);
+                }
+            }
+            catch (DateTimeException e)
+            {
+                return BadRequest(e.Message);
+            }
+            return BadRequest();
         }
 
     }
+
+ 
 
 
 

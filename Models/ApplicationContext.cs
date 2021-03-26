@@ -89,6 +89,12 @@ namespace work_platform_backend.Models
                 .Property(t => t.CreatorId)
                 .IsRequired(false);
 
+            modelBuilder.Entity<RTask>()
+                .HasOne(t => t.Team)
+                .WithMany(t => t.Tasks)
+                .OnDelete(DeleteBehavior.SetNull);    
+
+
 
             // modelBuilder.Entity<RTask>()
                 // .HasOne(t => t.DependantTask)
@@ -253,7 +259,13 @@ namespace work_platform_backend.Models
                     .OnDelete(DeleteBehavior.Cascade);    
 
                 
-         
+                modelBuilder.Entity<Comment>()
+                    .HasOne<Comment>()
+                    .WithMany(c => c.Replies)
+                    .HasForeignKey("ParentCommentId")
+                    .OnDelete(DeleteBehavior.NoAction);    
+                
+
                
                 
 

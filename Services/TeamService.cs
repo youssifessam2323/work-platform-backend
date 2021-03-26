@@ -11,27 +11,31 @@ namespace work_platform_backend.Services
 {
     public class TeamService
     {
-        private readonly ITeamRepository _TeamRepo;
-        private readonly IMapper _mapper;
+        private readonly ITeamRepository teamRepository;
+        private readonly IMapper mapper;
+        private readonly IProjectRepository projectRepository;
+        private readonly IRTaskRepository taskRepository;
 
-        public TeamService(ITeamRepository teamRepository,IMapper mapper)
+        public TeamService(ITeamRepository teamRepository, IMapper mapper, IProjectRepository projectRepository, IRTaskRepository taskRepository)
         {
-            _TeamRepo = teamRepository;
-            _mapper = mapper;
-          
+            this.teamRepository = teamRepository;
+            this.mapper = mapper;
+            this.projectRepository = projectRepository;
+            this.taskRepository = taskRepository;
         }
 
 
         public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId)
         {
+
             if (newTeam != null)
             {
                 newTeam.RoomId = roomId;
                 newTeam.LeaderId = creatorId;
                 newTeam.CreatedAt = DateTime.Now;
                 newTeam.TeamCode = Guid.NewGuid();
-                await _TeamRepo.SaveTeam(newTeam);
-                await _TeamRepo.SaveChanges();
+                await teamRepository.SaveTeam(newTeam);
+                await teamRepository.SaveChanges();
                 return newTeam;
             }
             return null;
@@ -40,11 +44,11 @@ namespace work_platform_backend.Services
 
         public async Task<Team> UpdateTeam(int id, Team Team)
         {
-            Team NewTeam = await _TeamRepo.UpdateTeamById(id,Team);
+            Team NewTeam = await teamRepository.UpdateTeamById(id,Team);
 
             if (NewTeam != null)
             {
-               await _TeamRepo.SaveChanges();
+               await teamRepository.SaveChanges();
                 return NewTeam;
             }
 
@@ -56,15 +60,16 @@ namespace work_platform_backend.Services
 
         public async Task DeleteTeam(int teamId)
         {
-            var Team = await _TeamRepo.DeleteTeamById(teamId);
-            if (Team == null)
+            var Subteams = await teamRepository.GetTeamSubTeamsById(teamId);
+            var team = await teamRepository.DeleteTeamById(teamId);
+            if (team == null)
             {
 
                 throw new NullReferenceException();
 
             }
 
-            await _TeamRepo.SaveChanges();
+            await teamRepository.SaveChanges();
 
 
         }
@@ -74,7 +79,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<Team>> GetTeamsByCreator(string CreatorId)
         {
-            var Teams = await _TeamRepo.GetAllTeamsByCreator(CreatorId);
+            var Teams = await teamRepository.GetAllTeamsByCreator(CreatorId);
 
             if (Teams.Count().Equals(0))
             {
@@ -88,7 +93,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<Team>> GetTeamsByMember(string UserId)
         {
-            var Teams = await _TeamRepo.GetAllTeamsByMember(UserId);
+            var Teams = await teamRepository.GetAllTeamsByMember(UserId);
 
 
             return Teams;
@@ -97,18 +102,15 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<ResponseTeamDto>> GetTeamsByRoom(int RoomId)
         {
-            var Teams = await _TeamRepo.GetAllTeamsByRoom(RoomId);
+            var Teams = await teamRepository.GetAllTeamsByRoom(RoomId);
 
             if (Teams.Count().Equals(0))
             {
 
-                return null;
-
-
-
+                return new List<ResponseTeamDto>();
                 
             }
-            var TeamResponse = _mapper.Map<IEnumerable<ResponseTeamDto>>(Teams);
+            var TeamResponse = mapper.Map<IEnumerable<ResponseTeamDto>>(Teams);
             
 
 
@@ -117,10 +119,30 @@ namespace work_platform_backend.Services
 
         }
 
+        public async Task<List<User>> GetMembersOfTeam(int teamId)
+        {
+            return await teamRepository.GetMembersOfTeam(teamId);
+        }
+
+     
+        public async Task<List<Team>> GetTeamSubTeams(int teamId)
+        {
+            return await teamRepository.GetTeamSubTeamsById(teamId);
+        }
+
+        public async Task<List<Project>> GetProjectsOfTeam(int teamId)
+        {   
+            return await projectRepository.GetProjectByTeam(teamId);
+        }
+
+        public async Task<List<RTask>> GetTasksOfTeam(int teamId)
+        {
+                return await taskRepository.GetTasksByTeam(teamId);
+        }
 
         public async Task<Team> GetTeam(int TeamId)
         {
-            var Teams = await _TeamRepo.GetTeamById(TeamId);
+            var Teams = await teamRepository.GetTeamById(TeamId);
 
             if (Teams==null)
             {

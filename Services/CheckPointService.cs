@@ -10,35 +10,24 @@ namespace work_platform_backend.Services
     public class CheckPointService
     {
        
-        private readonly ICheckpointRepository _checkpointRepo;
+        private readonly ICheckpointRepository checkpointRepository;
         
 
         public CheckPointService(ICheckpointRepository checkpointRepository)
         {
-            _checkpointRepo = checkpointRepository;
+            this.checkpointRepository = checkpointRepository;
            
         }
 
 
-        public async Task<CheckPoint> AddCheckpoint(CheckPoint newCheckpoint)
-        {
-            if (newCheckpoint != null)
-            {
-                await _checkpointRepo.SaveCheckPoint(newCheckpoint);
-                await _checkpointRepo.SaveChanges();
-                return newCheckpoint;
-            }
-            return null;
-
-        }
-
+       
         public async Task<CheckPoint> UpdateCheckPoint(int id, CheckPoint checkPoint)
         {
-            CheckPoint NewCheckpoint = await _checkpointRepo.UpdateCheckpointById(id,checkPoint);
+            CheckPoint NewCheckpoint = await checkpointRepository.UpdateCheckpointById(id,checkPoint);
 
             if (NewCheckpoint != null)
             {
-              await _checkpointRepo.SaveChanges();
+              await checkpointRepository.SaveChanges();
 
                 return NewCheckpoint;
             }
@@ -50,7 +39,7 @@ namespace work_platform_backend.Services
 
         public async Task DeleteCheckPoint(int checkPointId)
         {
-            var CheckPoint = await _checkpointRepo.DeleteCheckpointById(checkPointId);
+            var CheckPoint = await checkpointRepository.DeleteCheckpointById(checkPointId);
             if (CheckPoint == null)
             {
 
@@ -58,7 +47,7 @@ namespace work_platform_backend.Services
 
             }
 
-            await _checkpointRepo.SaveChanges();
+            await checkpointRepository.SaveChanges();
 
 
         }
@@ -66,7 +55,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<CheckPoint>> GetCheckPointsofParentTask(int ParentTaskId)
         {
-            var Checkpoints = await _checkpointRepo.GetAllCheckpointsByParentTask(ParentTaskId);
+            var Checkpoints = await checkpointRepository.GetAllCheckpointsByParentTaskId(ParentTaskId);
 
             if (Checkpoints.Count().Equals(0))
             {
@@ -83,7 +72,7 @@ namespace work_platform_backend.Services
 
         public async Task<CheckPoint> GetCheckPoint(int checkPointId)
         {
-            var Checkpoints = await _checkpointRepo.DeleteCheckpointById(checkPointId);
+            var Checkpoints = await checkpointRepository.DeleteCheckpointById(checkPointId);
 
             if (Checkpoints!=null)
             {
@@ -95,10 +84,17 @@ namespace work_platform_backend.Services
 
         }
 
+        public async Task<List<CheckPoint>> GetCheckpointsByTask(int taskId)
+        {
+           return (List<CheckPoint>)await checkpointRepository.GetAllCheckpointsByParentTaskId(taskId);
+        }
 
-
-
-
+        public async Task<CheckPoint> SaveNewCheckpointInTask(int taskId,CheckPoint checkpoint)
+        {
+            await checkpointRepository.SaveCheckPoint(taskId,checkpoint);
+            await checkpointRepository.SaveChanges();
+            return checkpoint;
+        }
     }
 }
 

@@ -12,16 +12,20 @@ namespace work_platform_backend.Models
         public DateTime CreatedAt { get; set; }
 
         
-        public int TaskId { get; set; }        
+        public int? TaskId { get; set; }        
         public RTask Task { get; set; }
         
         public string CreatorId { get; set; }
         
         public User Creator { get; set; }
                 
-    
+        public int? ParentCommentId {get;set;}
         public List<Comment> Replies{set;get;}
-        
-        
+
+
+        public override string ToString()
+        {
+            return "Comment Id = "+ Id + ", Comment Text = " + text;
+        }
     }
 }

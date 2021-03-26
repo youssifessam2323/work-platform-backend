@@ -1,37 +1,59 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using work_platform_backend.Dtos;
+using work_platform_backend.Exceptions;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
 namespace work_platform_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/projects")]
     [ApiController]
     public class ProjectController : ControllerBase
     {
-        private readonly ProjectService _projectService;
-        private readonly TaskService _taskService;
+        private readonly ProjectService projectService;
+        private readonly TaskService taskService;
+        private readonly UserService userService;
+
+        public ProjectController(ProjectService projectService, TaskService taskService, UserService userService)
+        {
+            this.projectService = projectService;
+            this.taskService = taskService;
+            this.userService = userService;
+        }
+
+
+        [HttpPost]
+        [Route("{projectId}/teams/{teamId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> AddTeamToProject(int projectId,int teamId)
+        {   
+            try
+            {
+            await projectService.AddTeamToProject(projectId,teamId);
+            }
+            catch(DbUpdateException e)
+            {
+                return BadRequest("this team is already in this project");
+            }
+            return Ok();
+        }
+
+
        
 
-
-        public ProjectController(ProjectService projectService, TaskService taskService)
-        {
-            _projectService = projectService;
-            _taskService = taskService;
-            
-
-        }
         [HttpGet]
         [Route("GetProject/{projectId}")]
         public async Task<IActionResult> GetSingleProject(int projectId)
         {
 
-            var project = await _projectService.GetProject(projectId);
+            var project = await projectService.GetProject(projectId);
             if (project == null)
             {
                 return NotFound();
@@ -41,45 +63,13 @@ namespace work_platform_backend.Controllers
 
         }
 
-        [HttpGet]
-        [Route("GetProjectsInRoom/{RoomId}")]
-        public async Task<IActionResult> GetProjectsInRoom(int RoomId)
-        {
 
-            var Projects = await _projectService.GetProjectsByRoom(RoomId);
-            if (Projects != null)
-            { 
-            //     List<List<ResponseProjectTasksDto>> ListOfTasksinProject = new List<List<ResponseProjectTasksDto>>();
-            //    foreach (var P in Projects)
-            //    {
-
-            //        ListOfTasksinProject.Add(await _taskService.GetTasksByProject(P.Id));
-
-            //    }
-
-                return Ok(Projects );
-
-            }
-            return Ok( new List<Project>());
-
-        }
-
-
-        [HttpPost("AddProject")]
-        public async Task<IActionResult> AddProject(Project project)
-        {
-            var NewProject = await _projectService.AddProject(project);
-            if (NewProject != null)
-            {
-                return Ok(NewProject);
-            }
-            return BadRequest();
-        }
+       
 
         [HttpPut("{ProjectId}")]
         public async Task<IActionResult> UpdateProject(int ProjectId, Project project)
         {
-            Project UpdatedProject = await _projectService.UpdateProject(ProjectId, project);
+            Project UpdatedProject = await projectService.UpdateProject(ProjectId, project);
             if (UpdatedProject == null)
             {
                 return NotFound();
@@ -95,7 +85,7 @@ namespace work_platform_backend.Controllers
         {
             try
             {
-                await _projectService.DeleteProject(projectId);
+                await projectService.DeleteProject(projectId);
 
 
             }
@@ -106,6 +96,27 @@ namespace work_platform_backend.Controllers
             }
 
             return Ok($"Object with id = {projectId} was  Deleted");
+        }
+
+
+        [HttpPost("{projectId}/tasks")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> AddTaskInProject(int projectId, RTask task)
+        {
+            try
+            {
+                var newTask = await taskService.AddTaskInProject(userService.GetUserId(), projectId, task);
+
+                if (newTask != null)
+                {
+                    return Ok(newTask);
+                }
+            }
+            catch (DateTimeException e)
+            {
+                return BadRequest(e.Message);
+            }
+            return BadRequest();
         }
     }
 }

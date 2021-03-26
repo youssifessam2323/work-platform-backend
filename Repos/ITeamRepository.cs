@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using work_platform_backend.Dtos.Response;
 using work_platform_backend.Models;
 
 namespace work_platform_backend.Repos
@@ -16,5 +15,7 @@ namespace work_platform_backend.Repos
         Task<Team> DeleteTeamById(int teamId);
         Task<bool> SaveChanges();
         Task<Team> GetTeamByTeamCode(string teamCode);
+        Task<List<Team>> GetTeamSubTeamsById(int teamId);
+        Task<List<User>> GetMembersOfTeam(int teamId);
     }
 }

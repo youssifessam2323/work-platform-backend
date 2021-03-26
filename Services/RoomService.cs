@@ -13,46 +13,67 @@ namespace work_platform_backend.Services
 {
     public class RoomService
     {
-        private readonly IRoomRepository _roomRepo;
-        private readonly IMapper _mapper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
- 
+        private readonly IRoomRepository roomRepository;
+        private readonly IMapper mapper;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly TeamService teamService;
+        private  IProjectRepository projectRepository { get; set; }
 
-        public RoomService(IRoomRepository roomRepository,IMapper mapper ,IHttpContextAccessor httpContextAccessor)
+
+
+        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null)
         {
-            _roomRepo = roomRepository;
-            _mapper = mapper;
-            _httpContextAccessor = httpContextAccessor;
-            
+            this.roomRepository = roomRepository;
+            this.mapper = mapper;
+            this.httpContextAccessor = httpContextAccessor;
+            this.teamService = teamService;
+            this.projectRepository = projectRepository;
         }
 
-        private string GetUserId() => (_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        private string GetUserId() => (httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
       
      
 
-        public async Task<Room> AddRoom(RequestRoomDto requestRoomDto , string creatorId)
+        public async Task<Room> AddRoom(RoomRequest roomRequest , string creatorId)
         {
-            if (requestRoomDto != null)
-            {
                 
-                var newRoom =  _mapper.Map<Room>(requestRoomDto);
+                var newRoom =  mapper.Map<Room>(roomRequest);
                 newRoom.CreatedAt = DateTime.Now ;
                 newRoom.CreatorId = creatorId;
-                await _roomRepo.SaveRoom(newRoom);
-                await _roomRepo.SaveChanges();
-                 return newRoom;
+                await roomRepository.SaveRoom(newRoom);
+                await roomRepository.SaveChanges();
+
+                if (newRoom != null)
+                {
+                    
+            
+                    Team newTeam = new Team()
+                    {
+                        Name = $" {newRoom.Name}/main ",
+                        Description = newRoom.Description,
+                        CreatedAt = DateTime.Now,
+                    };
+
+                var NewTeamByDefault = await teamService.AddTeam(newTeam,newRoom.Id,creatorId);
+                return newRoom;
+                }
+                return null;
             }
-            return null;
+
+        public async Task<List<Project>> GetRoomProjects(int roomId)
+        {
+            return (List<Project>)(await projectRepository.GetAllProjectsByRoom(roomId));
 
         }
 
-        public async Task<Room> UpdateRoom(int id, RequestRoomDto room)
+        public async Task<Room> UpdateRoom(int id, RoomRequest roomRequest)
         {
-            Room UpdatedRoom = await _roomRepo.UpdateRoomById(id, room);
+            Room UpdatedRoom = await roomRepository.UpdateRoomById(id, roomRequest);
 
             if (UpdatedRoom != null)
             {
-                await _roomRepo.SaveChanges();
+                await roomRepository.SaveChanges();
+                Console.WriteLine("Updated Room = " + UpdatedRoom);
                 return UpdatedRoom;
             }
 
@@ -64,7 +85,7 @@ namespace work_platform_backend.Services
 
         public async Task DeleteRoom(int roomId)
         {
-            var room = await _roomRepo.DeleteRoomById(roomId);
+            var room = await roomRepository.DeleteRoomById(roomId);
             if (room == null)
             {
 
@@ -72,22 +93,20 @@ namespace work_platform_backend.Services
 
             }
 
-            await _roomRepo.SaveChanges();
+            await roomRepository.SaveChanges();
 
 
         }
 
 
 
-        public async Task<ResponseRoomDto> GetRoom(int roomId)
+        public async Task<Room> GetRoom(int roomId)
         {
-            Room Room = await _roomRepo.GetRoomById(roomId);
+            Room room = await roomRepository.GetRoomById(roomId);
 
-            if (Room != null)
+            if (room != null)
             {
-
-                var newRoomResponse = _mapper.Map<ResponseRoomDto>(Room);
-                return newRoomResponse;
+                return room;
             }
 
 
@@ -97,7 +116,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<Room>> GetAllRooms()
         {
-            var Rooms = await _roomRepo.GetAllRooms();
+            var Rooms = await roomRepository.GetAllRooms();
 
             if (Rooms .Count()!= 0)
             {
@@ -110,16 +129,14 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<IEnumerable<ResponseRoomDto>> GetAllRoomsOfCreator(string CreatorId)
+        public async Task<IEnumerable<Room>> GetAllRoomsOfCreator(string CreatorId)
         {
             
-            var Rooms = await _roomRepo.GetRoomsByCreator(CreatorId);
+            var rooms = await roomRepository.GetRoomsByCreator(CreatorId);
 
-            if (Rooms.Count() != 0)
+            if (rooms.Count() != 0)
             {
-                var RoomResponse = _mapper.Map<IEnumerable<ResponseRoomDto>>(Rooms);
-                
-                return RoomResponse;
+                return rooms;
             }
 
 

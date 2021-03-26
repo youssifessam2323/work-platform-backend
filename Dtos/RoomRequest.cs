@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace work_platform_backend.Dtos
 {
-    public class RequestRoomDto
+    public class RoomRequest
     {
         [Required]
         public string Name { get; set; }

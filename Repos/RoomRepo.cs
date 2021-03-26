@@ -11,63 +11,76 @@ namespace work_platform_backend.Repos
 {
     public class RoomRepo : IRoomRepository
     {
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext context;
         private readonly IMapper _mapper;
 
         public RoomRepo(ApplicationContext context,IMapper mapper)
         {
-            _context = context;
+            this.context = context;
             _mapper = mapper;
         }
 
         public async Task<Room> GetRoomById(int roomId)
         {
-          return ( await _context.Rooms.FirstOrDefaultAsync(R=>R.Id==roomId));
+          return ( await context.Rooms.Include(r => r.Creator).FirstOrDefaultAsync(R=>R.Id==roomId));
         }
 
         public async Task<IEnumerable<Room>> GetAllRooms()
         {
-            return (await _context.Rooms.ToListAsync());
+            return (await context.Rooms.Include(r => r.Creator).ToListAsync());
         }
 
         public async Task<IEnumerable<Room>> GetRoomsByCreator(string creatorId)
         {
-            return (await _context.Rooms.Include(R => R.Creator).Where(R=>R.CreatorId==creatorId).ToListAsync());
+            return (await context.Rooms.Include(R => R.Creator).Where(R=>R.CreatorId==creatorId).ToListAsync());
         }
 
         public async Task SaveRoom( Room room)
         {
-           await _context.Rooms.AddAsync(room);
+           await context.Rooms.AddAsync(room);
         }
 
-        public async Task<Room> UpdateRoomById(int roomId, RequestRoomDto requestRoomDto)
+        public async Task<Room> UpdateRoomById(int roomId, RoomRequest roomRequest)
         {
-            var NewRoom = await _context.Rooms.FindAsync(roomId);
-            if (NewRoom != null)
+            var newRoom = await context.Rooms.FindAsync(roomId);
+            if (newRoom != null)
             {
-                var newRoom = _mapper.Map<Room>(requestRoomDto);
+                // var newRoom = _mapper.Map<Room>(roomRequest);
+                newRoom.Name = roomRequest.Name;
+                newRoom.Description= roomRequest.Description;
                 newRoom.CreatedAt = DateTime.Now;
-
-                return NewRoom;
+                
+                return newRoom;
             }
             return null;
         }
 
         public async Task<Room> DeleteRoomById(int roomId)
         {
-            var room = await _context.Rooms.FindAsync(roomId);
+            var room = await context.Rooms.FindAsync(roomId);
             if (room != null)
             {
-                _context.Rooms.Remove(room);
+                context.Rooms.Remove(room);
             }
             return room;
         }
 
-        public async Task<bool> SaveChanges()
+        public async Task AddNewProjectManager(ProjectManager projectManager)
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            await context.ProjectManagers.AddAsync(projectManager);
         }
 
-       
+        public async Task<bool> SaveChanges()
+        {
+            return (await context.SaveChangesAsync() >= 0);
+        }
+
+        public async Task<List<User>> GetRoomPorjectManagersByRoomId(int roomId)
+        {
+            IQueryable<ProjectManager> projectManagers = context.ProjectManagers
+                    .Include(pm => pm.User).Where(pm => pm.RoomId == roomId);
+
+             return await projectManagers.Select(pm => pm.User).ToListAsync();
+        }
     }
 }

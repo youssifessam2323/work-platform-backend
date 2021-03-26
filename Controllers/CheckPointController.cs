@@ -9,7 +9,7 @@ using work_platform_backend.Services;
 
 namespace work_platform_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/checkpoints")]
     [ApiController]
     public class CheckPointController : ControllerBase
     {
@@ -51,17 +51,7 @@ namespace work_platform_backend.Controllers
 
         }
 
-        [HttpPost("AddCheckPoint")]
-        public async Task<IActionResult> AddCheckPoint(CheckPoint checkPoint)
-        {
-            var NewCheckpoint = await _checkPointService.AddCheckpoint(checkPoint);
-            if (NewCheckpoint != null)
-            {
-                Ok(NewCheckpoint);
-            }
-            return BadRequest();
-        }
-
+    
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCheckPoint(int id, CheckPoint checkPoint)
         {

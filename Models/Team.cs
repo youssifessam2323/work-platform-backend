@@ -22,7 +22,7 @@ namespace work_platform_backend.Models
                 
 
         public string LeaderId { get; set; }
-        
+            
         
         public User Leader { get; set; }
         

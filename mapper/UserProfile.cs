@@ -15,7 +15,7 @@ namespace work_platform_backend.mapper
             CreateMap<RegisterRequest,User>();
             CreateMap<User,RegisterRequest>();
 
-            CreateMap<RequestRoomDto, Room>();
+            CreateMap<RoomRequest, Room>();
             CreateMap<Room, ResponseRoomDto>();
             CreateMap<ResponseRoomDto, Room>();
 

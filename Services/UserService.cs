@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,20 +18,20 @@ namespace work_platform_backend.Services
         private readonly IUserRepository userRepository;
         private readonly ITeamRepository teamRepository;
         private readonly IRoomRepository roomRepository;
+        private readonly ProjectManagerService projectManagerService;
         
                 
 
         private IMapper mapper;
 
-
-
-        public UserService(IHttpContextAccessor HttpContextAccessor, IUserRepository userRepository, ITeamRepository teamRepository = null, IMapper mapper = null, IRoomRepository roomRepository = null)
+        public UserService(IHttpContextAccessor HttpContextAccessor, IUserRepository userRepository, ITeamRepository teamRepository = null, IMapper mapper = null, IRoomRepository roomRepository = null, ProjectManagerService projectManagerService = null)
         {
             this.HttpContextAccessor = HttpContextAccessor;
             this.userRepository = userRepository;
             this.teamRepository = teamRepository;
             this.mapper = mapper;
             this.roomRepository = roomRepository;
+            this.projectManagerService = projectManagerService;
         }
 
 
@@ -71,9 +72,58 @@ namespace work_platform_backend.Services
             
             Console.WriteLine("Team ====> " + team);
             Console.WriteLine("User ====> " + user);
-            
+            if(team == null)
+            {
+                throw new ApplicationException();
+            }
             await userRepository.SaveNewTeamMember(user,team);     
             await userRepository.SaveChanges();   
+        }
+
+        public async Task ChangeTeamLeader(int teamId, string userId,string newLeaderUsername)
+        {
+            Team team = await teamRepository.GetTeamById(teamId);
+
+            if(team.LeaderId != userId)
+            {
+                throw new UnauthorizedAccessException("This Operation is For the Team Leader Only");
+            }
+
+            User user = await userRepository.GetUserByUsername(newLeaderUsername);
+            
+            team.Leader = user ;
+            await teamRepository.SaveChanges();
+        }
+
+        public async Task<List<Team>> GetTeamsThatUserLeads(int roomId, string userId)
+        {
+            var teams = await teamRepository.GetAllTeamsByRoom(roomId);
+            return teams.Where(t => t.LeaderId == userId).ToList();
+        }
+
+        public async Task<User> UpdateUserInfo(string userId, User newUser)
+        {   
+            return await userRepository.UpdateUser(userId,newUser);
+        }
+
+        public async Task AddToProjectManagers(int teamId, string userId)
+        {
+            Team team = await teamRepository.GetTeamById(teamId);
+            if(team != null)
+            {
+                Room room = await roomRepository.GetRoomById(team.RoomId); 
+                User user = await userRepository.GetUserById(userId);
+                await projectManagerService.AddNewProjectManager(user,room);
+            }else
+            {
+            throw new NullReferenceException("team Id = " + teamId + " is not found");
+            }
+        }
+
+        public async Task<User> GetUserByUsername(string username)
+        {
+            return await userRepository.GetUserByUsername(username);
+
         }
 
         public async Task<HashSet<Room>> getAuthUserRooms(string userId)

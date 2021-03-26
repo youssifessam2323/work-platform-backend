@@ -12,36 +12,37 @@ using work_platform_backend.Services;
 
 namespace work_platform_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/rooms")]
     [ApiController]
     public class RoomController : ControllerBase
     {
-        private readonly RoomService RoomService;
-        private readonly TeamService TeamService;
+        private readonly RoomService roomService;
+        private readonly TeamService teamService;
         private readonly UserService UserService;
+        private readonly ProjectManagerService projectManagerService;
+        private readonly ProjectService projectService;
 
-        public RoomController(RoomService roomService, TeamService teamService, UserService getUserService)
+        public RoomController(RoomService roomService, TeamService teamService, UserService getUserService, ProjectManagerService projectManagerService, ProjectService projectService)
         {
-            RoomService = roomService;
-            TeamService = teamService;
+            this.roomService = roomService;
+            this.teamService = teamService;
             UserService = getUserService;
-
-
-
+            this.projectManagerService = projectManagerService;
+            this.projectService = projectService;
         }
 
 
-       
-  
+
+
 
 
 
         [HttpGet]
-        [Route("GetAllRoom")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetAllRooms()
         {
 
-            var Room = await RoomService.GetAllRooms();
+            var Room = await roomService.GetAllRooms();
             if (Room == null)
             {
                 return NotFound();
@@ -51,102 +52,47 @@ namespace work_platform_backend.Controllers
 
         }
 
-        [HttpGet]
-        [Route("GetRoom/{RoomId}")]
-        public async Task<IActionResult> GetRoom(int RoomId)
+        [HttpGet("{roomId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetRoom(int roomId)
         {
 
-            var Room = await RoomService.GetRoom(RoomId);
-            if (Room == null)
-            {
+            var room = await roomService.GetRoom(roomId);
+            if (room == null)
+            {   
                 return NotFound();
 
             }
-            return Ok(Room);
+            return Ok(room);
 
             
         }
 
-        [Authorize(AuthenticationSchemes="Bearer")]
-        [HttpGet]
-        [Route("GetAllRoomOfCreator")]
-        public async Task<IActionResult> GetRoomsOfCreator()
+        [HttpGet("{RoomId}/projects")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetRoomProjects(int roomId)
         {
-            string RoomCreatorId = UserService.GetUserId();
-
-
-
-            var Room = await RoomService.GetAllRoomsOfCreator(RoomCreatorId);
-            if (Room== null)
-            {
-                
-                return Ok(new List<Room>());
-
-            }
-            return Ok(Room);
-
+           return Ok(await roomService.GetRoomProjects(roomId));
         }
 
 
         [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpGet]
-        [Route("GetAllRoomOfUser")]
-        public async Task<IActionResult> GetAllRoomOfUser()
+        [HttpPost]
+        public async Task<IActionResult> AddRoom(RoomRequest roomRequest)
         {
-            string memberId = UserService.GetUserId();
-
-            var TeamsOfUser = await TeamService.GetTeamsByMember(memberId);
-
-            if (TeamsOfUser !=null)
-            {
-                List<ResponseRoomDto> RoomOfTeams = new List<ResponseRoomDto>();
-                foreach (Team t in TeamsOfUser)
-                {
-                    RoomOfTeams.Add(await RoomService.GetRoom(t.RoomId));
-                    
-                }
-
-                var RoomCreatedByMe = await RoomService.GetAllRoomsOfCreator(memberId); 
-
-                foreach(var RoomDto in RoomCreatedByMe)
-                {
-                    RoomOfTeams.Add(RoomDto);
-                }
-
-                return Ok(RoomOfTeams.GroupBy(R => R.Id).Select(r => r.First()).ToList());
-
-            }
-
-            return Ok(new List<Room>()); 
-        }
-
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpPost("AddRoom")]
-        public async Task<IActionResult> AddRoom(RequestRoomDto requestRoomDto)
-        {
-            string creatorId = UserService.GetUserId();
-            var NewRoom = await RoomService.AddRoom(requestRoomDto, creatorId);
-            if (NewRoom != null)
-            {
+              
+            var newRoom = await roomService.AddRoom(roomRequest,UserService.GetUserId());
+            if(newRoom == null)
+                return BadRequest();
                 
-          
-                Team NewTeam = new Team()
-                {
-                    Name = $" {NewRoom.Name}/main ",
-                    Description = NewRoom.Description,
-                    CreatedAt = DateTime.Now
-                };
-
-               var NewTeamByDefault = await TeamService.AddTeam(NewTeam,NewRoom.Id, creatorId);
-                return Ok(new { NewRoom, NewTeam });
-            }
-            return BadRequest();
+                return Ok(newRoom);
         }
 
         [HttpPut("{RoomId}")]
-        public async Task<IActionResult> UpdateRoom(int RoomId, RequestRoomDto room)
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> UpdateRoom(int RoomId, RoomRequest roomRequest)
         {
-            Room UpdatedRoom = await RoomService.UpdateRoom(RoomId, room);
+            Room UpdatedRoom = await roomService.UpdateRoom(RoomId,roomRequest);
             if (UpdatedRoom == null)
             {
                 return NotFound();
@@ -156,24 +102,59 @@ namespace work_platform_backend.Controllers
         }
 
 
-        [HttpDelete]
-        [Route("deleteRoom/{roomId}")]
+        [HttpDelete("{roomId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+
         public async Task<IActionResult> DeletRoom(int roomId)
         {
             try
             {
-                await RoomService.DeleteRoom(roomId);
+                await roomService.DeleteRoom(roomId);
 
 
             }
             catch (Exception Ex)
             {
 
-                return NotFound(Ex.Message);
+                return NotFound(string.Format("there is no room with id = {0}",roomId));
             }
 
             return Ok($"Object with id = {roomId} was  Deleted");
         }
+
+        
+        [HttpGet("{roomId}/projectmanagers")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+
+        public async Task<IActionResult> GetProjectManagers(int roomId)
+        {
+            return Ok(await projectManagerService.GetProjectManagersByRoom(roomId));
+        }
+
+         
+        [HttpGet("{roomId}/teams")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+
+        public async Task<IActionResult> GetTeamsInRoom(int roomId)
+        {
+
+            var GetTeamsRoom = await teamService.GetTeamsByRoom(roomId);
+            if (GetTeamsRoom == null)
+            {
+                return Ok(new List<Team>());
+
+            }
+            return Ok(GetTeamsRoom);
+
+        }
+
+        [HttpPost("{roomId}/projects")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> AddNewProjectToRoom(int roomId,Project project)
+        {
+            return  Ok( await projectService.AddNewProjectToRoom(UserService.GetUserId(),roomId,project));
+        }
+
 
     }
 }

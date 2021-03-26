@@ -23,7 +23,7 @@ namespace work_platform_backend.Models
 
         public bool IsFinished { get; set; }
 
-        public int TeamId { get; set;}
+        public int? TeamId { get; set;}
         public Team Team { get; set; }
         
 
@@ -62,5 +62,11 @@ namespace work_platform_backend.Models
         
         public List<Session> Sessions { get; set; }
         public List<CheckPoint> ChildCheckPoints { get; internal set; }
+
+
+        public override string ToString()
+        {
+            return "ID = " + Id + " ,Name = " + Name;
+        }
     }
 }

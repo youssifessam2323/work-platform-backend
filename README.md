@@ -6,21 +6,23 @@
 
 - [GET] Teams of  User in A specific Room [DONE]
 
-- [GET] user by username [UNDONE]
+- [GET] user by username [DONE]
 
-- [POST] Add a user to the ProjectManagers of a specific Room (Note Must be member in a team of that room)     [UNDONE]
+- [POST] Add a user to the ProjectManagers of a specific Room (Note Must be member in a team of that room) [DONE]
 
-- [PUT] Changes the team leader(to do this operation, the user must be the leader of this team) [UNDONE] 
+- [PUT] Changes the team leader(to do this operation, the user must be the leader of this team) [DONE] 
 
-- [POST] Join Team by team Code(need the permission logic) [Half-DONE]
+- [POST] Join Team by team Code(need the permission logic) [DONE]
 
-- [GET] the User's Teams that lead in a room [UNDONE]
+- [GET] the User's Teams that lead in a room [DONE]
+
+- [GET] the User's Task's assigned to him At Specific team [DONE]
 
 - [GET] All Rooms By Specific User [DONE]
 
 - [DELETE] Delete A User [UNDONE]
 
-- [PUT] Edit User Data [UNDONE]
+- [PUT] Edit User Data [DONE]
 
 - [MSH 3AREF] Log out [UNDONE]
 
@@ -29,25 +31,24 @@
 
 ## Room API ; 
 
-- [POST] Create A room  [UNDONE]
+- [GET] Room's Settings [UNDONE]
 
 - [POST] Add setting to a room  [UNDONE]
 
-- [GET] Room By Id [UNDONE]
+- [POST] Create A room  [DONE]
 
-- [GET] Teams of a Specific Room [UNDONE]
+- [GET] Room By Id [DONE]
 
-- [GET] Room's Project Managers [UNDONE]
+- [GET] Teams of a Specific Room [DONE]
 
-- [GET] Room's Settings [UNDONE]
+- [GET] Room's Project Managers [DONE]
 
-- [GET] Room's Project [UNDONE]
 
-- [GET] Room's Leader [UNDONE]
+- [GET] Room's Project [DONE]
 
-- [PUT] Update The Room Data [UNDONE]
+- [PUT] Update The Room Data [DONE]
 
-- [DELETE] Delete the Room [UNDONE]
+- [DELETE] Delete the Room [DONE]
 
 
 ---
@@ -56,56 +57,64 @@
 
 ## Team API : 
 
-- [POST] Create a new Team in specific room [UNDONE]
+- [POST] Create a new Team in specific room [DONE]
 
-- [GET] A Team by Id [UNDONE]
+- [GET] A Team by Id [DONE]
 
-- [GET] team's SubTeams [UNDONE]
+- [GET] team's SubTeams [DONE]
 
-- [GET] team's Members [UNDONE]
+- [GET] team's Members [DONE]
 
-- [GET] projects assign to a specific team [UNDONE]
+- [GET] projects assign to a specific team [DONE]
 
-- [GET] team's tasks [UNDONE]
+- [GET] team's tasks [DONE]
 
-- [PUT] Update existing team by Id [UNDONE]
+- [PUT] Update existing team by Id [DONE]
 
-- [DELETE] Delete existing team by Id [UNDONE]
+- [DELETE] Delete existing team by Id [DONE]
 ---
 
 
 ## Task
 
-- [POST] create new task in a specific team [UNDONE]
+- [POST] create new task in a specific team [DONE]
 
-- [GET] tasks By Id [UNDONE]
+- [POST] create new task in a specific project [DONE]
 
-- [GET] Attachments in a task [UNDONE]
+- [POST] create new Comment in a task [UNDONE]
 
-- [GET] Dependant task/s of that task [UNDONE]
+- [POST] create new Attachment in a task [UNDONE]
 
-- [GET] task's Checkpoints [UNDONE]
+- [GET] tasks By Id [DONE]
 
-- [GET] the User's Task's assigned to him At Specific team [UNDONE]
+- [GET] Attachments in a task [DONE]
 
-- [GET] task's Comments(with their replies) [UNDONE]
+- [GET] Dependant task/s of that task [DONE]
 
-- [GET] task's Sessions of the auth user [UNDONE]
+- [GET] Get task's Checkpoints [DONE]
 
-- [PUT] update Task by Id [UNDONE]
+- [POST]Save task's Checkpoint  [DONE]
 
-- [DELETE] delete a task by Id [UNDONE]
+- [GET] task's Comments(with their replies) [DONE]
+
+- [GET] task's Sessions of the auth user [DONE]
+
+- [PUT] update Task by Id [DONE]
+
+- [DELETE] delete a task by Id [NOTWORKED]
 
 
 ---
 
 ## Project (must be from a project managers in the specific room)
 
-- [POST] create new Project in a room [UNDONE]
+- [POST] create new Project in a room [DONE]
 
-- [POST] add new team to a project [UNDONE]
+- [POST] add new team to a project [DONE]
 
+- [POST] add new task to a project [UNDERTEST]
 
+{Begin from here}
 - [GET] project's tasks [UNDONE]
 
 - [GET] teams assigned in a project [UNDONE] 
@@ -131,3 +140,34 @@
 - [PUT] update a checkpoint by Id [UNDONE]
 
 - [DELETE] delete a checkpoint by Id [UNDO]
+
+
+
+---
+---
+---
+
+
+# Ideas Want to do : 
+
+- Define a dto for each entity in the system (including there nested properties)
+
+---
+
+# Problems 
+
+- The Delete API of the task don't work
+
+- I want to Define nested Dtos to hide some Critical information
+
+- How to handle Exceptions 
+
+
+
+------
+------
+------
+------ 
+# Very Important Notes To do in Production : 
+
+- Make the Task's teamId foreign key to be nullabe 

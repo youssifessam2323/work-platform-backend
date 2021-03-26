@@ -12,6 +12,7 @@ namespace work_platform_backend.Repos
          Task<Project> UpdateProjectById(int projectId,Project project);
          Task <Project>DeleteProjectById(int projectId);
         Task<bool> SaveChanges();
-
+        Task<List<Project>> GetProjectByTeam(int teamId);
+        Task AddTeamToProject(int projectId, int teamId);
     }
 }

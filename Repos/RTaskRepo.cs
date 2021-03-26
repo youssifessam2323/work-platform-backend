@@ -9,89 +9,129 @@ namespace work_platform_backend.Repos
 {
     public class RTaskRepo : IRTaskRepository
     {
-        private readonly ApplicationContext _context;
+        private readonly ApplicationContext context;
 
         public RTaskRepo(ApplicationContext context)
         {
-            _context = context;
+            this.context = context;
         }
       
         public async Task<IEnumerable<RTask>> GetAllSubTasksByParentCheckPointId(int checkpointId)
         {
-           return( await _context.Tasks.Where(T => T.ParentCheckPointId == checkpointId).ToListAsync());
+           return( await context.Tasks.Where(T => T.ParentCheckPointId == checkpointId).ToListAsync());
         }
 
         public async Task<IEnumerable<RTask>> GetAllTasksByCreator(string userId)
         {
-            return (await _context.Tasks.Where(T => T.Creator.Id == userId).ToListAsync());
+            return (await context.Tasks.Where(T => T.Creator.Id == userId).ToListAsync());
         }
 
-        public Task<IEnumerable<RTask>> GetAllTasksByDependantTask(int dependantTaskId)
+        public async Task<IEnumerable<RTask>> GetAllTasksByDependantTask(int taskId)
         {
-            throw new NotImplementedException();
+            var task = await context.Tasks.Include(t => t.DependantTasks).Where(t => t.Id == taskId).SingleAsync();
+            return task.DependantTasks;
         }
 
         public Task<IEnumerable<RTask>> GetAllTasksByDependOnTask(int dependOnTaskId)
         {
-            throw new NotImplementedException();
+          throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<RTask>> GetAllTasksByProject(int projectId)
         {
-            return (await _context.Tasks.Include(T=>T.Team).Where(T => T.Project.Id == projectId).ToListAsync());
+            return (await context.Tasks.Include(T=>T.Team).Where(T => T.Project.Id == projectId).ToListAsync());
         }
 
         public async Task<IEnumerable<RTask>> GetAllTasksByTeam(int teamId)
         {
-            return (await _context.Tasks.Where(T => T.Team.Id == teamId).ToListAsync());
+            return (await context.Tasks.Where(T => T.Team.Id == teamId).ToListAsync());
         }
 
         public async Task<RTask> GetTaskById(int taskId)
         {
-            return (await _context.Tasks.FirstOrDefaultAsync(T => T.Id == taskId));
+            return (await context.Tasks.FirstOrDefaultAsync(T => T.Id == taskId));
         }
 
       
         public async Task SaveTask(RTask task)
         {
-           await _context.Tasks.AddAsync(task);
+           await context.Tasks.AddAsync(task);
         }
 
         public async Task<RTask> UpdateTaskById(int taskId, RTask task)
         {
-            var NewTask = await _context.Tasks.FindAsync(taskId);
-            if (NewTask != null)
+            var newTask = await context.Tasks.FindAsync(taskId);
+            if (newTask != null)
             {
-                NewTask.Name = task.Name;
-                NewTask.Description = task.Description;
-                NewTask.PlannedStartDate = task.PlannedStartDate;
-                NewTask.PlannedEndDate = task.PlannedEndDate;
-                NewTask.ActualStartDate = task.ActualStartDate;
-                NewTask.ActualEndDate = task.ActualEndDate;
-                NewTask.IsFinished = task.IsFinished;
-                NewTask.ParentCheckPointId = task.ParentCheckPointId;
-
+                newTask.Name = task.Name;
+                newTask.Description = task.Description;
+                newTask.PlannedStartDate = task.PlannedStartDate;
+                newTask.PlannedEndDate = task.PlannedEndDate;
+                newTask.ActualStartDate = task.ActualStartDate;
+                newTask.ActualEndDate = task.ActualEndDate;
+                newTask.IsFinished = task.IsFinished;
+                newTask.ParentCheckPointId = task.ParentCheckPointId;
+                
+               context.Tasks.Update(newTask);
+               return newTask;
             }
             return null;
         }
 
-        public async Task<RTask> DeleteTaskById(int taskId)
+
+        //not completed
+        public async Task DeleteTaskById(int taskId)
         {
 
-            RTask task = await _context.Tasks.FindAsync(taskId);
+            RTask task = await context.Tasks.Include(t => t.DependantTasks)
+                                    .Include(t => t.Comments)
+                                    .ThenInclude(c => c.Replies)
+                                    .Where(t => t.Id == taskId)
+                                    .FirstAsync();
+            
+            Console.WriteLine(task);
+            task.Comments.ForEach(c => Console.WriteLine(c));
+            task.Comments.ForEach( async c => {
+                c.Replies.ForEach(r =>  context.Comments.Remove(r));
+                await context.SaveChangesAsync();
+                context.Comments.Remove(c);
+            });
+
+            foreach(var dependantTask in task.DependantTasks)
+            {
+                await DeleteTaskById(dependantTask.Id);
+            }
             if (task != null)
             {
-                _context.Tasks.Remove(task);
+                context.Tasks.Remove(task);
 
             }
-            return task;
         }
 
 
         public async Task<bool> SaveChanges()
         {
-            return (await _context.SaveChangesAsync() >= 0);
+            return (await context.SaveChangesAsync() >= 0);
         }
 
+        public async Task<List<RTask>> GetTasksByTeam(int teamId)
+        {
+            return await context.Tasks.Where(t => t.TeamId == teamId).ToListAsync();
+        }
+
+        public Task<List<Comment>> GetTaskComments(int taskId)
+        {
+            return context.Comments.Where(c => c.TaskId == taskId).ToListAsync();
+        }
+
+        public async Task<List<RTask>> GetTasksByUserIdAndTeamId(string userId, int teamId)
+        {
+            List<UserTask> userTasks = await context.UserTasks.Include(ut => ut.Task).Where(ut => ut.UserId == userId).ToListAsync(); 
+            List<RTask> tasks = new List<RTask>();
+            userTasks.ForEach(ut => {
+                tasks.Add(ut.Task);
+            });
+            return tasks.Where(t => t.TeamId == teamId).ToList();
+        }
     }
 }

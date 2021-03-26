@@ -53,7 +53,12 @@ namespace work_platform_backend.Repos
 
         public async Task<Team> GetTeamById(int teamId)
         {
-           return( await context.Teams.FirstOrDefaultAsync(T => T.Id == teamId));
+           return( await context.Teams
+                        .Include(t =>t.TeamMembers).ThenInclude(tm =>tm.User)
+                        .Include(t => t.Tasks)
+                        .Include(t => t.SubTeams).ThenInclude(t => t.SubTeams)
+                        .Include(t => t.Room)
+                        .FirstOrDefaultAsync(T => T.Id == teamId));
         }
 
         public async Task<bool> SaveChanges()
@@ -73,7 +78,6 @@ namespace work_platform_backend.Repos
             {
                 NewTeam.Name = team.Name;
                 NewTeam.Description = team.Description;
-                NewTeam.CreatedAt = team.CreatedAt;
                 NewTeam.LeaderId = team.LeaderId;
                 NewTeam.RoomId = team.RoomId;
                 return NewTeam;
@@ -97,6 +101,22 @@ namespace work_platform_backend.Repos
             Console.WriteLine("Inserted team code =  " + teamCode);
             Guid insertedTeamCode = new Guid(teamCode);
             return await context.Teams.Where(t => t.TeamCode == insertedTeamCode).FirstAsync();    
+        }
+
+        public async Task<List<Team>> GetTeamSubTeamsById(int teamId)
+        {
+            Team team = await context.Teams.Include(t => t.SubTeams).Where(t => t.Id == teamId).FirstAsync();
+             return team.SubTeams;
+        }
+
+        public async Task<List<User>> GetMembersOfTeam(int teamId)
+        {
+            var teamMembers =  await context.TeamsMembers.Include(tm =>tm.User).Where(tm => tm.TeamId == teamId).ToListAsync();
+            List<User> users = new List<User>();
+        
+            teamMembers.ForEach(tm => users.Add(tm.User));
+
+            return users;
         }
     }
 }
