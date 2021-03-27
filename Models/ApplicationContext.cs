@@ -30,6 +30,7 @@ namespace work_platform_backend.Models
         public DbSet<UserTask> UserTasks { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Session> Sessions { get; set; }
+        public DbSet<TeamChat> TeamChat { get; set; }
         
         
         
@@ -290,8 +291,15 @@ namespace work_platform_backend.Models
                     //Reply feature Configuration
 
 
+                modelBuilder.Entity<TeamChat>()
+                    .HasIndex(tc => tc.TeamId)
+                    .IsUnique(true);
 
-
+                modelBuilder.Entity<TeamChat>()
+                    .HasOne(tc => tc.Team)
+                    .WithOne(t => t.TeamChat)
+                    .HasForeignKey("TeamId")
+                    .OnDelete(DeleteBehavior.Cascade);
 
               base.OnModelCreating(modelBuilder);
 

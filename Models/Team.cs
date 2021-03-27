@@ -39,6 +39,8 @@ namespace work_platform_backend.Models
 
         public List<TeamProject> TeamProjects { get; set; }
 
+        public TeamChat TeamChat { get; set; }
+        
         
         
         public override string ToString()

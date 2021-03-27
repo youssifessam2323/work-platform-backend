@@ -143,7 +143,7 @@ namespace work_platform_backend.Controllers
             }
             catch (DbUpdateException e)
             {
-                return BadRequest(string.Format("No Room with ID = {0}", roomId));
+                return BadRequest("Room Does not exist");
             }
 
         }

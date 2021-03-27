@@ -120,10 +120,8 @@ namespace work_platform_backend.Controllers
         [Route("{TaskId}/dependants")]
         public async Task<IActionResult> GetTaskDependantTasks(int TaskId)
         {
-
             var dependantTasks = await taskService.GetTaskDependantTasks(TaskId);
             return Ok(dependantTasks);
-
         }
 
 
