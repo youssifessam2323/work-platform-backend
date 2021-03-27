@@ -8,7 +8,7 @@ namespace work_platform_backend.Models
         public int TeamId { get; set; }
         public Team Team { get; set; }
         
-        public string CreatorId { get; set; }
+        public string CreatorId  { get; set; }
         
         public User Creator { get; set; }
         
