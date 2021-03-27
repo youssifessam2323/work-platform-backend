@@ -138,6 +138,7 @@
 
 - [PUT] update a checkpoint by Id [UNDONE]
 
+
 - [DELETE] delete a checkpoint by Id [UNDO]
 
 
@@ -172,3 +173,5 @@
 # Very Important Notes To do in Production : 
 
 - Make the Task's teamId foreign key to be nullabe 
+=======
+- [DELETE] delete a checkpoint by Id [UNDONE]
