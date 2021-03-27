@@ -112,18 +112,17 @@
 
 - [POST] add new team to a project [DONE]
 
-- [POST] add new task to a project [UNDERTEST]
+- [POST] add new task to a project [DONE]
 
-{Begin from here}
-- [GET] project's tasks [UNDONE]
+- [GET] project's tasks [DONE]
 
-- [GET] teams assigned in a project [UNDONE] 
+- [GET] teams assigned in a project [DONE] 
 
-- [PUT] project by Id [UNDONE]
+- [PUT] project by Id [DONE]
 
-- [DELETE] project by ID [UNDONE]
+- [DELETE] project by ID [NOTWORKED]
 
-- [DELETE] remove a team from a project [UNDONE]
+- [DELETE] remove a team from a project [DONE]
 
 ---
 
@@ -156,7 +155,9 @@
 
 # Problems 
 
-- The Delete API of the task don't work
+- The Delete API of the Project don't work(because of the relationship with task)
+
+- The Delete API of the Task don't work
 
 - I want to Define nested Dtos to hide some Critical information
 

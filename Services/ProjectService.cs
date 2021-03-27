@@ -59,8 +59,8 @@ namespace work_platform_backend.Services
 
         public async Task DeleteProject(int projectId)
         {
-            var Team = await projectRepository.DeleteProjectById(projectId);
-            if (Team == null)
+            var project = await projectRepository.DeleteProjectById(projectId);
+            if (project == null)
             {
 
                 throw new NullReferenceException();
@@ -72,6 +72,11 @@ namespace work_platform_backend.Services
 
         }
 
+        public async Task RemoveTeamToProject(int projectId, int teamId)
+        {
+            await projectRepository.RemoveTeamFromProject(projectId,teamId);
+            await projectRepository.SaveChanges();
+        }
 
         public async Task<IEnumerable<ResponseProjectDto>> GetProjectsByRoom(int roomId)
         {
@@ -109,6 +114,11 @@ namespace work_platform_backend.Services
             await projectRepository.SaveProject(project);
             await projectRepository.SaveChanges();
             return project;
+        }
+
+        public async Task<List<Team>> GetAssignedTeams(int projectId)
+        {
+            return await projectRepository.GetProjectAssignedTeams(projectId);
         }
     }
 }

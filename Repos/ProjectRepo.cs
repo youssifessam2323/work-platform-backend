@@ -23,7 +23,11 @@ namespace work_platform_backend.Repos
 
         public async Task<Project> GetProjectById(int projectId)
         {
-          return( await context.Projects.FirstOrDefaultAsync(P => P.Id == projectId));
+          return( await context.Projects
+                                .Include(p => p.Creator)
+                                .Include(p => p.Tasks)
+                                .Include(p => p.TeamProjects).ThenInclude(tp => tp.Team)
+                                .FirstOrDefaultAsync(P => P.Id == projectId));
         }
 
         
@@ -82,6 +86,18 @@ namespace work_platform_backend.Repos
             teamProject.ProjectId = projectId;
             await context.TeamProjects.AddAsync(teamProject);
             
+        }
+
+        public async Task<List<Team>> GetProjectAssignedTeams(int projectId)
+        {
+            List<TeamProject> teamProjects = await context.TeamProjects.Include(tp => tp.Team).Where(tp => tp.ProjectId == projectId).ToListAsync();
+            return teamProjects.Select(tp => tp.Team).ToList();
+        }
+
+        public async Task RemoveTeamFromProject(int projectId, int teamId)
+        {
+            TeamProject task = await context.TeamProjects.Where(tp => tp.TeamId == teamId && tp.ProjectId == projectId).FirstAsync();
+            context.TeamProjects.Remove(task);
         }
     }
 }

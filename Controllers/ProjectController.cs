@@ -46,10 +46,32 @@ namespace work_platform_backend.Controllers
         }
 
 
+        
+        [HttpDelete]
+        [Route("{projectId}/teams/{teamId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> RemoveTeamToProject(int projectId,int teamId)
+        {   
+            try
+            {
+            await projectService.RemoveTeamToProject(projectId,teamId);
+            }
+            catch(DbUpdateException e)
+            {
+                return BadRequest("this team is already in this project");
+            }
+            catch(InvalidOperationException e)
+            {
+                return BadRequest("the project or team is not exist");
+            }
+            return Ok();
+        }
+
+
        
 
         [HttpGet]
-        [Route("GetProject/{projectId}")]
+        [Route("{projectId}")]
         public async Task<IActionResult> GetSingleProject(int projectId)
         {
 
@@ -80,19 +102,17 @@ namespace work_platform_backend.Controllers
 
 
         [HttpDelete]
-        [Route("delete/{projectId}")]
+        [Route("{projectId}")]
         public async Task<IActionResult> DeletProject(int projectId)
         {
             try
             {
                 await projectService.DeleteProject(projectId);
-
-
             }
             catch (Exception Ex)
             {
 
-                return NotFound(Ex.Message);
+                return NotFound(Ex.InnerException);
             }
 
             return Ok($"Object with id = {projectId} was  Deleted");
@@ -117,6 +137,22 @@ namespace work_platform_backend.Controllers
                 return BadRequest(e.Message);
             }
             return BadRequest();
+        }
+
+
+         [HttpGet("{projectId}/tasks")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetTaskInProject(int projectId)
+        {
+            return Ok(await taskService.GetTasksByProject(projectId));
+        }
+
+
+        [HttpGet("{projectId}/teams")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetTeamsAssignedInProject(int projectId)
+        {
+            return Ok(await projectService.GetAssignedTeams(projectId));
         }
     }
 }

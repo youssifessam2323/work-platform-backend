@@ -14,5 +14,7 @@ namespace work_platform_backend.Repos
         Task<bool> SaveChanges();
         Task<List<Project>> GetProjectByTeam(int teamId);
         Task AddTeamToProject(int projectId, int teamId);
+        Task<List<Team>> GetProjectAssignedTeams(int projectId);
+        Task RemoveTeamFromProject(int projectId, int teamId);
     }
 }

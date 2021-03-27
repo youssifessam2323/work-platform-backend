@@ -94,7 +94,10 @@ namespace work_platform_backend.Models
                 .WithMany(t => t.Tasks)
                 .OnDelete(DeleteBehavior.SetNull);    
 
-
+            modelBuilder.Entity<RTask>()
+                .HasOne(t => t.Project)
+                .WithMany(p => p.Tasks)
+                .OnDelete(DeleteBehavior.SetNull);    
 
             // modelBuilder.Entity<RTask>()
                 // .HasOne(t => t.DependantTask)

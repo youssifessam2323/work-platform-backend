@@ -104,18 +104,10 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<IEnumerable<ResponseProjectTasksDto>> GetTasksByProject(int ProjectId)
+        public async Task<IEnumerable<RTask>> GetTasksByProject(int ProjectId)
         {
-            var Tasks = await taskRepository.GetAllTasksByProject(ProjectId);
-
-            if (Tasks.Count().Equals(0))
-            {
-                return null;
-
-            }
-            var TaskInProjectsResponse = mapper.Map< IEnumerable<ResponseProjectTasksDto>>(Tasks);
-
-            return TaskInProjectsResponse;
+            var tasks = await taskRepository.GetAllTasksByProject(ProjectId);
+            return tasks;
 
         }
 
