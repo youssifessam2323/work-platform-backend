@@ -10,6 +10,9 @@ namespace work_platform_backend.mapper
         {
             CreateMap<Team,TeamResponse>();
             CreateMap<TeamResponse,Team>();
+
+
+       
         }
     }
 }
