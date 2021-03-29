@@ -10,6 +10,7 @@ namespace work_platform_backend.Repos
     {
         Task SaveTeamChat(TeamChat teamChat);
         Task<TeamChat> DeleteTeamChatById(int TeamChatId);
+        Task<TeamChat> DeleteTeamChatByTeamId(int TeamId);
 
         Task<TeamChat> GetTeamChatById(int TeamchatId);
         Task<TeamChat> GetTeamChatByTeam(int teamId);

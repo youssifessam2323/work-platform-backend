@@ -30,6 +30,16 @@ namespace work_platform_backend.Repos
             return teamChat;
         }
 
+        public async Task<TeamChat> DeleteTeamChatByTeamId(int teamId)
+        {
+            TeamChat teamChat =  await context.TeamChats.Where(Tc=>Tc.TeamId ==teamId).FirstOrDefaultAsync();
+            if (teamChat != null)
+            {
+                context.TeamChats.Remove(teamChat);
+            }
+            return teamChat;
+        }
+
         public async Task<ICollection<TeamChat>> GetTeamChatByCreator(string CreatorId)
         {
            return(await context.TeamChats.Where(Tc => Tc.CreatorId == CreatorId).ToListAsync());

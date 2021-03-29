@@ -51,6 +51,21 @@ namespace work_platform_backend.Services
 
         }
 
+        public async Task DeleteTeamChatByTeam(int teamId)
+        {
+            var teamChat = await teamChatRepository.DeleteTeamChatByTeamId(teamId);
+            if (teamChat == null)
+            {
+
+                throw new NullReferenceException();
+
+            }
+
+            await teamChatRepository.SaveChanges();
+
+
+        }
+
 
 
         public async Task<TeamChat> GetTeamChat(int teamChatId)
