@@ -20,14 +20,14 @@ namespace work_platform_backend.Services
             this.chatMessageRepository = chatMessageRepository;
         }
 
-        public async Task<ChatMessage> CreateMessage(ChatMessage newMessage,string fromUserId,int toTeamChatId)
+        public async Task<ChatMessage> CreateMessage(ChatMessage newMessage,string creatorId,int chatId)
         {
 
             if (newMessage != null)
             {
                 newMessage.Content = Regex.Replace(newMessage.Content, @"(?i)<(?!img|a|/a|/img).*?>", string.Empty);
-                newMessage.FromUserId = fromUserId;
-                newMessage.ToTeamChatId = toTeamChatId;
+                newMessage.CreatorId = creatorId;
+                newMessage.ChatId = chatId;
 
                 await chatMessageRepository.SaveMessage(newMessage);
                 await chatMessageRepository.SaveChanges();

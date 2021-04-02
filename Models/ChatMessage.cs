@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace work_platform_backend.Models
 {
@@ -11,11 +8,11 @@ namespace work_platform_backend.Models
         public string Content { get; set; }
         public DateTime Timestamp { get; set; }
 
-        public string FromUserId { get; set; }
-        public User FromUser { get; set; }
-        public int ToTeamChatId { get; set; }
-        public TeamChat ToTeamChat{ get; set; }
-         public int MessageTypeId { get; set; } 
+        public string CreatorId { get; set; }
+        public User Creator { get; set; }
+        public int ChatId { get; set; }
+        public TeamChat Chat{ get; set; }
+         public int? MessageTypeId { get; set; } 
         public ChatMessageType  MessageType { get; set; }
     }
 }

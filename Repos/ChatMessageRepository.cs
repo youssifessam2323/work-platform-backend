@@ -39,15 +39,15 @@ namespace work_platform_backend.Repos
           
         }
 
-        public async Task<ICollection<ChatMessage>> GetAllMessageByTeamCHat(int TeamChatId)
+        public async Task<ICollection<ChatMessage>> GetAllMessageByTeamCHat(int ChatId)
         {
-           return( await context.ChatMessages.Where(m => m.ToTeamChatId == TeamChatId).ToListAsync());
+           return( await context.ChatMessages.Where(m => m.ChatId == ChatId).ToListAsync());
            
         }
 
         public async Task<ICollection<ChatMessage>> GetAllMessageByUser(string userId)
         {
-            return( await context.ChatMessages.Where(m => m.FromUserId == userId).ToListAsync());
+            return( await context.ChatMessages.Where(m => m.CreatorId == userId).ToListAsync());
             
         }
 

@@ -8,7 +8,6 @@ namespace work_platform_backend.Models
 
         public string MessageTypeName { get; set; }
 
-        public ICollection<ChatMessage> Messages { get; set; }
 
 
     }

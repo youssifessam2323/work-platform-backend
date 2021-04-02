@@ -100,7 +100,7 @@ namespace work_platform_backend.Models
             modelBuilder.Entity<RTask>()
                 .HasOne(t => t.Project)
                 .WithMany(p => p.Tasks)
-                .OnDelete(DeleteBehavior.SetNull);    
+                .OnDelete(DeleteBehavior.Restrict);    
 
             // modelBuilder.Entity<RTask>()
                 // .HasOne(t => t.DependantTask)
@@ -300,26 +300,32 @@ namespace work_platform_backend.Models
                 modelBuilder.Entity<TeamChat>()
                     .HasOne(tc => tc.Team)
                     .WithOne(t => t.TeamChat)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.SetNull);
 
 
                 modelBuilder.Entity<ChatMessage>()
-                        .HasIndex(tc => tc.ToTeamChatId)
+                        .HasIndex(tc => tc.ChatId)
                         .IsUnique(true);
 
                 modelBuilder.Entity<ChatMessage>()
-                      .HasOne(tc => tc.ToTeamChat)
-                       .WithMany(m=>m.Messages)
-                       .HasForeignKey(tc => tc.ToTeamChatId)
+                      .HasOne(cm => cm.Chat)
+                       .WithMany(tc => tc.ChatMessages)
+                       .HasForeignKey(m => m.ChatId)
                        .OnDelete(DeleteBehavior.Cascade);
 
 
                 modelBuilder.Entity<ChatMessage>()
                     .HasOne(mt => mt.MessageType)
-                     .WithMany(m => m.Messages)
-                     .HasForeignKey(mt => mt.MessageTypeId)
-                     .OnDelete(DeleteBehavior.Cascade);
+                     .WithMany()
+                     .HasForeignKey(cm => cm.MessageTypeId)
+                     .OnDelete(DeleteBehavior.SetNull);
 
+
+                modelBuilder.Entity<ChatMessage>()
+                    .HasOne( u => u.Creator)
+                    .WithMany( u => u.Messages)
+                    .HasForeignKey("CreatorId")
+                    .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
 

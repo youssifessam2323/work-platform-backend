@@ -188,29 +188,29 @@ namespace work_platform_backend.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("ChatId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FromUserId")
+                    b.Property<string>("CreatorId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("MessageTypeId")
+                    b.Property<int?>("MessageTypeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ToTeamChatId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("FromUserId");
+                    b.HasIndex("ChatId")
+                        .IsUnique();
+
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("MessageTypeId");
-
-                    b.HasIndex("ToTeamChatId")
-                        .IsUnique();
 
                     b.ToTable("ChatMessages");
                 });
@@ -552,7 +552,7 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("CreatorId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("TeamId")
+                    b.Property<int?>("TeamId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -560,7 +560,8 @@ namespace work_platform_backend.Migrations
                     b.HasIndex("CreatorId");
 
                     b.HasIndex("TeamId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[TeamId] IS NOT NULL");
 
                     b.ToTable("TeamChats");
                 });
@@ -759,21 +760,21 @@ namespace work_platform_backend.Migrations
 
             modelBuilder.Entity("work_platform_backend.Models.ChatMessage", b =>
                 {
-                    b.HasOne("work_platform_backend.Models.User", "FromUser")
+                    b.HasOne("work_platform_backend.Models.TeamChat", "Chat")
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("work_platform_backend.Models.User", "Creator")
                         .WithMany("Messages")
-                        .HasForeignKey("FromUserId");
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("work_platform_backend.Models.ChatMessageType", "MessageType")
-                        .WithMany("Messages")
+                        .WithMany()
                         .HasForeignKey("MessageTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("work_platform_backend.Models.TeamChat", "ToTeamChat")
-                        .WithMany("Messages")
-                        .HasForeignKey("ToTeamChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.CheckPoint", b =>
@@ -852,7 +853,7 @@ namespace work_platform_backend.Migrations
                     b.HasOne("work_platform_backend.Models.Project", "Project")
                         .WithMany("Tasks")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("work_platform_backend.Models.Team", "Team")
                         .WithMany("Tasks")
@@ -923,8 +924,7 @@ namespace work_platform_backend.Migrations
                     b.HasOne("work_platform_backend.Models.Team", "Team")
                         .WithOne("TeamChat")
                         .HasForeignKey("work_platform_backend.Models.TeamChat", "TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.TeamProject", b =>
