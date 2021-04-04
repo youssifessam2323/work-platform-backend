@@ -47,11 +47,21 @@ namespace work_platform_backend.Hubs
             try
             {
 
+                var userId = userService.GetUserId();
 
-
-                var newTeam = await teamService.AddTeam(team, roomId, userService.GetUserId());
+                var newTeam = await teamService.AddTeam(team, roomId, userId);
                 if (newTeam != null)
                 {
+
+                    var JoinChatOfTeamByDefault = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
+
+                    if (JoinChatOfTeamByDefault != null)
+                    {
+                        await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeamByDefault.ChatName);
+                        await Clients.Group(JoinChatOfTeamByDefault.ChatName).SendAsync("ReceiveMessage", $"User with Id = {userId} Join Group Of {JoinChatOfTeamByDefault}");
+
+                    }
+
                     var teamViewModel = mapper.Map<Team, TeamViewModel>(newTeam);
                   
                     await Clients.All.SendAsync("addTeam", teamViewModel);  //Change soon
@@ -72,18 +82,20 @@ namespace work_platform_backend.Hubs
         {
             try
             {
-                var user = userService.GetUserId();   //Join this Team
+                var userId = userService.GetUserId();   //Join this Team
                 var teamJoin = await teamService.GetTeamByTeamCode(teamCode);
 
 
                 //User And Team Are Found 
-                if (user != null &&teamJoin!= null )
+                if (userId != null &&teamJoin!= null )
                 {
                    var JoinChatOfTeam = await teamChatService.GetTeamChatOfTeam(teamJoin.Id);
 
                     if (JoinChatOfTeam != null)
                     {
+                        var user = await userService.getUserById(userId);
                         await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //show in this Room that turn to it add His Name To This Group 
+                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessage", $"User: {user.UserName} Join Group of {JoinChatOfTeam} ");
                     }         
                 }
 
