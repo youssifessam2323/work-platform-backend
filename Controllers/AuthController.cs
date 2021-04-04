@@ -34,7 +34,7 @@ namespace work_platform_backend.Controllers
         public async Task<ActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
             if(!ModelState.IsValid)
-            {
+            {   
                 var errors = (from item in ModelState.Values
                                     from error in item.Errors
                                     select error.ErrorMessage).ToList();

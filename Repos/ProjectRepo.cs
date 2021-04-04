@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using work_platform_backend.Exceptions;
 using work_platform_backend.Models;
 
 namespace work_platform_backend.Repos
@@ -96,7 +97,13 @@ namespace work_platform_backend.Repos
 
         public async Task RemoveTeamFromProject(int projectId, int teamId)
         {
-            TeamProject task = await context.TeamProjects.Where(tp => tp.TeamId == teamId && tp.ProjectId == projectId).FirstAsync();
+            Console.WriteLine(teamId + " " + projectId );
+            TeamProject task = await context.TeamProjects.Where(tp => tp.TeamId == teamId && tp.ProjectId == projectId).SingleOrDefaultAsync();
+            Console.WriteLine(task);
+            if(task == null )
+            {
+                throw new ResourceNotFoundException();
+            }
             context.TeamProjects.Remove(task);
         }
     }

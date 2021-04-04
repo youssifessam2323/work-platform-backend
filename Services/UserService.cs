@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using work_platform_backend.Dtos.Response;
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -48,19 +47,17 @@ namespace work_platform_backend.Services
             return null;
         }
 
-        public async Task<UserResponse> getUserById(string id)
+        public async Task<User> getUserById(string id)
         {
-            var user = await userRepository.GetUserById(id);
-             return mapper.Map<UserResponse>(user);
+            return await userRepository.GetUserById(id);
         }
 
-        public async Task<List<TeamResponse>> getTeamOfUserInRoom(int roomId,string userId)
+        public async Task<List<Team>> getTeamOfUserInRoom(int roomId,string userId)
         {
             Console.WriteLine("Room ID =====> = " +  roomId);
             List<Team> teams =((List<Team>) await teamRepository.GetAllTeamsByMember(userId)).Where(t => t.RoomId == roomId).ToList();
 
-            List<TeamResponse> teamResponse =teams.Select(t => mapper.Map<TeamResponse>(t)).ToList();
-            return teamResponse;
+            return teams;
         }
 
 

@@ -34,29 +34,28 @@ namespace work_platform_backend.Services
       
      
 
-        public async Task<Room> AddRoom(RoomRequest roomRequest , string creatorId)
+        public async Task<Room> AddRoom(Room room , string creatorId)
         {
                 
-                var newRoom =  mapper.Map<Room>(roomRequest);
-                newRoom.CreatedAt = DateTime.Now ;
-                newRoom.CreatorId = creatorId;
-                await roomRepository.SaveRoom(newRoom);
+                room.CreatedAt = DateTime.Now ;
+                room.CreatorId = creatorId;
+                await roomRepository.SaveRoom(room);
                 await roomRepository.SaveChanges();
 
-                if (newRoom != null)
+                if (room != null)
                 {
                     
             
                     Team newTeam = new Team()
                     {
-                        Name = $" {newRoom.Name}/main ",
-                        Description = newRoom.Description,
+                        Name = $" {room.Name}/main ",
+                        Description = room.Description,
                         CreatedAt = DateTime.Now,
                     };
 
-                await teamService.AddTeam(newTeam,newRoom.Id,creatorId);
+                await teamService.AddTeam(newTeam,room.Id,creatorId);
 
-                return newRoom;
+                return room;
                 }
                 return null;
             }
@@ -67,15 +66,15 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<Room> UpdateRoom(int id, RoomRequest roomRequest)
+        public async Task<Room> UpdateRoom(int id, Room room)
         {
-            Room UpdatedRoom = await roomRepository.UpdateRoomById(id, roomRequest);
+            Room updatedRoom = await roomRepository.UpdateRoomById(id, room);
 
-            if (UpdatedRoom != null)
+            if (updatedRoom != null)
             {
                 await roomRepository.SaveChanges();
-                Console.WriteLine("Updated Room = " + UpdatedRoom);
-                return UpdatedRoom;
+                Console.WriteLine("Updated Room = " + updatedRoom);
+                return updatedRoom;
             }
 
 

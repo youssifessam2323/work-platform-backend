@@ -111,17 +111,17 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<IEnumerable<ResponseTeamDto>> GetTeamsByRoom(int RoomId)
+        public async Task<IEnumerable<Team>> GetTeamsByRoom(int RoomId)
         {
             var Teams = await teamRepository.GetAllTeamsByRoom(RoomId);
 
             if (Teams.Count().Equals(0))
             {
 
-                return new List<ResponseTeamDto>();
+                return new List<Team>();
                 
             }
-            var TeamResponse = mapper.Map<IEnumerable<ResponseTeamDto>>(Teams);
+            var TeamResponse = mapper.Map<IEnumerable<Team>>(Teams);
             
 
 

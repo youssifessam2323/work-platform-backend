@@ -138,12 +138,12 @@ namespace work_platform_backend
 
             app.UseAuthorization();
 
-            //app.UseEndpoints(endpoints =>
-            //{
+            app.UseEndpoints(endpoints =>
+            {
             //    endpoints.MapRazorPages();
-            //    endpoints.MapControllers();
+               endpoints.MapControllers();
             //    endpoints.MapHub<ChatHub>("/chatHub");
-            //});
+            });
         }
     }
 }

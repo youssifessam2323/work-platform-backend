@@ -40,14 +40,14 @@ namespace work_platform_backend.Repos
            await context.Rooms.AddAsync(room);
         }
 
-        public async Task<Room> UpdateRoomById(int roomId, RoomRequest roomRequest)
+        public async Task<Room> UpdateRoomById(int roomId, Room room)
         {
             var newRoom = await context.Rooms.FindAsync(roomId);
             if (newRoom != null)
             {
                 // var newRoom = _mapper.Map<Room>(roomRequest);
-                newRoom.Name = roomRequest.Name;
-                newRoom.Description= roomRequest.Description;
+                newRoom.Name = room.Name;
+                newRoom.Description= room.Description;
                 newRoom.CreatedAt = DateTime.Now;
                 
                 return newRoom;

@@ -9,7 +9,12 @@ namespace work_platform_backend.Models
         public int TeamId { get; set; }
         
         public Team Team { get; set; }
-        
-        
+
+
+        public override string ToString()
+        {
+            return "team = " + TeamId + " Project  = " + ProjectId;
+        }
+
     }
 }

@@ -78,18 +78,17 @@ namespace work_platform_backend.Services
             await projectRepository.SaveChanges();
         }
 
-        public async Task<IEnumerable<ResponseProjectDto>> GetProjectsByRoom(int roomId)
+        public async Task<IEnumerable<Project>> GetProjectsByRoom(int roomId)
         {
-            var Projects = await projectRepository.GetAllProjectsByRoom(roomId);
+            var projects = await projectRepository.GetAllProjectsByRoom(roomId);
 
-            if (Projects.Count().Equals(0))
+            if (projects.Count().Equals(0))
             {
                 return null;
 
             }
-            var ProjectsResponse = _mapper.Map<IEnumerable<ResponseProjectDto>>(Projects);
 
-            return ProjectsResponse;
+            return projects;
 
         }
 

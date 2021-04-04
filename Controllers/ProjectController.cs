@@ -60,9 +60,9 @@ namespace work_platform_backend.Controllers
             {
                 return BadRequest("this team is already in this project");
             }
-            catch(InvalidOperationException e)
+            catch(ResourceNotFoundException e )
             {
-                return BadRequest("the project or team is not exist");
+                return NotFound(e.Message);
             }
             return Ok();
         }

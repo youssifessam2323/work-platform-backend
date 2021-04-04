@@ -78,7 +78,7 @@ namespace work_platform_backend.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
-        public async Task<IActionResult> AddRoom(RoomRequest roomRequest)
+        public async Task<IActionResult> AddRoom(Room roomRequest)
         {
               
             var newRoom = await roomService.AddRoom(roomRequest,UserService.GetUserId());
@@ -90,14 +90,14 @@ namespace work_platform_backend.Controllers
 
         [HttpPut("{RoomId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> UpdateRoom(int RoomId, RoomRequest roomRequest)
+        public async Task<IActionResult> UpdateRoom(int RoomId, Room room)
         {
-            Room UpdatedRoom = await roomService.UpdateRoom(RoomId,roomRequest);
-            if (UpdatedRoom == null)
+            Room updatedRoom = await roomService.UpdateRoom(RoomId,room);
+            if (updatedRoom == null)
             {
                 return NotFound();
             }
-            return Ok(UpdatedRoom);
+            return Ok(updatedRoom);
 
         }
 
