@@ -303,9 +303,9 @@ namespace work_platform_backend.Models
                     .OnDelete(DeleteBehavior.SetNull);
 
 
-                modelBuilder.Entity<ChatMessage>()
-                        .HasIndex(tc => tc.ChatId)
-                        .IsUnique(true);                             //This Case Caues error as if user can Write one Message Only 
+                //modelBuilder.Entity<ChatMessage>()
+                //        .HasIndex(tc => tc.ChatId)
+                //        .IsUnique(true);                             //This Case Caues error as if user can Write one Message Only 
 
                 modelBuilder.Entity<ChatMessage>()
                       .HasOne(cm => cm.Chat)

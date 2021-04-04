@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace work_platform_backend.Migrations
 {
-    public partial class chatModels : Migration
+    public partial class EditinChat : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -85,8 +85,7 @@ namespace work_platform_backend.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ChatMessages_ChatId",
                 table: "ChatMessages",
-                column: "ChatId",
-                unique: true);
+                column: "ChatId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChatMessages_CreatorId",

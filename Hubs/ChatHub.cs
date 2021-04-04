@@ -108,10 +108,25 @@ namespace work_platform_backend.Hubs
 
         public async Task LeaveTeam(int teamId)
         {
+            try
+            {
+               
+                 var ChatThatJoined = await teamChatService.GetTeamChatOfTeam(teamId);
 
-            var ChatThatJoined = await teamChatService.GetTeamChatOfTeam(teamId);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatThatJoined.ChatName);   //when change room or logout
 
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatThatJoined.ChatName);   //when change room or logout
+                await teamService.DeleteTeam(teamId);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("onError", "You failed to Leave the Team Unexpected Error !" + ex.Message);
+            }
+             
+           
+            {
+
+               
+            }
         }
 
 

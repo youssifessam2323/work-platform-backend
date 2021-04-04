@@ -205,8 +205,7 @@ namespace work_platform_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatId")
-                        .IsUnique();
+                    b.HasIndex("ChatId");
 
                     b.HasIndex("CreatorId");
 

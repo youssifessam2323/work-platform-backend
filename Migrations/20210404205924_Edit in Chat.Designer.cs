@@ -10,8 +10,8 @@ using work_platform_backend.Models;
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20210402013338_chatModels")]
-    partial class chatModels
+    [Migration("20210404205924_Edit in Chat")]
+    partial class EditinChat
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -207,8 +207,7 @@ namespace work_platform_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatId")
-                        .IsUnique();
+                    b.HasIndex("ChatId");
 
                     b.HasIndex("CreatorId");
 
