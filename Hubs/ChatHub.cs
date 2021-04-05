@@ -82,18 +82,21 @@ namespace work_platform_backend.Hubs
         {
             try
             {
-                var userId = userService.GetUserId();   //Join this Team
+                string userId = userService.GetUserId();
+
+                await userService.JoinTeam(teamCode,userId);   //Join this Team
                 var teamJoin = await teamService.GetTeamByTeamCode(teamCode);
 
 
                 //User And Team Are Found 
-                if (userId != null &&teamJoin!= null )
+                if (!string.IsNullOrEmpty(userId) && teamJoin!= null )
                 {
+                    
                    var JoinChatOfTeam = await teamChatService.GetTeamChatOfTeam(teamJoin.Id);
 
                     if (JoinChatOfTeam != null)
                     {
-                        var user = await userService.getUserById(userId);
+                       var user = await userService.getUserById(userId);
                         await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //show in this Room that turn to it add His Name To This Group 
                         await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessage", $"User: {user.UserName} Join Group of {JoinChatOfTeam} ");
                     }         
@@ -106,16 +109,20 @@ namespace work_platform_backend.Hubs
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task LeaveTeam(int teamId)
         {
             try
             {
                
+
                  var ChatThatJoined = await teamChatService.GetTeamChatOfTeam(teamId);
 
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatThatJoined.ChatName);   //when change room or logout
 
-                await teamService.DeleteTeam(teamId);
+                await userService.LeaveTeam(teamId, userService.GetUserId());
+
+
             }
             catch (Exception ex)
             {
@@ -166,80 +173,67 @@ namespace work_platform_backend.Hubs
             }
         }
 
-     
-       
-
-        //public async Task DeleteTeam(string teamName)
-        //{
-        //    try
-        //    {
-        //        // Delete from database
-        //        //var team = _context.Teams.Include(r => r.Admin)
-        //        //    .Where(r => r.Name == teamName && r.Admin.UserName == IdentityName).FirstOrDefault();
-        //        //_context.Teams.Remove(team);
-        //        context.SaveChanges();
-
-        //        // Delete from list
-        //        var teamViewModel = _TeamChats.First(r => r.Name == teamName);
-        //        _TeamChats.Remove(teamViewModel);
-
-        //        // Move users back to Lobby
-        //        await Clients.Group(teamName).SendAsync("onRoomDeleted", string.Format("Team {0} has been deleted.\nYou are now moved to the Lobby!", teamName));
-
-        //        // Tell all users to update their Team list
-        //        await Clients.All.SendAsync("removeChatTeam", teamViewModel);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        await Clients.Caller.SendAsync("onError", "Can't delete this chat Team. Only owner can delete this room.");
-        //    }
-        //}
 
 
-      //  public override Task OnConnectedAsync()  /*when enter application after signin or Register*/
-      //  {
-      //      try
-      //      {
-      //          //var user = userService.GetUserId();
-      //          //var userViewModel = mapper.Map<User, UserViewModel>(user);
-      //          //userViewModel.Device = GetDevice();
-      //          //userViewModel.CurrentTeam = "";
 
-      //          if (!_ConnectionUsers.Any(u => u.Username == IdentityName))
-      //          {
-      //          /*    _ConnectionUsers.Add(userViewModel); */  //add user to list show list of user when messages
+        public async Task DeleteTeam(int teamId)
+        {
+            try
+            {
+               await teamService.DeleteTeam(teamId);
+              
+            }
+            catch (Exception)
+            {
+                await Clients.Caller.SendAsync("onError", "Can't delete this chat Team. Only owner can delete this room.");
+            }
+        }
 
-      //          }
 
-      //          /*Clients.Caller.SendAsync("getProfileInfo", user.FullName, user.Avatar);*/   // Show information of user
-      //      }
-      //      catch (Exception ex)
-      //      {
-      //          Clients.Caller.SendAsync("onError", "OnConnected:" + ex.Message);
-      //      }
-      //      return base.OnConnectedAsync();
-      //  }
+        //  public override Task OnConnectedAsync()  /*when enter application after signin or Register*/
+        //  {
+        //      try
+        //      {
+        //          //var user = userService.GetUserId();
+        //          //var userViewModel = mapper.Map<User, UserViewModel>(user);
+        //          //userViewModel.Device = GetDevice();
+        //          //userViewModel.CurrentTeam = "";
 
-      //  public override Task OnDisconnectedAsync(Exception exception)
-      //  {
-      //      try
-      //      {
-      //          var user = _ConnectionUsers.Where(u => u.Username == IdentityName).First();
-      //          _ConnectionUsers.Remove(user);
+        //          if (!_ConnectionUsers.Any(u => u.Username == IdentityName))
+        //          {
+        //          /*    _ConnectionUsers.Add(userViewModel); */  //add user to list show list of user when messages
 
-      //          // Tell other users to remove you from their list
-      //          Clients.OthersInGroup(user.CurrentTeam).SendAsync("removeUser", user);
+        //          }
 
-      //          // Remove mapping
-      //          //_ConnectionsMap.Remove(user.Username);
-      //      }
-      //      catch (Exception ex)
-      //      {
-      //          Clients.Caller.SendAsync("onError", "OnDisconnected: " + ex.Message);
-      //      }
-      //return base.OnDisconnectedAsync(exception);
-      
-      //  }
+        //          /*Clients.Caller.SendAsync("getProfileInfo", user.FullName, user.Avatar);*/   // Show information of user
+        //      }
+        //      catch (Exception ex)
+        //      {
+        //          Clients.Caller.SendAsync("onError", "OnConnected:" + ex.Message);
+        //      }
+        //      return base.OnConnectedAsync();
+        //  }
+
+        //  public override Task OnDisconnectedAsync(Exception exception)
+        //  {
+        //      try
+        //      {
+        //          var user = _ConnectionUsers.Where(u => u.Username == IdentityName).First();
+        //          _ConnectionUsers.Remove(user);
+
+        //          // Tell other users to remove you from their list
+        //          Clients.OthersInGroup(user.CurrentTeam).SendAsync("removeUser", user);
+
+        //          // Remove mapping
+        //          //_ConnectionsMap.Remove(user.Username);
+        //      }
+        //      catch (Exception ex)
+        //      {
+        //          Clients.Caller.SendAsync("onError", "OnDisconnected: " + ex.Message);
+        //      }
+        //return base.OnDisconnectedAsync(exception);
+
+        //  }
 
 
         //public IEnumerable<UserViewModel> GetUsers(string teamName)  //after getting room show the current room of user in list of Users
@@ -247,7 +241,7 @@ namespace work_platform_backend.Hubs
         //    return _ConnectionUsers.Where(u => u.CurrentTeam == teamName).ToList();
         //}
 
-    
+
         //private string IdentityName
         //{
         //    get { return Context.User.Identity.Name; }
@@ -262,5 +256,5 @@ namespace work_platform_backend.Hubs
 
         //    return "Web";
         //}
-        }
+    }
 }

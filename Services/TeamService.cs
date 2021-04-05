@@ -78,7 +78,7 @@ namespace work_platform_backend.Services
                 throw new NullReferenceException();
 
             }
-            await teamChatService.DeleteTeamChatByTeam(teamId);
+           
 
             await teamRepository.SaveChanges();
 

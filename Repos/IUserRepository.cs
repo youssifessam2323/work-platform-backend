@@ -9,6 +9,7 @@ namespace work_platform_backend.Repos
     {
         Task<User> GetUserById(string id);
         Task SaveNewTeamMember(User user, Team team);
+        void DeleteTeamMember(User user, Team team);
         Task SaveChanges();
         Task<List<Team>> getUserTeams(string userId);
         Task<User> GetUserByUsername(string username);
