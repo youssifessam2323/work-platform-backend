@@ -133,8 +133,9 @@ namespace work_platform_backend
             app.UseHttpsRedirection();
 
             app.UseRouting();
-          
 
+            app.UseCors();
+            
             app.UseAuthentication();
 
             app.UseAuthorization();
@@ -143,7 +144,7 @@ namespace work_platform_backend
             {
             //    endpoints.MapRazorPages();
                endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chatHub");
+               endpoints.MapHub<ChatHub>("/chathub");
             });
         }
     }
