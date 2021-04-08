@@ -42,7 +42,7 @@ namespace work_platform_backend.Hubs
 
 
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task CreateTeam(Team team, int roomId)
+        public async Task CreateTeam(Team team, int roomId)    //Change => Enter Team{Name , Description}
         {
             try
             {
@@ -58,15 +58,17 @@ namespace work_platform_backend.Hubs
                     if (JoinChatOfTeamByDefault != null)
                     {
                         await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeamByDefault.ChatName);
-                        await Clients.Group(JoinChatOfTeamByDefault.ChatName).SendAsync("ReceiveMessage", $"User with Id = {userId} Join Group Of {JoinChatOfTeamByDefault}");
+                        await Clients.Group(JoinChatOfTeamByDefault.ChatName).SendAsync("ReceiveMessageOnAdd", $"User with Id = {userId} Create Chat Group Called {JoinChatOfTeamByDefault}");
 
                     }
 
                     var teamViewModel = mapper.Map<Team, TeamViewModel>(newTeam);
                   
-                    await Clients.All.SendAsync("addTeam", teamViewModel);  //Change soon
+                    await Clients.All.SendAsync("addTeam", teamViewModel);  //Change soon Tell all Clients on Hub That a New Team Added
                 }
                 
+
+               
                 
             
             }
@@ -85,7 +87,7 @@ namespace work_platform_backend.Hubs
                 string userId = userService.GetUserId();
 
                 await userService.JoinTeam(teamCode,userId);   //Join this Team
-                var teamJoin = await teamService.GetTeamByTeamCode(teamCode);
+                var teamJoin = await teamService.GetTeamByTeamCode(teamCode);  //Throw exception if Not Found TeamCode
 
 
                 //User And Team Are Found 
@@ -98,7 +100,7 @@ namespace work_platform_backend.Hubs
                     {
                        var user = await userService.getUserById(userId);
                         await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //show in this Room that turn to it add His Name To This Group 
-                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessage", $"User: {user.UserName} Join Group of {JoinChatOfTeam} ");
+                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} ");
                     }         
                 }
 
@@ -114,31 +116,27 @@ namespace work_platform_backend.Hubs
         {
             try
             {
-               
-
-                 var ChatThatJoined = await teamChatService.GetTeamChatOfTeam(teamId);
-
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatThatJoined.ChatName);   //when change room or logout
 
                 await userService.LeaveTeam(teamId, userService.GetUserId());
 
+                var ChatThatJoined = await teamChatService.GetTeamChatOfTeam(teamId);
+                if (ChatThatJoined != null)
+                {
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatThatJoined.ChatName);   //when change room or logout
+                }
 
             }
             catch (Exception ex)
             {
                 await Clients.Caller.SendAsync("onError", "You failed to Leave the Team Unexpected Error !" + ex.Message);
             }
-             
-           
-            {
-
-               
-            }
+                    
+          
         }
 
 
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task SendToTeam(ChatMessage ChatMessage, int teamId)
+        public async Task SendToTeam(string message, int teamId)
         {
             try
             {
@@ -146,13 +144,16 @@ namespace work_platform_backend.Hubs
                 var Chat = await teamChatService.GetTeamChatOfTeam(teamId);
                 if (Chat != null)
                 {
+                    ChatMessage chatMessage = new ChatMessage()
+                    {
+                        Content = message
+                    };
+                   
 
-                    var newMessage = await chatMessageService.CreateMessage(ChatMessage, userService.GetUserId(), Chat.Id);
+                    var newMessage = await chatMessageService.CreateMessage(chatMessage, userService.GetUserId(), Chat.Id);
                     if (newMessage != null)
                     {
-
-                      
-
+                     
                         MessageViewModel messageViewModel = new MessageViewModel()
                         {
                             Content = newMessage.Content,
@@ -165,6 +166,8 @@ namespace work_platform_backend.Hubs
                     }
 
                 }
+
+                
           
             }
             catch (Exception)
@@ -185,7 +188,7 @@ namespace work_platform_backend.Hubs
             }
             catch (Exception)
             {
-                await Clients.Caller.SendAsync("onError", "Can't delete this chat Team. Only owner can delete this room.");
+                await Clients.Caller.SendAsync("onError", "Can't delete this chat Team. Only owner can delete this Team.");
             }
         }
 

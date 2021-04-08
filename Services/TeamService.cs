@@ -41,7 +41,7 @@ namespace work_platform_backend.Services
 
                 TeamChat newTeamChat = new TeamChat()
                 {
-                    ChatName = $" {newTeam.Name}/Chatting ",
+                    ChatName = $" {newTeam.Name}/GroupChat ",
                 };
 
                 await teamChatService.CreateTeamChat(newTeamChat, newTeam.LeaderId, newTeam.Id);
