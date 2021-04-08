@@ -79,6 +79,7 @@ namespace work_platform_backend.Hubs
         }
 
 
+
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task JoinTeam(string teamCode)     //Check every switching From team to team
         {
