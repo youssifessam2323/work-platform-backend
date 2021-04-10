@@ -6,6 +6,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using work_platform_backend.Dtos;
+using work_platform_backend.Exceptions;
+using work_platform_backend.Exceptions.Room;
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -34,8 +36,16 @@ namespace work_platform_backend.Services
       
      
 
-        public async Task<Room> AddRoom(Room room , string creatorId)
+        public async Task AddRoom(RoomDto roomDto , string creatorId)
         {
+                var room = mapper.Map<Room>(roomDto);
+
+                Room isRoomNameNotUnique = await roomRepository.GetRoomByName(room.Name);
+
+                if(isRoomNameNotUnique != null)
+                {
+                    throw new RoomNameMustBeUniqueException();
+                }
                 
                 room.CreatedAt = DateTime.Now ;
                 room.CreatorId = creatorId;
@@ -55,19 +65,44 @@ namespace work_platform_backend.Services
 
                 await teamService.AddTeam(newTeam,room.Id,creatorId);
 
-                return room;
                 }
-                return null;
+                throw new  RoomNotFoundException("Error While Saving the Room");
             }
+
+
+
+
 
         public async Task<List<Project>> GetRoomProjects(int roomId)
         {
-            return (List<Project>)(await projectRepository.GetAllProjectsByRoom(roomId));
-
+            if(!(await isRoomExist(roomId)))
+            {
+                throw new RoomNotFoundException("room not exist");
+            }
+            
+            Room room = await roomRepository.GetRoomById(roomId);
+            if(room == null)
+            {
+                throw new RoomNotFoundException("Room not exist");
+            }
+            return (List<Project>)await projectRepository.GetAllProjectsByRoom(roomId);
         }
 
-        public async Task<Room> UpdateRoom(int id, Room room)
+        public async Task<Room> UpdateRoom(int id, RoomDto roomDto)
         {
+            var room = mapper.Map<Room>(roomDto);
+
+            if(!(await isRoomExist(id)))
+            {
+                throw new RoomNotFoundException("room not exist");
+            }
+
+
+            if(!(await isRoomNameUnique(roomDto.Name)))
+            {
+                throw new RoomNameMustBeUniqueException();
+            }
+            
             Room updatedRoom = await roomRepository.UpdateRoomById(id, room);
 
             if (updatedRoom != null)
@@ -76,57 +111,62 @@ namespace work_platform_backend.Services
                 Console.WriteLine("Updated Room = " + updatedRoom);
                 return updatedRoom;
             }
+            throw new RoomNotFoundException("Room not exist");
 
+        }
 
-            return null;
-
+        private async Task<bool> isRoomNameUnique(string name)
+        {
+            var room = await roomRepository.GetRoomByName(name);
+            if(room != null)
+            {
+                return false;
+            }
+            return true;
         }
 
 
         public async Task DeleteRoom(int roomId)
         {
-            var room = await roomRepository.DeleteRoomById(roomId);
-            if (room == null)
+            if(await isRoomExist(roomId))
             {
-
-                throw new NullReferenceException();
-
+                await roomRepository.DeleteRoomById(roomId);
+                await roomRepository.SaveChanges();
             }
-
-            await roomRepository.SaveChanges();
-
+            throw new RoomNotFoundException("room not exist");
 
         }
 
 
+        private async Task<bool> isRoomExist(int roomId)
+        {
+            Room r = await roomRepository.GetRoomById(roomId);
 
-        public async Task<Room> GetRoom(int roomId)
+            if(r == null )
+            {
+                return false;
+            }
+
+            return true ;
+        }
+
+
+        public async Task<RoomDetailsDto> GetRoom(int roomId)
         {
             Room room = await roomRepository.GetRoomById(roomId);
-
+            RoomDetailsDto roomDetailsDto = mapper.Map<RoomDetailsDto>(room);
             if (room != null)
             {
-                return room;
+                return roomDetailsDto;
             }
-
-
-            return null;
-
+            throw new RoomNotFoundException("Room not exist");
         }
 
-        public async Task<IEnumerable<Room>> GetAllRooms()
+        public async Task<IEnumerable<RoomDetailsDto>> GetAllRooms()
         {
-            var Rooms = await roomRepository.GetAllRooms();
-
-            if (Rooms .Count()!= 0)
-            {
-
-                return Rooms;
-            }
-
-
-            return null;
-
+            List<Room> rooms = (List<Room>)await roomRepository.GetAllRooms();
+            List<RoomDetailsDto> roomResponses = rooms.Select(r => mapper.Map<RoomDetailsDto>(r)).ToList(); 
+            return roomResponses;
         }
 
         public async Task<IEnumerable<Room>> GetAllRoomsOfCreator(string CreatorId)

@@ -48,25 +48,6 @@ namespace work_platform_backend.Controllers
 
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpGet]
-        [Route("GetTeamsMember")]
-
-        public async Task<IActionResult> GetTeamsOfMember()
-        {
-            string TeamMemberId = userService.GetUserId();
-            var GetTeamsMember = await teamService.GetTeamsByMember(TeamMemberId);
-            if (GetTeamsMember == null)
-            {
-                return Ok(new List<Team>());
-
-
-            }
-            return Ok(GetTeamsMember);
-
-        }
-
-
 
         [HttpGet]
         [Route("{teamId}")]

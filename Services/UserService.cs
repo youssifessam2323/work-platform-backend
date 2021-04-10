@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
+using work_platform_backend.Exceptions;
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -18,12 +20,13 @@ namespace work_platform_backend.Services
         private readonly ITeamRepository teamRepository;
         private readonly IRoomRepository roomRepository;
         private readonly ProjectManagerService projectManagerService;
+        private readonly ITeamMembersRepository teamMembersRepository;
         
                 
 
         private IMapper mapper;
 
-        public UserService(IHttpContextAccessor HttpContextAccessor, IUserRepository userRepository, ITeamRepository teamRepository = null, IMapper mapper = null, IRoomRepository roomRepository = null, ProjectManagerService projectManagerService = null)
+        public UserService(IHttpContextAccessor HttpContextAccessor, IUserRepository userRepository, ITeamRepository teamRepository = null, IMapper mapper = null, IRoomRepository roomRepository = null, ProjectManagerService projectManagerService = null, ITeamMembersRepository teamMembersRepository = null)
         {
             this.HttpContextAccessor = HttpContextAccessor;
             this.userRepository = userRepository;
@@ -31,6 +34,7 @@ namespace work_platform_backend.Services
             this.mapper = mapper;
             this.roomRepository = roomRepository;
             this.projectManagerService = projectManagerService;
+            this.teamMembersRepository = teamMembersRepository;
         }
 
 
@@ -52,12 +56,19 @@ namespace work_platform_backend.Services
             return await userRepository.GetUserById(id);
         }
 
-        public async Task<List<Team>> getTeamOfUserInRoom(int roomId,string userId)
+        public async Task<List<TeamDto>> getTeamOfUserInRoom(int roomId,string userId)
         {
-            Console.WriteLine("Room ID =====> = " +  roomId);
+            Room room = await roomRepository.GetRoomById(roomId);
+            if(room == null)
+            {
+                throw new RoomNotFoundException("room not exist");
+            }
+            
             List<Team> teams =((List<Team>) await teamRepository.GetAllTeamsByMember(userId)).Where(t => t.RoomId == roomId).ToList();
-
-            return teams;
+            
+            var teamsDto = teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
+            
+            return teamsDto;
         }
 
 
@@ -67,55 +78,107 @@ namespace work_platform_backend.Services
             Team team = await teamRepository.GetTeamByTeamCode(teamCode);
             User user = await userRepository.GetUserById(userId);     
             
-            Console.WriteLine("Team ====> " + team);
-            Console.WriteLine("User ====> " + user);
             if(team == null)
             {
-                throw new ApplicationException();
+                throw new Exception("team not exist");
             }
-            await userRepository.SaveNewTeamMember(user,team);     
+
+            var teamMembers = await teamMembersRepository.GetTeamMembersByUserIdAndTeamId(userId,team.Id);
+            
+          
+            Console.WriteLine("TeamMember  ====> " + teamMembers);
+            if(teamMembers != null)
+            {
+                throw new Exception("user is aready in the team");
+            }
+
+            Console.WriteLine("Team ====> " + team);
+            Console.WriteLine("User ====> " + user);
+            
+            await userRepository.SaveNewTeamMember(userId,team.Id);     
             await userRepository.SaveChanges();   
         }
 
         public async Task ChangeTeamLeader(int teamId, string userId,string newLeaderUsername)
         {
+        
             Team team = await teamRepository.GetTeamById(teamId);
 
-            if(team.LeaderId != userId)
+            var isAuthUserIsLeader = team.LeaderId == userId ? true : false;
+
+            if(!isAuthUserIsLeader)
             {
-                throw new UnauthorizedAccessException("This Operation is For the Team Leader Only");
+                throw new UnauthorizedAccessException("this operation is for the leader only");
             }
 
             User user = await userRepository.GetUserByUsername(newLeaderUsername);
             
-            team.Leader = user ;
+            
+            team.LeaderId = user.Id ;
             await teamRepository.SaveChanges();
         }
 
-        public async Task<List<Team>> GetTeamsThatUserLeads(int roomId, string userId)
+        public async Task<List<TeamDto>> GetTeamsThatUserLeads(int roomId, string userId)
         {
+            var isRoomExist = await roomRepository.isRoomExist(roomId);
+            
+            if(!isRoomExist)
+            {
+                throw new Exception("room not exist");
+            }
             var teams = await teamRepository.GetAllTeamsByRoom(roomId);
-            return teams.Where(t => t.LeaderId == userId).ToList();
+            return teams.Where(t => t.LeaderId == userId).Select(t => mapper.Map<TeamDto>(t)).ToList();
         }
 
-        public async Task<User> UpdateUserInfo(string userId, User newUser)
+        public async Task UpdateUserInfo(string userId, UserDto userDto)
         {   
-            return await userRepository.UpdateUser(userId,newUser);
+            var isUserExist = await userRepository.IsUserExistByUsername(userDto.UserName);
+
+            if(isUserExist)
+            {
+                throw new Exception("username was taken");
+            }
+            var user = mapper.Map<User>(userDto);
+
+            await userRepository.UpdateUser(userId,user);
         }
+
+
+
 
         public async Task AddToProjectManagers(int teamId, string userId)
         {
             Team team = await teamRepository.GetTeamById(teamId);
-            if(team != null)
+            
+            if(team == null)
             {
-                Room room = await roomRepository.GetRoomById(team.RoomId); 
-                User user = await userRepository.GetUserById(userId);
-                await projectManagerService.AddNewProjectManager(user,room);
-            }else
-            {
-            throw new NullReferenceException("team Id = " + teamId + " is not found");
+                throw new Exception("team not exist");
             }
+
+
+            var teamMembers = await teamMembersRepository.GetTeamMembersByUserIdAndTeamId(userId,teamId);
+            if(teamMembers == null)
+            {
+                throw new Exception("user is not in this team");
+            }
+
+            Room room = await roomRepository.GetRoomById(team.RoomId); 
+
+
+            var isProjectManagerExist = await  projectManagerService.IsProjectManagerExists(userId,room.Id);
+            if(isProjectManagerExist)
+            {
+                throw new Exception("user is already a project manager in this room");
+            }
+
+            // User user = await userRepository.GetUserById(userId);
+            await projectManagerService.AddNewProjectManager(userId,room.Id);
+
+           
+          
         }
+
+
 
         public async Task<User> GetUserByUsername(string username)
         {
@@ -123,7 +186,7 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<HashSet<Room>> getAuthUserRooms(string userId)
+        public async Task<HashSet<RoomDto>> getAuthUserRooms(string userId)
         {
             Console.WriteLine("Authenticad User = " + userId);
             List<Team> teams =await userRepository.getUserTeams(userId);
@@ -133,8 +196,10 @@ namespace work_platform_backend.Services
             foreach(var team in teams)
             {
                 rooms.Add(await roomRepository.GetRoomById(team.RoomId));
-            }    
-            return rooms;
+            }
+            
+            return rooms.Select(r => mapper.Map<RoomDto>(r)).ToHashSet();
+             
         }
     }
 }

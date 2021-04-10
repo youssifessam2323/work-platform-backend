@@ -46,7 +46,15 @@ namespace work_platform_backend.Controllers
                     Errors = errors
                 };
             }
-            AuthenticationResponse authenticationResponse = await authService.SignUp(registerRequest);
+            AuthenticationResponse authenticationResponse = null ;
+            try
+            {
+                authenticationResponse = await authService.SignUp(registerRequest);
+            }
+            catch(MailKit.Security.AuthenticationException e) 
+            {
+                return BadRequest("Email Created but it will be act as i nothing because it is not existing Email");
+            }
             
             
             if(!authenticationResponse.IsSuccess)

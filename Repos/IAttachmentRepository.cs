@@ -11,7 +11,6 @@ namespace work_platform_backend.Repos
         Task <Attachment>UpdateAttachmentById(int attachmentId,Attachment attachment);
         Task <Attachment>DeleteAttachmentById(int attachmentId);
         Task<bool> SaveChanges();
-
-
+        Task<Attachment> GetAttachmentById(int attachmentId);
     }
 }

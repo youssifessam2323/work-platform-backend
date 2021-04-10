@@ -100,7 +100,7 @@ namespace work_platform_backend.Repos
         {
             Console.WriteLine("Inserted team code =  " + teamCode);
             Guid insertedTeamCode = new Guid(teamCode);
-            return await context.Teams.Where(t => t.TeamCode == insertedTeamCode).FirstAsync();    
+            return await context.Teams.Where(t => t.TeamCode == insertedTeamCode).SingleOrDefaultAsync();    
         }
 
         public async Task<List<Team>> GetTeamSubTeamsById(int teamId)

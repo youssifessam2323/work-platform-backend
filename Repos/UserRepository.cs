@@ -24,12 +24,12 @@ namespace work_platform_backend.Repos
             return await context.Users.FindAsync(id); 
         }
 
-        public async Task SaveNewTeamMember(User user, Team team)
+        public async Task SaveNewTeamMember(string userId, int teamId)
         {
             TeamsMembers teamsMembers = new TeamsMembers();
             
-            teamsMembers.User = user;
-            teamsMembers.Team = team;
+            teamsMembers.UserId = userId;
+            teamsMembers.TeamId = teamId;
 
             Console.WriteLine("Team Members = " + teamsMembers);    
             await context.TeamsMembers.AddAsync(teamsMembers);
@@ -54,7 +54,7 @@ namespace work_platform_backend.Repos
 
         public async Task<User> GetUserByUsername(string username)
         {
-            return await context.Users.Where(u => u.UserName == username).FirstAsync();
+            return await context.Users.Where(u => u.UserName == username).SingleOrDefaultAsync();
         }
 
         public async Task<User> UpdateUser(string userId, User newUser)
@@ -77,6 +77,18 @@ namespace work_platform_backend.Repos
             user.ImageUrl = newUser.ImageUrl;
 
             return user;
+        }
+
+        public async Task<bool> IsUserExistByUsername(string username)
+        {
+            var user = await context.Users.Where(u => u.UserName == username).FirstOrDefaultAsync();
+            return user != null ? true : false;
+        }
+
+        public async Task<bool> IsUserExistById(string userId)
+        {
+            var user = await context.Users.FindAsync(userId);
+            return user != null ? true : false;
         }
     }
 }

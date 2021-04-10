@@ -22,12 +22,22 @@ namespace work_platform_backend.Repos
 
         public async Task<Room> GetRoomById(int roomId)
         {
-          return ( await context.Rooms.Include(r => r.Creator).FirstOrDefaultAsync(R=>R.Id==roomId));
+          return await context.Rooms
+                            .Include(r => r.Creator)
+                            .Include(r => r.Projects)
+                            .Include(r => r.Teams)
+                            .Include(r => r.ProjectManagers)
+                            .FirstOrDefaultAsync(R=>R.Id==roomId);
         }
 
         public async Task<IEnumerable<Room>> GetAllRooms()
         {
-            return (await context.Rooms.Include(r => r.Creator).ToListAsync());
+            return (await context.Rooms
+                                .Include(r => r.Creator)
+                                .Include(r => r.Projects)
+                                .Include(r => r.Teams)
+                                .Include(r => r.ProjectManagers)
+                                .ToListAsync());
         }
 
         public async Task<IEnumerable<Room>> GetRoomsByCreator(string creatorId)
@@ -43,7 +53,6 @@ namespace work_platform_backend.Repos
         public async Task<Room> UpdateRoomById(int roomId, Room room)
         {
             var newRoom = await context.Rooms.FindAsync(roomId);
-            if (newRoom != null)
             {
                 // var newRoom = _mapper.Map<Room>(roomRequest);
                 newRoom.Name = room.Name;
@@ -81,6 +90,31 @@ namespace work_platform_backend.Repos
                     .Include(pm => pm.User).Where(pm => pm.RoomId == roomId);
 
              return await projectManagers.Select(pm => pm.User).ToListAsync();
+        }
+
+        public async Task<Room> GetRoomByName(string name)
+        {
+            return await context.Rooms.Where(r => r.Name == name).SingleOrDefaultAsync();
+        }
+
+        public async Task<bool> IsProjectManagerExist(string userId, int roomId)
+        {
+            ProjectManager projectManager = await context.ProjectManagers
+                    .Where(pm => pm.UserId == userId && pm.RoomId == roomId)
+                    .SingleOrDefaultAsync();
+
+            if(projectManager != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> isRoomExist(int roomId)
+        {
+            var room = await context.Rooms.Where(r => r.Id == roomId).SingleOrDefaultAsync();
+            
+            return  room != null ?  true : false;  
         }
     }
 }
