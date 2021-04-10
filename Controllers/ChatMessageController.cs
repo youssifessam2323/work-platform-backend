@@ -116,6 +116,21 @@ namespace work_platform_backend.Controllers
         }
 
 
+        [HttpGet]
+        [Route("{chatId}/MessageHistory")]
+        public async Task<IActionResult> GetMessagesHistory(int chatId)
+        {
+
+            var AllMessagesHistory = await chatMessageService.GetMessageHistorybyChat(chatId);
+            if (AllMessagesHistory == null)
+            {
+                return Ok(new List<ChatMessage>());
+
+            }
+            return Ok(AllMessagesHistory);
+        }
+
+
 
 
     }

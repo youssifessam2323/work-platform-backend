@@ -114,6 +114,20 @@ namespace work_platform_backend.Services
         }
 
 
+       public async Task<IEnumerable<ChatMessage>> GetMessageHistorybyChat(int chatId)
+
+        {
+            var chatMessagesHistory = await chatMessageRepository.GetMessageHistorybyChat(chatId);
+            if (chatMessagesHistory.Count().Equals(0))
+            {
+                return null;
+
+            }
+
+            return chatMessagesHistory;
+        }
+
+
 
 
 

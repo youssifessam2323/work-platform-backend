@@ -57,8 +57,8 @@ namespace work_platform_backend.Hubs
 
                     if (JoinChatOfTeamByDefault != null)
                     {
-                        await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeamByDefault.ChatName);
-                        await Clients.Group(JoinChatOfTeamByDefault.ChatName).SendAsync("ReceiveMessageOnAdd", $"User with Id = {userId} Create Chat Group Called {JoinChatOfTeamByDefault}");
+                        //await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeamByDefault.ChatName);
+                        await Clients.Caller.SendAsync("ReceiveMessageOnAdd", $" Chat Group Called {JoinChatOfTeamByDefault} Created");
 
                     }
 
@@ -100,8 +100,9 @@ namespace work_platform_backend.Hubs
                     if (JoinChatOfTeam != null)
                     {
                        var user = await userService.getUserById(userId);
-                        await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //show in this Room that turn to it add His Name To This Group 
-                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} ");
+                        
+                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join
+                        await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //add to Group to tell Clients on Group new User Come
                     }         
                 }
 
@@ -145,13 +146,15 @@ namespace work_platform_backend.Hubs
                 var Chat = await teamChatService.GetTeamChatOfTeam(teamId);
                 if (Chat != null)
                 {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, Chat.ChatName);
+
                     ChatMessage chatMessage = new ChatMessage()
                     {
                         Content = message
                     };
                    
 
-                    var newMessage = await chatMessageService.CreateMessage(chatMessage, userService.GetUserId(), Chat.Id);
+                    var newMessage = await chatMessageService.CreateMessage(chatMessage, userService.GetUserId(), Chat.Id); //save message in database
                     if (newMessage != null)
                     {
                      
@@ -163,6 +166,7 @@ namespace work_platform_backend.Hubs
                             ToChat = newMessage.ChatId
 
                         };
+                        
                         await Clients.Group(Chat.ChatName).SendAsync("newMessage", messageViewModel);
                     }
 
@@ -193,6 +197,25 @@ namespace work_platform_backend.Hubs
             }
         }
 
+
+      
+        public async Task< IEnumerable<MessageViewModel>> GetMessageHistory(int teamId)
+        {
+            //IEnumerable<ChatMessage> allMessagesOfChat = new List<ChatMessage>();
+
+            var Chat = await teamChatService.GetTeamChatOfTeam(teamId);
+            
+            if (Chat != null)
+            {
+
+              var allMessagesOfChat = await chatMessageService.GetMessageHistorybyChat(Chat.Id);             
+                return mapper.Map<IEnumerable<ChatMessage>, IEnumerable<MessageViewModel>>(allMessagesOfChat);
+
+            }
+           
+            return (new List<MessageViewModel>());
+
+        }
 
         //  public override Task OnConnectedAsync()  /*when enter application after signin or Register*/
         //  {
