@@ -13,7 +13,10 @@ namespace work_platform_backend.Models
         {
         }
 
-
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {   
+            optionsBuilder.EnableSensitiveDataLogging();
+        }
         public DbSet<Team> Teams { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RTask> Tasks { get; set; }

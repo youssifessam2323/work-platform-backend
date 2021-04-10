@@ -31,5 +31,10 @@ namespace work_platform_backend.Dtos
          [Required]
          public string BirthDate { get; set; }
 
+             public string GetName()
+             {
+                return $"{this.FirstName} {this.LastName}";
+             }
+
     }
 }
