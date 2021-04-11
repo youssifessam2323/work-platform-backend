@@ -86,6 +86,21 @@ namespace work_platform_backend.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetTasksOfProject/{ProjectId}")]
+        public async Task<IActionResult> GetTasksOfProject(int ProjectId)
+        {
+
+            var TasksByProject = await taskService.GetTasksByProject(ProjectId);
+            if (TasksByProject == null)
+            {
+                return NotFound();
+
+            }
+            return Ok(TasksByProject);
+
+        }
+
        
 
         [HttpPut("{ProjectId}")]

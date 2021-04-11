@@ -21,5 +21,6 @@ namespace work_platform_backend.Repos
         Task<List<Comment>> GetTaskComments(int taskId);
         Task<List<RTask>> GetTasksByUserIdAndTeamId(string userId, int teamId);
         Task<List<User>> GetTaskAssignedUsers(int taskId);
+        Task<bool> isTaskExist(int taskId);
     }
 }

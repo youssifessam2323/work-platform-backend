@@ -88,17 +88,11 @@ namespace work_platform_backend.Services
 
   
 
-        public async Task<IEnumerable<Team>> GetTeamsByCreator(string CreatorId)
+        public async Task<IEnumerable<TeamDto>> GetTeamsByCreator(string CreatorId)
         {
-            var Teams = await teamRepository.GetAllTeamsByCreator(CreatorId);
+            var teams = await teamRepository.GetAllTeamsByCreator(CreatorId);
 
-            if (Teams.Count().Equals(0))
-            {
-                return null;
-
-            }
-
-            return Teams;
+            return teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
 
         }
 
@@ -151,17 +145,17 @@ namespace work_platform_backend.Services
                 return await taskRepository.GetTasksByTeam(teamId);
         }
 
-        public async Task<Team> GetTeam(int TeamId)
+        public async Task<TeamDetailsDto> GetTeam(int TeamId)
         {
-            var Teams = await teamRepository.GetTeamById(TeamId);
+            var team = await teamRepository.GetTeamById(TeamId);
 
-            if (Teams==null)
+            if (team== null)
             {
-                return null;
-
+                throw new Exception("team not exist");
             }
 
-            return Teams;
+
+            return mapper.Map<TeamDetailsDto>(team);
 
         }
 

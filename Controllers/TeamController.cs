@@ -31,36 +31,24 @@ namespace work_platform_backend.Controllers
            
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpGet]
-        [Route("GetTeamsCreator")]
-        public async Task<IActionResult> GetTeamsCreator()
-        {
-            string teamCreatorId = userService.GetUserId();
-
-            var GetTeamsByCreator = await teamService.GetTeamsByCreator(teamCreatorId);
-            if (GetTeamsByCreator == null)
-            {
-                return Ok(new List<Team>());
-
-            }
-            return Ok(GetTeamsByCreator);
-
-        }
+      
 
 
         [HttpGet]
         [Route("{teamId}")]
         public async Task<IActionResult> GetTeamById(int teamId)
         {
-
-            var Team = await teamService.GetTeam(teamId);
-            if (Team == null)
+            try
+            {
+            var team = await teamService.GetTeam(teamId);
+            return Ok(team);
+            }
+            catch(Exception e)
             {
                 return NotFound(string.Format("No Team Found with this Id = {0} ",teamId));
 
             }
-            return Ok(Team);
+
 
         }
 

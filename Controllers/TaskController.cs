@@ -47,7 +47,6 @@ namespace work_platform_backend.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         [ProducesResponseType(typeof(List<AttachmentDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
-        [HttpDelete("{roomId}")]
         [HttpGet]
         [Route("{taskId}/attachments")]
         public async Task<IActionResult> GetAttachmentsInTask(int TaskId)
@@ -63,64 +62,52 @@ namespace work_platform_backend.Controllers
             }
         }
 
-      
 
-        [HttpGet]
-        [Route("GetTasksOfProject/{ProjectId}")]
-        public async Task<IActionResult> GetTasksOfProject(int ProjectId)
-        {
-
-            var TasksByProject = await taskService.GetTasksByProject(ProjectId);
-            if (TasksByProject == null)
-            {
-                return NotFound();
-
-            }
-            return Ok(TasksByProject);
-
-        }
-
-        [HttpGet]
-        [Route("GetSubTasksOfParentCheckPoint/{CheckPointId}")]
-        public async Task<IActionResult> GetSubTasksOfParentCheckPoint(int CheckPointId)
-        {
-
-            var TasksByParentCheckpoint = await taskService.GetSubTasksByParentCheckPoint(CheckPointId);
-            if (TasksByParentCheckpoint == null)
-            {
-                return NotFound();
-
-            }
-            return Ok(TasksByParentCheckpoint);
-
-        }
-
-  
-
-
+        ///<summary>
+        /// get task's dependant tasks
+        ///</summary>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(List<TaskDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
         [HttpGet]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        [Route("{TaskId}/dependants")]
-        public async Task<IActionResult> GetTaskDependantTasks(int TaskId)
+        [Route("{taskId}/dependants")]
+        public async Task<IActionResult> GetTaskDependantTasks(int taskId)
         {
-            var dependantTasks = await taskService.GetTaskDependantTasks(TaskId);
-            return Ok(dependantTasks);
-        }
-
-
-        [HttpGet]
-        [Route("{TaskId}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetSingleTask(int TaskId)
-        {
-
-            var task = await taskService.GetTask(TaskId);
-            if (task == null)
+            try
             {
-                return NotFound();
+                var dependantTasks = await taskService.GetTaskDependantTasks(taskId);
+                return Ok(dependantTasks);
 
             }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+        }
+
+          ///<summary>
+        /// get task by Id
+        ///</summary>
+        ///<param name="taskId"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(List<TaskDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+         
+        [HttpGet]
+        [Route("{taskId}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetSingleTask(int taskId)
+        {
+            try
+            {
+            var task = await taskService.GetTask(taskId);
             return Ok(task);
+            }catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
         }
 
@@ -128,12 +115,12 @@ namespace work_platform_backend.Controllers
 
 
 
-
-        [HttpPut("{TaskId}")]
+        // Not Working
+        [HttpPut("{taskId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> UpdateTask(int TaskId, RTask task)
+        public async Task<IActionResult> UpdateTask(int taskId, TaskDetailsDto task)
         {
-            RTask UpdatedTask = await taskService.UpdateTask(TaskId, task);
+            RTask UpdatedTask = await taskService.UpdateTask(taskId, task);
             if (UpdatedTask == null)
             {
                 return NotFound();
@@ -163,40 +150,99 @@ namespace work_platform_backend.Controllers
             return Ok($"Object with id = {TaskId} was  Deleted");
         }
 
+
+
+        ///<summary>
+        /// save new comment in task
+        ///</summary>
+        ///<param name="taskId"></param>
+        ///<param name="commentDto"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [HttpPost]
         [Route("{taskId}/comments")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> SaveNewCheckpointInTask(int taskId,Comment comment)
+        public async Task<IActionResult> SaveNewCommentInTask(int taskId,CommentDto commentDto)
         {
-            return Ok(await commentService.AddNewCommentInTask(userService.GetUserId(),taskId,comment));
+            try
+            {
+                await commentService.AddNewCommentInTask(userService.GetUserId(),taskId,commentDto);
+                return Ok();
+            }
+            catch(Exception e )
+            {
+                return NotFound(e.Message);
+            }
         }
 
-
+        ///<summary>
+        /// get comments of specific task
+        ///</summary>
+        ///<param name="taskId"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(List<CommentDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [HttpGet]
         [Route("{taskId}/comments")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetTaskComments(int taskId)
         {
-            return Ok(await commentService.GetCommentsByTask(taskId));
+            try
+            {
+                return Ok(await commentService.GetCommentsByTask(taskId));
+            }
+            catch(Exception e )
+            {
+                return NotFound(e.Message);
+            }
+            
         }
 
 
 
-    
+        ///<summary>
+        /// get checkpoints of specific task
+        ///</summary>
+        ///<param name="taskId"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(List<CheckPointDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [HttpGet]
         [Route("{taskId}/checkpoints")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetTaskCheckpoints(int taskId)
         {
-            return Ok(await checkPointService.GetCheckpointsByTask(taskId));
+             try
+            {
+                return Ok(await checkPointService.GetCheckpointsByTask(taskId));
+            }
+            catch(Exception e )
+            {
+                return NotFound(e.Message);
+            }
         }
+
+
+
 
         [HttpPost]
         [Route("{taskId}/checkpoints")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> SaveNewCheckpointInTask(int taskId,CheckPoint checkPoint)
         {
-            return Ok(await checkPointService.SaveNewCheckpointInTask(taskId,checkPoint));
+                 try
+            {
+               return Ok(await checkPointService.SaveNewCheckpointInTask(taskId,checkPoint));
+            }
+            catch(Exception e )
+            {
+                return NotFound(e.Message);
+            }   
+
         }
 
 

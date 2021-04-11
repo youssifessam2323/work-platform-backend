@@ -14,10 +14,14 @@ namespace work_platform_backend.Controllers
     public class CheckPointController : ControllerBase
     {
         private readonly CheckPointService _checkPointService;
+        private readonly TaskService taskService ;
 
-        public CheckPointController(CheckPointService checkPointService)
+
+
+        public CheckPointController(CheckPointService checkPointService, TaskService taskService)
         {
             _checkPointService = checkPointService;
+            this.taskService = taskService;
         }
 
 
@@ -48,6 +52,22 @@ namespace work_platform_backend.Controllers
 
             }
             return Ok(checkPoint);
+
+        }
+
+
+        [HttpGet]
+        [Route("GetSubTasksOfParentCheckPoint/{CheckPointId}")]
+        public async Task<IActionResult> GetSubTasksOfParentCheckPoint(int CheckPointId)
+        {
+
+            var TasksByParentCheckpoint = await taskService.GetSubTasksByParentCheckPoint(CheckPointId);
+            if (TasksByParentCheckpoint == null)
+            {
+                return NotFound();
+
+            }
+            return Ok(TasksByParentCheckpoint);
 
         }
 

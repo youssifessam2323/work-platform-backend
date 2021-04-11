@@ -42,10 +42,10 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<RTask> UpdateTask(int id, RTask task)
+        public async Task<RTask> UpdateTask(int id, TaskDetailsDto taskDetailsDto)
         {
+            var task = mapper.Map<RTask>(taskDetailsDto);
             RTask UpdatedTask = await taskRepository.UpdateTaskById(id, task);
-
             if (UpdatedTask != null)
             {
                 await taskRepository.SaveChanges();
@@ -64,18 +64,17 @@ namespace work_platform_backend.Services
             await taskRepository.SaveChanges();
         }
 
-        public async Task<RTask> GetTask(int TaskId)
+        public async Task<TaskDetailsDto> GetTask(int TaskId)
         {
-            var Task = await taskRepository.GetTaskById(TaskId);
+            var task = await taskRepository.GetTaskById(TaskId);
 
-            if (Task!=null)
+            if (task == null)
             {
-                return Task;
-
+                throw new Exception("task not exist");
             }
+            var taskDto = mapper.Map<TaskDetailsDto>(task);
 
-            return null;
-
+            return taskDto;
         }
 
         public async Task<IEnumerable<TaskDto>> GetTaskByCreator(string CreatorId)
@@ -107,17 +106,17 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<List<RTask>> GetTaskDependantTasks(int taskId)
+        public async Task<List<TaskDto>> GetTaskDependantTasks(int taskId)
         {
+            if(!await taskRepository.isTaskExist(taskId))
+            {
+                throw new Exception("task not exist");
+            }
+
             var dependantTasks = (List<RTask>)await taskRepository.GetAllTasksByDependantTask(taskId);
             
-            //retrieve recursivly all task dependant task 
-            //but do not work
-            foreach(var dependantTask in dependantTasks)
-            {
-                 dependantTask.DependantTasks = (List<RTask>)await taskRepository.GetAllTasksByDependantTask(dependantTask.Id);
-            }
-            return dependantTasks;
+
+            return dependantTasks.Select(t => mapper.Map<TaskDto>(t)).ToList();
         }
 
         public async Task<List<Comment>> GetTaskComments(int taskId)

@@ -58,6 +58,7 @@ namespace work_platform_backend.Repos
                         .Include(t => t.Tasks)
                         .Include(t => t.SubTeams).ThenInclude(t => t.SubTeams)
                         .Include(t => t.Room)
+                        .Include(t => t.TeamChat)
                         .FirstOrDefaultAsync(T => T.Id == teamId));
         }
 
