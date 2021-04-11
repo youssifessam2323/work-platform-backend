@@ -49,13 +49,13 @@ namespace work_platform_backend.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
         [HttpDelete("{roomId}")]
         [HttpGet]
-        [Route("{TaskId}/attachments")]
+        [Route("{taskId}/attachments")]
         public async Task<IActionResult> GetAttachmentsInTask(int TaskId)
         {
             try
             {
-            var Attachments = await AttachmentService.GetAttachmentsOfTask(TaskId);
-            return Ok(Attachments);
+            var attachments = await AttachmentService.GetAttachmentsOfTask(TaskId);
+            return Ok(attachments);
             }
             catch(TaskNotFoundException e)
             {
@@ -63,20 +63,7 @@ namespace work_platform_backend.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("GetTasksOfTeam/{TeamId}")]
-        public async Task<IActionResult> GetTasksOfTeam(int TeamId)
-        {
-
-            var TasksByTeam = await taskService.GetTasksByTeam(TeamId);
-            if (TasksByTeam == null)
-            {
-                return NotFound();
-
-            }
-            return Ok(TasksByTeam);
-
-        }
+      
 
         [HttpGet]
         [Route("GetTasksOfProject/{ProjectId}")]

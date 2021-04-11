@@ -182,6 +182,22 @@ namespace work_platform_backend.Controllers
             return BadRequest();
         }
 
+
+        [HttpGet]
+        [Route("{teamId}/tasks")]
+        public async Task<IActionResult> GetTasksOfTeam(int teamId)
+        {
+
+            var tasksByTeam = await taskService.GetTasksByTeam(teamId);
+            if (tasksByTeam == null)
+            {
+                return NotFound();
+
+            }
+            return Ok(tasksByTeam);
+
+        }
+
     }
 
  
