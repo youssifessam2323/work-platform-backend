@@ -99,7 +99,6 @@ namespace work_platform_backend.Services
             await userRepository.SaveChanges();   
         }
 
-        
         public async Task ChangeTeamLeader(int teamId, string userId,string newLeaderUsername)
         {
         
