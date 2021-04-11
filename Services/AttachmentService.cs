@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-<<<<<<< HEAD
-=======
 using AutoMapper;
 using work_platform_backend.Dtos;
 using work_platform_backend.Exceptions.Attachment;
 using work_platform_backend.Exceptions.Task;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -16,27 +13,6 @@ namespace work_platform_backend.Services
 {
     public class AttachmentService
     {
-<<<<<<< HEAD
-        private readonly IAttachmentRepository AttachmentRepository;
-
-        public AttachmentService(IAttachmentRepository attachmentRepository)
-        {
-            AttachmentRepository = attachmentRepository;
-
-        }
-
-
-        public async Task<Attachment> AddAttachment(Attachment newAttachment)
-        {
-            if (newAttachment != null)
-            {
-                await AttachmentRepository.SaveAttachment(newAttachment);
-                await AttachmentRepository.SaveChanges();
-                return newAttachment;
-            }
-            return null;
-
-=======
         private readonly IAttachmentRepository attachmentRepository ;      
         private IMapper mapper;
         private IRTaskRepository taskRepository;
@@ -65,24 +41,15 @@ namespace work_platform_backend.Services
             }
             
           
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         public async Task<Attachment> UpdateAttachment(int id, Attachment attachment)
         {
-<<<<<<< HEAD
-            Attachment UpdatedAttachmentt = await AttachmentRepository.UpdateAttachmentById(id, attachment);
-
-            if (UpdatedAttachmentt != null)
-            {
-                await AttachmentRepository.SaveChanges();
-=======
             Attachment UpdatedAttachmentt = await attachmentRepository.UpdateAttachmentById(id, attachment);
 
             if (UpdatedAttachmentt != null)
             {
                 await attachmentRepository.SaveChanges();
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
                 return UpdatedAttachmentt;
             }
 
@@ -94,11 +61,7 @@ namespace work_platform_backend.Services
 
         public async Task DeleteAttachment(int attachmentId)
         {
-<<<<<<< HEAD
-            var attachment = await AttachmentRepository.DeleteAttachmentById(attachmentId);
-=======
             var attachment = await attachmentRepository.DeleteAttachmentById(attachmentId);
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             if (attachment == null)
             {
 
@@ -106,21 +69,12 @@ namespace work_platform_backend.Services
 
             }
 
-<<<<<<< HEAD
-            await AttachmentRepository.SaveChanges();
-=======
             await attachmentRepository.SaveChanges();
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
 
         }
 
 
-<<<<<<< HEAD
-        public async Task<IEnumerable<Attachment>> GetAttachmentsOfTask(int taskId)
-        {
-            return await AttachmentRepository.GetAttachmentByTask(taskId);
-=======
         public async Task<IEnumerable<AttachmentDto>> GetAttachmentsOfTask(int taskId)
         {
             if(await taskRepository.GetTaskById(taskId) == null )
@@ -139,7 +93,6 @@ namespace work_platform_backend.Services
             {
                 throw new AttachmentNotFoundExcpetion("attachment not exist");
             }
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
     }
 }

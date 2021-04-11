@@ -5,10 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using work_platform_backend.Dtos;
 using work_platform_backend.Exceptions;
-<<<<<<< HEAD
-=======
 using work_platform_backend.Exceptions.Team;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -18,13 +15,6 @@ namespace work_platform_backend.Services
     {
         private readonly IRTaskRepository taskRepository;
         private readonly IMapper mapper;
-<<<<<<< HEAD
-
-        public TaskService(IRTaskRepository taskRepository,IMapper mapper)
-        {
-            this.taskRepository = taskRepository;
-            this.mapper = mapper;
-=======
         private ITeamRepository teamRepository;
 
         public TaskService(IRTaskRepository taskRepository, IMapper mapper, ITeamRepository teamRepository)
@@ -32,7 +22,6 @@ namespace work_platform_backend.Services
             this.taskRepository = taskRepository;
             this.mapper = mapper;
             this.teamRepository = teamRepository;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
 
@@ -89,26 +78,11 @@ namespace work_platform_backend.Services
 
         }
 
-<<<<<<< HEAD
-        public async Task<IEnumerable<RTask>> GetTaskByCreator(string CreatorId)
-        {
-            var Tasks = await taskRepository.GetAllTasksByCreator(CreatorId);
-
-            if (Tasks.Count().Equals(0))
-            {
-                return null;
-
-            }
-
-            return Tasks;
-
-=======
         public async Task<IEnumerable<TaskDto>> GetTaskByCreator(string CreatorId)
         {
             var tasks = await taskRepository.GetAllTasksByCreator(CreatorId);
 
             return tasks.Select(t => mapper.Map<TaskDto>(t)).ToList(); 
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         public async Task<IEnumerable<RTask>> GetTasksByTeam(int TeamId)
@@ -165,11 +139,6 @@ namespace work_platform_backend.Services
 
         }
 
-<<<<<<< HEAD
-        public async Task<List<RTask>> GetTasksAssignedToUserInTeam(string userId, int teamId)
-        {
-            return await taskRepository.GetTasksByUserIdAndTeamId(userId,teamId);
-=======
         public async Task<List<TaskDto>> GetTasksAssignedToUserInTeam(string userId, int teamId)
         {
             var team = await teamRepository.GetTeamById(teamId);
@@ -179,7 +148,6 @@ namespace work_platform_backend.Services
             }
             var tasks = await taskRepository.GetTasksByUserIdAndTeamId(userId,teamId);
             return tasks.Select(t => mapper.Map<TaskDto>(t)).ToList();
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
       
@@ -198,8 +166,6 @@ namespace work_platform_backend.Services
             }
             return null;
         }
-<<<<<<< HEAD
-=======
 
         public async Task<List<UserDto>> GetUsersAssignedToTaskByTaskId(int taskId)
         {
@@ -208,6 +174,5 @@ namespace work_platform_backend.Services
             return users.Select(u => mapper.Map<UserDto>(u)).ToList();
         }
 
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
     }
 }

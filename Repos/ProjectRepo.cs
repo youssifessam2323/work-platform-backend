@@ -18,16 +18,11 @@ namespace work_platform_backend.Repos
         }
         public async Task<IEnumerable<Project>> GetAllProjectsByRoom(int roomId)
         {
-<<<<<<< HEAD
-            return (await context.Projects.Include(P=>P.Tasks).ThenInclude(t => t.Team).Include(p => p.Creator)
-                .Where(P => P.Room.Id == roomId).ToListAsync());
-=======
             return (await context.Projects
                         .Include(p => p.Creator)
                         .Include(P=>P.Tasks)
                         .ThenInclude(t => t.Team)
                         .Where(P => P.Room.Id == roomId).ToListAsync());
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         public async Task<Project> GetProjectById(int projectId)

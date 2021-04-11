@@ -6,11 +6,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using work_platform_backend.Dtos;
-<<<<<<< HEAD
-=======
 using work_platform_backend.Exceptions;
 using work_platform_backend.Exceptions.Room;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 
@@ -39,10 +36,6 @@ namespace work_platform_backend.Services
       
      
 
-<<<<<<< HEAD
-        public async Task<Room> AddRoom(Room room , string creatorId)
-        {
-=======
         public async Task AddRoom(RoomDto roomDto , string creatorId)
         {
                 var room = mapper.Map<Room>(roomDto);
@@ -53,7 +46,6 @@ namespace work_platform_backend.Services
                 {
                     throw new RoomNameMustBeUniqueException();
                 }
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
                 
                 room.CreatedAt = DateTime.Now ;
                 room.CreatorId = creatorId;
@@ -73,21 +65,6 @@ namespace work_platform_backend.Services
 
                 await teamService.AddTeam(newTeam,room.Id,creatorId);
 
-<<<<<<< HEAD
-                return room;
-                }
-                return null;
-            }
-
-        public async Task<List<Project>> GetRoomProjects(int roomId)
-        {
-            return (List<Project>)(await projectRepository.GetAllProjectsByRoom(roomId));
-
-        }
-
-        public async Task<Room> UpdateRoom(int id, Room room)
-        {
-=======
                 }
                 throw new  RoomNotFoundException("Error While Saving the Room");
             }
@@ -126,7 +103,6 @@ namespace work_platform_backend.Services
                 throw new RoomNameMustBeUniqueException();
             }
             
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             Room updatedRoom = await roomRepository.UpdateRoomById(id, room);
 
             if (updatedRoom != null)
@@ -135,12 +111,6 @@ namespace work_platform_backend.Services
                 Console.WriteLine("Updated Room = " + updatedRoom);
                 return updatedRoom;
             }
-<<<<<<< HEAD
-
-
-            return null;
-
-=======
             throw new RoomNotFoundException("Room not exist");
 
         }
@@ -153,65 +123,21 @@ namespace work_platform_backend.Services
                 return false;
             }
             return true;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
 
         public async Task DeleteRoom(int roomId)
         {
-<<<<<<< HEAD
-            var room = await roomRepository.DeleteRoomById(roomId);
-            if (room == null)
-            {
-
-                throw new NullReferenceException();
-
-            }
-
-            await roomRepository.SaveChanges();
-
-=======
             if(await isRoomExist(roomId))
             {
                 await roomRepository.DeleteRoomById(roomId);
                 await roomRepository.SaveChanges();
             }
             throw new RoomNotFoundException("room not exist");
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
         }
 
 
-<<<<<<< HEAD
-
-        public async Task<Room> GetRoom(int roomId)
-        {
-            Room room = await roomRepository.GetRoomById(roomId);
-
-            if (room != null)
-            {
-                return room;
-            }
-
-
-            return null;
-
-        }
-
-        public async Task<IEnumerable<Room>> GetAllRooms()
-        {
-            var Rooms = await roomRepository.GetAllRooms();
-
-            if (Rooms .Count()!= 0)
-            {
-
-                return Rooms;
-            }
-
-
-            return null;
-
-=======
         private async Task<bool> isRoomExist(int roomId)
         {
             Room r = await roomRepository.GetRoomById(roomId);
@@ -241,7 +167,6 @@ namespace work_platform_backend.Services
             List<Room> rooms = (List<Room>)await roomRepository.GetAllRooms();
             List<RoomDetailsDto> roomResponses = rooms.Select(r => mapper.Map<RoomDetailsDto>(r)).ToList(); 
             return roomResponses;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         public async Task<IEnumerable<Room>> GetAllRoomsOfCreator(string CreatorId)

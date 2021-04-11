@@ -1,19 +1,4 @@
 using System;
-<<<<<<< HEAD
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-=======
 using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,19 +6,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using work_platform_backend.Authorization;
-<<<<<<< HEAD
-using work_platform_backend.Hubs;
-using work_platform_backend.Models;
-using work_platform_backend.Repos;
-using work_platform_backend.Services;
-=======
 using work_platform_backend.Models;
 using work_platform_backend.Repos;
 using work_platform_backend.Services;
@@ -41,7 +19,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
+using work_platform_backend.Hubs;
 
 namespace work_platform_backend
 {
@@ -60,8 +38,6 @@ namespace work_platform_backend
             services.AddControllers()
                 .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-<<<<<<< HEAD
-=======
 
              services.AddSwaggerGen(c =>
              {
@@ -74,7 +50,6 @@ namespace work_platform_backend
           
              });
 
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             
             services.AddScoped<AuthService>();
@@ -100,10 +75,7 @@ namespace work_platform_backend
             services.AddScoped<SessionService>();
             services.AddScoped<IUserRepository,UserRepository>();
             services.AddScoped<ISessionRepository,SessionRepository>();
-<<<<<<< HEAD
-=======
             services.AddScoped<ITeamMembersRepository,TeamMembersRepository>();
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             
 
 
@@ -128,10 +100,7 @@ namespace work_platform_backend
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequiredLength = 5;
-<<<<<<< HEAD
-=======
                 options.SignIn.RequireConfirmedEmail = true;
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             }).AddEntityFrameworkStores<ApplicationContext>()
                 .AddDefaultTokenProviders();
 
@@ -161,10 +130,6 @@ namespace work_platform_backend
                 config.AddPolicy(Policies.MEMBER,Policies.MemberPolicy());
             });
 
-<<<<<<< HEAD
-
-            services.AddSignalR();
-=======
             services.AddCors(opt =>
             {
                 opt.AddPolicy("AllowAllHeaders",builder => 
@@ -176,7 +141,6 @@ namespace work_platform_backend
             });
         
                 services.AddSignalR();               
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -191,10 +155,6 @@ namespace work_platform_backend
 
             app.UseRouting();
 
-<<<<<<< HEAD
-            app.UseCors();
-            
-=======
                   // Enable middleware to serve generated Swagger as a JSON endpoint.
           
     // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -210,24 +170,15 @@ namespace work_platform_backend
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });      
 
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             app.UseAuthentication();
 
             app.UseAuthorization();
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             app.UseEndpoints(endpoints =>
             {
             //    endpoints.MapRazorPages();
                endpoints.MapControllers();
-<<<<<<< HEAD
                endpoints.MapHub<ChatHub>("/chathub");
-=======
-            //    endpoints.MapHub<ChatHub>("/chatHub");
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             });
         }
     }

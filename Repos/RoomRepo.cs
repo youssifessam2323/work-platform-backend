@@ -22,30 +22,22 @@ namespace work_platform_backend.Repos
 
         public async Task<Room> GetRoomById(int roomId)
         {
-<<<<<<< HEAD
-          return ( await context.Rooms.Include(r => r.Creator).FirstOrDefaultAsync(R=>R.Id==roomId));
-=======
           return await context.Rooms
                             .Include(r => r.Creator)
                             .Include(r => r.Projects)
                             .Include(r => r.Teams)
                             .Include(r => r.ProjectManagers)
                             .FirstOrDefaultAsync(R=>R.Id==roomId);
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         public async Task<IEnumerable<Room>> GetAllRooms()
         {
-<<<<<<< HEAD
-            return (await context.Rooms.Include(r => r.Creator).ToListAsync());
-=======
             return (await context.Rooms
                                 .Include(r => r.Creator)
                                 .Include(r => r.Projects)
                                 .Include(r => r.Teams)
                                 .Include(r => r.ProjectManagers)
                                 .ToListAsync());
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         public async Task<IEnumerable<Room>> GetRoomsByCreator(string creatorId)
@@ -61,10 +53,6 @@ namespace work_platform_backend.Repos
         public async Task<Room> UpdateRoomById(int roomId, Room room)
         {
             var newRoom = await context.Rooms.FindAsync(roomId);
-<<<<<<< HEAD
-            if (newRoom != null)
-=======
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
             {
                 // var newRoom = _mapper.Map<Room>(roomRequest);
                 newRoom.Name = room.Name;
@@ -103,8 +91,6 @@ namespace work_platform_backend.Repos
 
              return await projectManagers.Select(pm => pm.User).ToListAsync();
         }
-<<<<<<< HEAD
-=======
 
         public async Task<Room> GetRoomByName(string name)
         {
@@ -130,6 +116,5 @@ namespace work_platform_backend.Repos
             
             return  room != null ?  true : false;  
         }
->>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
     }
 }
