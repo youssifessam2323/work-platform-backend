@@ -7,6 +7,7 @@ namespace work_platform_backend.mapper
 {
     public class UserProfile : Profile
     {
+
         
         public UserProfile()
         {

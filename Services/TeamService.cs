@@ -41,7 +41,7 @@ namespace work_platform_backend.Services
 
                 TeamChat newTeamChat = new TeamChat()
                 {
-                    ChatName = $" {newTeam.Name}/Chatting ",
+                    ChatName = $" {newTeam.Name}/GroupChat ",
                 };
 
                 await teamChatService.CreateTeamChat(newTeamChat, newTeam.LeaderId, newTeam.Id);
@@ -162,6 +162,21 @@ namespace work_platform_backend.Services
             }
 
             return Teams;
+
+        }
+
+
+        public async Task<Team> GetTeamByTeamCode(string teamCode)
+        {
+            var team = await teamRepository.GetTeamByTeamCode(teamCode);
+
+            if (team == null)
+            {
+                return null;
+
+            }
+
+            return team;
 
         }
 

@@ -99,6 +99,20 @@ namespace work_platform_backend.Services
             await userRepository.SaveChanges();   
         }
 
+        public async Task LeaveTeam(int teamId, string userId)
+        {
+            Team team = await teamRepository.GetTeamById(teamId);
+            User user = await userRepository.GetUserById(userId);
+
+            Console.WriteLine("Team ====> " + team);
+            Console.WriteLine("User ====> " + user);
+            if (team == null )
+            {
+                throw new ApplicationException();
+            }
+             userRepository.DeleteTeamMember(user, team);
+            await userRepository.SaveChanges();    
+        }
         public async Task ChangeTeamLeader(int teamId, string userId,string newLeaderUsername)
         {
         

@@ -28,6 +28,7 @@ namespace work_platform_backend.Services
                 newMessage.Content = Regex.Replace(newMessage.Content, @"(?i)<(?!img|a|/a|/img).*?>", string.Empty);
                 newMessage.CreatorId = creatorId;
                 newMessage.ChatId = chatId;
+                newMessage.Timestamp = DateTime.Now;
 
                 await chatMessageRepository.SaveMessage(newMessage);
                 await chatMessageRepository.SaveChanges();
@@ -110,6 +111,20 @@ namespace work_platform_backend.Services
 
             return AllMessages;
 
+        }
+
+
+       public async Task<IEnumerable<ChatMessage>> GetMessageHistorybyChat(int chatId)
+
+        {
+            var chatMessagesHistory = await chatMessageRepository.GetMessageHistorybyChat(chatId);
+            if (chatMessagesHistory.Count().Equals(0))
+            {
+                return null;
+
+            }
+
+            return chatMessagesHistory;
         }
 
 

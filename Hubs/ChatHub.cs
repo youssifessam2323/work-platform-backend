@@ -23,125 +23,156 @@ namespace work_platform_backend.Hubs
         private readonly IMapper mapper;
         private readonly UserService userService;
         private readonly TeamChatService teamChatService;
+        private readonly TeamService teamService;
+        private readonly ChatMessageService chatMessageService;
 
-        public ChatHub(ApplicationContext context, IMapper mapper , UserService userService,TeamChatService teamChatService )
+        public ChatHub(ApplicationContext context, IMapper mapper , UserService userService,TeamChatService teamChatService,TeamService teamService , ChatMessageService chatMessageService )
         {
             this.context = context;
             this.mapper = mapper;
             this.userService = userService;
             this.teamChatService = teamChatService;
-        }
+            this.teamService = teamService;
+            this.chatMessageService = chatMessageService;
 
 
-        public async Task CreateTeamChat(string teamChatName)
+
+            }
+
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task CreateTeam(Team team, int roomId)    //Change => Enter Team{Name , Description}
         {
             try
             {
 
-                // Accept: Letters, numbers and one space between words.
-                Match match = Regex.Match(teamChatName, @"^\w+( \w+)*$");
-                if (!match.Success)
-                {
-                    await Clients.Caller.SendAsync("onError", "Invalid Team name!\nTeam name must contain only letters and numbers.");
-                }
-                else if (teamChatName.Length < 5 || teamChatName.Length > 100)
-                {
-                    await Clients.Caller.SendAsync("onError", "Team name must be between 5-100 characters!");
-                }
-                else if (context.Teams.Any(r => r.Name == teamChatName))
-                {
-                    await Clients.Caller.SendAsync("onError", "Another Team with this name exists");
-                }
-                else
-                {
-                    // Create and save chat team in database
-                    //var user = context.Users.Where(u => u.UserName == IdentityName).FirstOrDefault();
-                    //var team = new TeamChat()
-                    //{
-                    //    Name = teamName,
-                    //    //Admin = user
-                    //};
-                    //context.Teams.Add(team);
-                    //context.SaveChanges();
+                var userId = userService.GetUserId();
 
-                    //if (team != null)
-                    //{
-                        // Update Team list
-                        //var teamChatViewModel = _mapper.Map<TeamChat, TeamChatViewModel>(team);
-                        //_Teams.Add(teamChatViewModel);
-                        //await Clients.All.SendAsync("addChatTeam", teamChatViewModel);  //Change soon
-                    //}
+                var newTeam = await teamService.AddTeam(team, roomId, userId);
+                if (newTeam != null)
+                {
+
+                    var JoinChatOfTeamByDefault = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
+
+                    if (JoinChatOfTeamByDefault != null)
+                    {
+                        //await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeamByDefault.ChatName);
+                        await Clients.Caller.SendAsync("ReceiveMessageOnAdd", $" Chat Group Called {JoinChatOfTeamByDefault} Created");
+
+                    }
+
+                    var teamViewModel = mapper.Map<Team, TeamViewModel>(newTeam);
+                  
+                    await Clients.All.SendAsync("addTeam", teamViewModel);  //Change soon Tell all Clients on Hub That a New Team Added
                 }
+                
+
+               
+                
+            
             }
             catch (Exception ex)
             {
-                await Clients.Caller.SendAsync("onError", "Couldn't create chat team: " + ex.Message);
+                await Clients.Caller.SendAsync("onError", "Couldn't create team: " + ex.Message);
             }
         }
 
 
 
-        public async Task Join(string teamName)     //Check every switching From team to team
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task JoinTeam(string teamCode)     //Check every switching From team to team
         {
             try
             {
-                var user = _ConnectionUsers.Where(u => u.Username == IdentityName).FirstOrDefault();   //Connected on this Team
-                if (user != null && user.CurrentTeam != teamName)
+                string userId = userService.GetUserId();
+
+                await userService.JoinTeam(teamCode,userId);   //Join this Team
+                var teamJoin = await teamService.GetTeamByTeamCode(teamCode);  //Throw exception if Not Found TeamCode
+
+
+                //User And Team Are Found 
+                if (!string.IsNullOrEmpty(userId) && teamJoin!= null )
                 {
-                    //// Remove user from others list as if it is not on this room (Deactive)
-                    if (!string.IsNullOrEmpty(user.CurrentTeam))
-                        await Clients.OthersInGroup(user.CurrentTeam).SendAsync("removeUser", user);  //remove UserName
+                    
+                   var JoinChatOfTeam = await teamChatService.GetTeamChatOfTeam(teamJoin.Id);
 
-                    ////// Join to new chat room (active)
-                    await Leave(user.CurrentTeam);  //to leave GroupChat from current room old(Remove Connection From Group)
-                    await Groups.AddToGroupAsync(Context.ConnectionId, teamName);  //show in this Room that turn to it add His Name To This Group 
-
-
-                    user.CurrentTeam = teamName;
-
-                    // Tell others to update their list of users
-                    await Clients.Groups(teamName).SendAsync("addUser", user);  //username added on this room
+                    if (JoinChatOfTeam != null)
+                    {
+                       var user = await userService.getUserById(userId);
+                        
+                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join
+                        await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //add to Group to tell Clients on Group new User Come
+                    }         
                 }
-
 
             }
             catch (Exception ex)
             {
-                await Clients.Caller.SendAsync("onError", "You failed to join the chat room!" + ex.Message);
+                await Clients.Caller.SendAsync("onError", "You failed to join the Team!" + ex.Message);
             }
         }
 
-        public async Task Leave(string teamName)
-        {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, teamName);   //when change room or logout
-        }
-
-
-
-        public async Task SendToTeam(string teamName, string message)
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task LeaveTeam(int teamId)
         {
             try
             {
-                var user = context.Users.Where(u => u.UserName == IdentityName).FirstOrDefault();
-                var team = context.Teams.Where(r => r.Name == teamName).FirstOrDefault();
 
-                if (!string.IsNullOrEmpty(message.Trim()))      //remove white spaces character from message 
+                await userService.LeaveTeam(teamId, userService.GetUserId());
+
+                var ChatThatJoined = await teamChatService.GetTeamChatOfTeam(teamId);
+                if (ChatThatJoined != null)
                 {
-                    // Create and save message in database
-                    //var msg = new Message()
-                    //{
-                    //    Content = Regex.Replace(message, @"(?i)<(?!img|a|/a|/img).*?>", string.Empty),   //to remove html tags
-                    //    FromUser = user,
-                    //    ToTeam = team,
-                    //    Timestamp = DateTime.Now
-                    //};
-                    //_context.Messages.Add(msg);
-                    context.SaveChanges();
-
-                    // Broadcast the message
-                    //var messageViewModel = _mapper.Map<Message, MessageViewModel>(msg);      //chat.js recieve this message to send to it
-                    //await Clients.Group(teamName).SendAsync("newMessage", messageViewModel);   //used to send message on group of Room and users listen
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatThatJoined.ChatName);   //when change room or logout
                 }
+
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("onError", "You failed to Leave the Team Unexpected Error !" + ex.Message);
+            }
+                    
+          
+        }
+
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task SendToTeam(string message, int teamId)
+        {
+            try
+            {
+
+                var Chat = await teamChatService.GetTeamChatOfTeam(teamId);
+                if (Chat != null)
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, Chat.ChatName);
+
+                    ChatMessage chatMessage = new ChatMessage()
+                    {
+                        Content = message
+                    };
+                   
+
+                    var newMessage = await chatMessageService.CreateMessage(chatMessage, userService.GetUserId(), Chat.Id); //save message in database
+                    if (newMessage != null)
+                    {
+                     
+                        MessageViewModel messageViewModel = new MessageViewModel()
+                        {
+                            Content = newMessage.Content,
+                            Timestamp = newMessage.Timestamp,
+                            FromUser = newMessage.CreatorId,
+                            ToChat = newMessage.ChatId
+
+                        };
+                        
+                        await Clients.Group(Chat.ChatName).SendAsync("newMessage", messageViewModel);
+                    }
+
+                }
+
+                
+          
             }
             catch (Exception)
             {
@@ -149,101 +180,107 @@ namespace work_platform_backend.Hubs
             }
         }
 
-     
-       
 
-        public async Task DeleteTeam(string teamName)
+
+
+        public async Task DeleteTeam(int teamId)
         {
             try
             {
-                // Delete from database
-                //var team = _context.Teams.Include(r => r.Admin)
-                //    .Where(r => r.Name == teamName && r.Admin.UserName == IdentityName).FirstOrDefault();
-                //_context.Teams.Remove(team);
-                context.SaveChanges();
-
-                // Delete from list
-                var teamViewModel = _TeamChats.First(r => r.Name == teamName);
-                _TeamChats.Remove(teamViewModel);
-
-                // Move users back to Lobby
-                await Clients.Group(teamName).SendAsync("onRoomDeleted", string.Format("Team {0} has been deleted.\nYou are now moved to the Lobby!", teamName));
-
-                // Tell all users to update their Team list
-                await Clients.All.SendAsync("removeChatTeam", teamViewModel);
+               await teamService.DeleteTeam(teamId);
+              
             }
             catch (Exception)
             {
-                await Clients.Caller.SendAsync("onError", "Can't delete this chat Team. Only owner can delete this room.");
+                await Clients.Caller.SendAsync("onError", "Can't delete this chat Team. Only owner can delete this Team.");
             }
         }
 
 
-        public override Task OnConnectedAsync()  /*when enter application after signin or Register*/
+      
+        public async Task< IEnumerable<MessageViewModel>> GetMessageHistory(int teamId)
         {
-            try
+            //IEnumerable<ChatMessage> allMessagesOfChat = new List<ChatMessage>();
+
+            var Chat = await teamChatService.GetTeamChatOfTeam(teamId);
+            
+            if (Chat != null)
             {
-                var user = context.Users.Where(u => u.UserName == IdentityName).FirstOrDefault();
-                //var userViewModel = _mapper.Map<ApplicationUser, UserViewModel>(user);
-                //userViewModel.Device = GetDevice();
-                //userViewModel.CurrentTeam = "";
 
-                if (!_ConnectionUsers.Any(u => u.Username == IdentityName))
-                {
-                /*    _ConnectionUsers.Add(userViewModel); */  //add user to list show list of user when messages
+              var allMessagesOfChat = await chatMessageService.GetMessageHistorybyChat(Chat.Id);             
+                return mapper.Map<IEnumerable<ChatMessage>, IEnumerable<MessageViewModel>>(allMessagesOfChat);
 
-                }
-
-                /*Clients.Caller.SendAsync("getProfileInfo", user.FullName, user.Avatar);*/   // Show information of user
             }
-            catch (Exception ex)
-            {
-                Clients.Caller.SendAsync("onError", "OnConnected:" + ex.Message);
-            }
-            return base.OnConnectedAsync();
+           
+            return (new List<MessageViewModel>());
+
         }
 
-        public override Task OnDisconnectedAsync(Exception exception)
-        {
-            try
-            {
-                var user = _ConnectionUsers.Where(u => u.Username == IdentityName).First();
-                _ConnectionUsers.Remove(user);
+        //  public override Task OnConnectedAsync()  /*when enter application after signin or Register*/
+        //  {
+        //      try
+        //      {
+        //          //var user = userService.GetUserId();
+        //          //var userViewModel = mapper.Map<User, UserViewModel>(user);
+        //          //userViewModel.Device = GetDevice();
+        //          //userViewModel.CurrentTeam = "";
 
-                // Tell other users to remove you from their list
-                Clients.OthersInGroup(user.CurrentTeam).SendAsync("removeUser", user);
+        //          if (!_ConnectionUsers.Any(u => u.Username == IdentityName))
+        //          {
+        //          /*    _ConnectionUsers.Add(userViewModel); */  //add user to list show list of user when messages
 
-                // Remove mapping
-                //_ConnectionsMap.Remove(user.Username);
-            }
-            catch (Exception ex)
-            {
-                Clients.Caller.SendAsync("onError", "OnDisconnected: " + ex.Message);
-            }
+        //          }
 
-            return base.OnDisconnectedAsync(exception);
-        }
+        //          /*Clients.Caller.SendAsync("getProfileInfo", user.FullName, user.Avatar);*/   // Show information of user
+        //      }
+        //      catch (Exception ex)
+        //      {
+        //          Clients.Caller.SendAsync("onError", "OnConnected:" + ex.Message);
+        //      }
+        //      return base.OnConnectedAsync();
+        //  }
+
+        //  public override Task OnDisconnectedAsync(Exception exception)
+        //  {
+        //      try
+        //      {
+        //          var user = _ConnectionUsers.Where(u => u.Username == IdentityName).First();
+        //          _ConnectionUsers.Remove(user);
+
+        //          // Tell other users to remove you from their list
+        //          Clients.OthersInGroup(user.CurrentTeam).SendAsync("removeUser", user);
+
+        //          // Remove mapping
+        //          //_ConnectionsMap.Remove(user.Username);
+        //      }
+        //      catch (Exception ex)
+        //      {
+        //          Clients.Caller.SendAsync("onError", "OnDisconnected: " + ex.Message);
+        //      }
+        //return base.OnDisconnectedAsync(exception);
+
+        //  }
 
 
-        public IEnumerable<UserViewModel> GetUsers(string teamName)  //after getting room show the current room of user in list of Users
-        {
-            return _ConnectionUsers.Where(u => u.CurrentTeam == teamName).ToList();
-        }
-
-    
-        private string IdentityName
-        {
-            get { return Context.User.Identity.Name; }
-        }
+        //public IEnumerable<UserViewModel> GetUsers(string teamName)  //after getting room show the current room of user in list of Users
+        //{
+        //    return _ConnectionUsers.Where(u => u.CurrentTeam == teamName).ToList();
+        //}
 
 
-        private string GetDevice()
-        {
-            var device = Context.GetHttpContext().Request.Headers["Device"].ToString();
-            if (!string.IsNullOrEmpty(device) && (device.Equals("Desktop") || device.Equals("Mobile")))
-                return device;
+        //private string IdentityName
+        //{
+        //    get { return Context.User.Identity.Name; }
+        //}
 
-            return "Web";
-        }
-        }
+
+        //private string GetDevice()
+        //{
+        //    var device = Context.GetHttpContext().Request.Headers["Device"].ToString();
+        //    if (!string.IsNullOrEmpty(device) && (device.Equals("Desktop") || device.Equals("Mobile")))
+        //        return device;
+
+        //    return "Web";
+        //}
+    }
 }
