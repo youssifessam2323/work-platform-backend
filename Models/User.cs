@@ -11,7 +11,11 @@ namespace work_platform_backend.Models
     {
         
         public string Name { get; set; }
+<<<<<<< HEAD
   
+=======
+    
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         public DateTime BirthDate { get; set; }
 
         public string ImageUrl { get; set; }

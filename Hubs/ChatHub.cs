@@ -19,7 +19,6 @@ namespace work_platform_backend.Hubs
         public readonly static List<UserViewModel> _ConnectionUsers = new List<UserViewModel>();
         public readonly static List<TeamChatViewModel> _TeamChats = new List<TeamChatViewModel>();
 
-
         private readonly ApplicationContext context;
         private readonly IMapper mapper;
         private readonly UserService userService;

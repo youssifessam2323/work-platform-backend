@@ -8,6 +8,7 @@ namespace work_platform_backend.Repos
     public interface IRoomRepository
     {
          Task<Room> GetRoomById(int roomId);
+         Task<bool> isRoomExist(int roomId);
         Task<IEnumerable<Room>> GetRoomsByCreator(string creatorId);
         Task<IEnumerable<Room>> GetAllRooms();
          Task SaveRoom(Room room );
@@ -16,5 +17,7 @@ namespace work_platform_backend.Repos
          Task<bool> SaveChanges();
         Task AddNewProjectManager(ProjectManager projectManager);
         Task<List<User>> GetRoomPorjectManagersByRoomId(int roomId);
+        Task<Room> GetRoomByName(string name);
+        Task<bool> IsProjectManagerExist(string userId,int roomId);
     }
 }

@@ -28,7 +28,10 @@ namespace work_platform_backend.Services
                 newMessage.Content = Regex.Replace(newMessage.Content, @"(?i)<(?!img|a|/a|/img).*?>", string.Empty);
                 newMessage.CreatorId = creatorId;
                 newMessage.ChatId = chatId;
+<<<<<<< HEAD
                 newMessage.Timestamp = DateTime.Now;
+=======
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
                 await chatMessageRepository.SaveMessage(newMessage);
                 await chatMessageRepository.SaveChanges();
@@ -114,6 +117,7 @@ namespace work_platform_backend.Services
         }
 
 
+<<<<<<< HEAD
        public async Task<IEnumerable<ChatMessage>> GetMessageHistorybyChat(int chatId)
 
         {
@@ -128,6 +132,8 @@ namespace work_platform_backend.Services
         }
 
 
+=======
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
 
 

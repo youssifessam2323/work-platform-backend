@@ -20,5 +20,6 @@ namespace work_platform_backend.Repos
         Task<List<RTask>> GetTasksByTeam(int teamId);
         Task<List<Comment>> GetTaskComments(int taskId);
         Task<List<RTask>> GetTasksByUserIdAndTeamId(string userId, int teamId);
+        Task<List<User>> GetTaskAssignedUsers(int taskId);
     }
 }

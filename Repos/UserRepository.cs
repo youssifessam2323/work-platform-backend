@@ -24,17 +24,27 @@ namespace work_platform_backend.Repos
             return await context.Users.FindAsync(id); 
         }
 
+<<<<<<< HEAD
         public async Task SaveNewTeamMember(User user, Team team)
         {
             TeamsMembers teamsMembers = new TeamsMembers();
             
             teamsMembers.User = user;
             teamsMembers.Team = team;
+=======
+        public async Task SaveNewTeamMember(string userId, int teamId)
+        {
+            TeamsMembers teamsMembers = new TeamsMembers();
+            
+            teamsMembers.UserId = userId;
+            teamsMembers.TeamId = teamId;
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
             Console.WriteLine("Team Members = " + teamsMembers);    
             await context.TeamsMembers.AddAsync(teamsMembers);
         }
 
+<<<<<<< HEAD
         public void  DeleteTeamMember(User user, Team team)
         {
             TeamsMembers teamsMembers = new TeamsMembers();
@@ -47,6 +57,8 @@ namespace work_platform_backend.Repos
            
         }
 
+=======
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
         public async Task SaveChanges()
         {
@@ -66,7 +78,11 @@ namespace work_platform_backend.Repos
 
         public async Task<User> GetUserByUsername(string username)
         {
+<<<<<<< HEAD
             return await context.Users.Where(u => u.UserName == username).FirstAsync();
+=======
+            return await context.Users.Where(u => u.UserName == username).SingleOrDefaultAsync();
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         }
 
         public async Task<User> UpdateUser(string userId, User newUser)
@@ -91,6 +107,20 @@ namespace work_platform_backend.Repos
             return user;
         }
 
+<<<<<<< HEAD
       
+=======
+        public async Task<bool> IsUserExistByUsername(string username)
+        {
+            var user = await context.Users.Where(u => u.UserName == username).FirstOrDefaultAsync();
+            return user != null ? true : false;
+        }
+
+        public async Task<bool> IsUserExistById(string userId)
+        {
+            var user = await context.Users.FindAsync(userId);
+            return user != null ? true : false;
+        }
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
     }
 }

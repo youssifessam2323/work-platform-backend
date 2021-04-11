@@ -5,8 +5,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
 using work_platform_backend.Exceptions;
+using work_platform_backend.Exceptions.Task;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
@@ -36,35 +39,28 @@ namespace work_platform_backend.Controllers
 
 
 
-        [HttpGet]
-        [Route("GetTasksOfCreator/{TaskCreatorId}")]
-        public async Task<IActionResult> GetTasksOfCreator(string TaskCreatorId)
-        {
+       
 
-            var TaskByCreator = await taskService.GetTaskByCreator(TaskCreatorId);
-            if (TaskByCreator == null)
-            {
-                return NotFound();
-
-            }
-            return Ok(TaskByCreator);
-
-        }
-
-
+        ///<summary>
+        /// get task's attachments
+        ///</summary>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(List<AttachmentDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
+        [HttpDelete("{roomId}")]
         [HttpGet]
         [Route("{TaskId}/attachments")]
         public async Task<IActionResult> GetAttachmentsInTask(int TaskId)
         {
-
-            var Attachments = await AttachmentService.GetAttachmentsOfTask(TaskId);
-            if (Attachments == null)
+            try
             {
-                return Ok();
-
-            }
+            var Attachments = await AttachmentService.GetAttachmentsOfTask(TaskId);
             return Ok(Attachments);
-
+            }
+            catch(TaskNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpGet]
@@ -224,6 +220,16 @@ namespace work_platform_backend.Controllers
         {
             return Ok(await sessionService.GetSessionsByTaskAndUser(userService.GetUserId(),taskId));
         }
+
+        [HttpGet]
+        [Route("{taskId}/assignedusers")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetAssignUsersForATask(int taskId)
+        {
+            return Ok(await taskService.GetUsersAssignedToTaskByTaskId(taskId));
+        }
+
+
 
        
     }

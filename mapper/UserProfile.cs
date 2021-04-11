@@ -8,12 +8,17 @@ namespace work_platform_backend.mapper
     public class UserProfile : Profile
     {
 
+        
         public UserProfile()
         {
             //Source=>Target
 
             CreateMap<RegisterRequest,User>();
             CreateMap<User,RegisterRequest>();
+
+            CreateMap<User,UserDetailsDto>();
+            CreateMap<User,UserDto>().ReverseMap();
+
 
 
             //Map With ViewModels

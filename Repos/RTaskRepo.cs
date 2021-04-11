@@ -137,5 +137,13 @@ namespace work_platform_backend.Repos
             });
             return tasks.Where(t => t.TeamId == teamId).ToList();
         }
+<<<<<<< HEAD
+=======
+
+        public async Task<List<User>> GetTaskAssignedUsers(int taskId)
+        {
+            return await context.UserTasks.Where(ut => ut.TaskId ==  taskId).Select(ut => ut.User).ToListAsync();
+        }
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
     }
 }

@@ -20,7 +20,6 @@ namespace work_platform_backend.Models
         public Guid TeamCode { get; set; }
         
                 
-
         public string LeaderId { get; set; }
             
         

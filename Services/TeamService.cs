@@ -41,7 +41,11 @@ namespace work_platform_backend.Services
 
                 TeamChat newTeamChat = new TeamChat()
                 {
+<<<<<<< HEAD
                     ChatName = $" {newTeam.Name}/GroupChat ",
+=======
+                    ChatName = $" {newTeam.Name}/Chatting ",
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
                 };
 
                 await teamChatService.CreateTeamChat(newTeamChat, newTeam.LeaderId, newTeam.Id);
@@ -78,7 +82,11 @@ namespace work_platform_backend.Services
                 throw new NullReferenceException();
 
             }
+<<<<<<< HEAD
            
+=======
+            await teamChatService.DeleteTeamChatByTeam(teamId);
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
             await teamRepository.SaveChanges();
 
@@ -166,6 +174,7 @@ namespace work_platform_backend.Services
         }
 
 
+<<<<<<< HEAD
         public async Task<Team> GetTeamByTeamCode(string teamCode)
         {
             var team = await teamRepository.GetTeamByTeamCode(teamCode);
@@ -181,6 +190,8 @@ namespace work_platform_backend.Services
         }
 
 
+=======
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
 
 
     }

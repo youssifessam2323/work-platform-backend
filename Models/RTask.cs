@@ -25,44 +25,19 @@ namespace work_platform_backend.Models
 
         public int? TeamId { get; set;}
         public Team Team { get; set; }
-        
-
         public string CreatorId { get; set; }        
         public User Creator { get; set; }
-
-
-        
-        // public List<CheckPoint> ChildCheckPoints { get; set; }
-        
         public List<Attachment> Attachments { get; set; }
-
-        
         public int? ProjectId { get; set; }
         public Project Project { get; set; }
-        
-
-        
         [ForeignKey("DependantTaskId")]
         public List<RTask> DependantTasks { get; set; }
-        
-        
-
-        
-        
-
         public int? ParentCheckPointId { get; set; }
-        
-        
         public CheckPoint ParentCheckPoint { get; set; }
-        
-               
         public List<UserTask> UserTasks { get; set; }
-        
         public List<Comment> Comments { get; set; }
-        
         public List<Session> Sessions { get; set; }
-        public List<CheckPoint> ChildCheckPoints { get; internal set; }
-
+        public List<CheckPoint> ChildCheckPoints { get; set; }
 
         public override string ToString()
         {

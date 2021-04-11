@@ -139,6 +139,12 @@ namespace work_platform_backend.Services
 
             return false;
         }
+<<<<<<< HEAD
+=======
+
+
+        
+>>>>>>> 1e220a26bb5cb28e0043bf6570f889c02ac1eeca
         public async Task<AuthenticationResponse> Signin(LoginRequest loginRequest)
         {
             User user = await userManager.FindByEmailAsync(loginRequest.Email);

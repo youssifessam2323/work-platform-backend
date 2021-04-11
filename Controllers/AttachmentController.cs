@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
@@ -12,34 +16,35 @@ namespace work_platform_backend.Controllers
     [ApiController]
     public class AttachmentController : ControllerBase
     {
-        private readonly AttachmentService AttachmentService;
+        private readonly AttachmentService attachmentService;
         private  readonly ILogger Logger ; 
+        private  readonly UserService userService;
 
-        public AttachmentController(AttachmentService attachmentService,ILogger<AttachmentController> logger)
+        public AttachmentController(AttachmentService attachmentService, ILogger<AttachmentController> logger, UserService userService)
         {
-            AttachmentService = attachmentService;
+            this.attachmentService = attachmentService;
             Logger = logger;
-
+            this.userService = userService;
         }
 
-        
 
 
-        [HttpPost()]
-        public async Task<IActionResult> AddAttachment(Attachment attachment)
+        ///<summary>
+        /// Add new attachment (taskId is required)
+        ///</summary>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [HttpPost]
+        public async Task<IActionResult> AddAttachment(AttachmentDto attachment)
         {
-            var NewAttachment = await AttachmentService.AddAttachment(attachment);
-            if (NewAttachment != null)
-            {
-                return Ok(NewAttachment);
-            }
-            return BadRequest();
+                await attachmentService.AddAttachment(attachment,userService.GetUserId());
+                return Ok();
         }
 
         [HttpPut("{AttachmentId}")]
-        public async Task<IActionResult> UpdateProject(int AttachmentId, Attachment attachment)
+        public async Task<IActionResult> UpdateAttachment(int AttachmentId, Attachment attachment)
         {
-            Attachment UpdatedAttachment = await AttachmentService.UpdateAttachment(AttachmentId, attachment);
+            Attachment UpdatedAttachment = await attachmentService.UpdateAttachment(AttachmentId, attachment);
             if (UpdatedAttachment == null)
             {
                 return NotFound("There is no attachment with id = " + AttachmentId);
@@ -48,16 +53,20 @@ namespace work_platform_backend.Controllers
 
         }
 
-
+        ///<summary>
+        /// delete attachment by it's Id 
+        ///</summary>
+        ///<param name="attachmentId"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [HttpDelete]
         [Route("{attachmentId}")]
-        public async Task<IActionResult> DeletProject(int attachmentId)
+        public async Task<IActionResult> DeletAttachment(int attachmentId)
         {
             try
-            {
-                await AttachmentService.DeleteAttachment(attachmentId);
-
-
+            {   await attachmentService.getAttachmentById(attachmentId);
+                await attachmentService.DeleteAttachment(attachmentId);
             }
             catch (Exception Ex)
             {
@@ -65,7 +74,7 @@ namespace work_platform_backend.Controllers
                 return NotFound(Ex.Message);
             }
 
-            return Ok($"Object with id = {attachmentId} was  Deleted");
+            return Ok("attachment deleted successfully");
         }
 
 
