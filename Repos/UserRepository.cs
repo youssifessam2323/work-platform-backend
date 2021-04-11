@@ -35,6 +35,18 @@ namespace work_platform_backend.Repos
             await context.TeamsMembers.AddAsync(teamsMembers);
         }
 
+        public void  DeleteTeamMember(User user, Team team)
+        {
+            TeamsMembers teamsMembers = new TeamsMembers();
+
+            teamsMembers.User = user;
+            teamsMembers.Team = team;
+
+            Console.WriteLine("Team Members = " + teamsMembers);
+            context.TeamsMembers.Remove(teamsMembers);
+           
+        }
+
 
         public async Task SaveChanges()
         {

@@ -56,12 +56,20 @@ namespace work_platform_backend.Repos
             return (await context.ChatMessages.FirstOrDefaultAsync(m => m.Id == chatMessageId));
         }
 
+
+        public async Task<IEnumerable<ChatMessage>> GetMessageHistorybyChat(int chatId)
+        {
+          return( await context.ChatMessages.Where(Cm => Cm.ChatId == chatId)
+                         .Take(20)
+                       .ToListAsync());
+        }
+
         public async Task<bool> SaveChanges()
         {
             return (await context.SaveChangesAsync() >= 0);
         }
 
-       
+        
     }
 
 }

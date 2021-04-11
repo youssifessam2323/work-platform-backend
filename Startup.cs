@@ -19,6 +19,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
+using work_platform_backend.Hubs;
 
 namespace work_platform_backend
 {
@@ -173,12 +174,11 @@ namespace work_platform_backend
 
             app.UseAuthorization();
 
-
             app.UseEndpoints(endpoints =>
             {
             //    endpoints.MapRazorPages();
                endpoints.MapControllers();
-            //    endpoints.MapHub<ChatHub>("/chatHub");
+               endpoints.MapHub<ChatHub>("/chathub");
             });
         }
     }

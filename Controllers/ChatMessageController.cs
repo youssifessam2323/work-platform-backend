@@ -32,10 +32,10 @@ namespace work_platform_backend.Controllers
         {
            
             
-                var newChatTeam = await chatMessageService.CreateMessage(chatMessage, userService.GetUserId(), toTeamChatId);
-                if (newChatTeam != null)
+                var newMessage = await chatMessageService.CreateMessage(chatMessage, userService.GetUserId(), toTeamChatId);
+                if (newMessage != null)
                 {
-                    return Ok(newChatTeam);
+                    return Ok(newMessage);
                 }
         
                 return BadRequest("Message error not sent !!");
@@ -54,7 +54,7 @@ namespace work_platform_backend.Controllers
             }
             catch (DbUpdateException ex)
             {
-
+                    
                 return BadRequest("Message Not Found To Delete ");
             }
 
@@ -113,6 +113,21 @@ namespace work_platform_backend.Controllers
 
             }
             return Ok(AllMessages);
+        }
+
+
+        [HttpGet]
+        [Route("{chatId}/MessageHistory")]
+        public async Task<IActionResult> GetMessagesHistory(int chatId)
+        {
+
+            var AllMessagesHistory = await chatMessageService.GetMessageHistorybyChat(chatId);
+            if (AllMessagesHistory == null)
+            {
+                return Ok(new List<ChatMessage>());
+
+            }
+            return Ok(AllMessagesHistory);
         }
 
 

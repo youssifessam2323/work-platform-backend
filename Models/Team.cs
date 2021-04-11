@@ -16,8 +16,10 @@ namespace work_platform_backend.Models
         
         public DateTime CreatedAt { get; set; }
 
+        // under testing 
         public Guid TeamCode { get; set; }
-
+        
+                
         public string LeaderId { get; set; }
             
         

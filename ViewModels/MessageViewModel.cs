@@ -8,8 +8,8 @@ namespace work_platform_backend.ViewModels
     public class MessageViewModel
     {
         public string Content { get; set; }
-        public string Timestamp { get; set; }
-        public string From { get; set; }
-        public string To { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string FromUser { get; set; }
+        public int ToChat { get; set; }
     }
 }
