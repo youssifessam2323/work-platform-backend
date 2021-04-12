@@ -21,71 +21,68 @@ namespace work_platform_backend.Controllers
         private readonly TeamService teamService;
         private readonly UserService userService;
         private readonly TaskService taskService;
-     
 
-        public TeamController(TeamService teamService, UserService userService, TaskService taskService )
+
+        public TeamController(TeamService teamService, UserService userService, TaskService taskService)
         {
             this.teamService = teamService;
             this.userService = userService;
             this.taskService = taskService;
-           
-        }
-
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpGet]
-        [Route("GetTeamsCreator")]
-        public async Task<IActionResult> GetTeamsCreator()
-        {
-            string teamCreatorId = userService.GetUserId();
-
-            var GetTeamsByCreator = await teamService.GetTeamsByCreator(teamCreatorId);
-            if (GetTeamsByCreator == null)
-            {
-                return Ok(new List<Team>());
-
-            }
-            return Ok(GetTeamsByCreator);
 
         }
+
+
 
 
         [HttpGet]
         [Route("{teamId}")]
         public async Task<IActionResult> GetTeamById(int teamId)
         {
-
-            var Team = await teamService.GetTeam(teamId);
-            if (Team == null)
+            try
             {
-                return NotFound(string.Format("No Team Found with this Id = {0} ",teamId));
+                var team = await teamService.GetTeam(teamId);
+                return Ok(team);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
 
             }
-            return Ok(Team);
+
 
         }
+
 
 
         [HttpGet]
         [Route("{teamId}/subteams")]
         public async Task<IActionResult> GetTeamSubTeams(int teamId)
         {
-
-            var Team = await teamService.GetTeamSubTeams(teamId);
-            if (Team.Count == 0)
+            try
             {
-                return Ok(new List<Team>());
+                var Team = await teamService.GetTeamSubTeams(teamId);
+                return Ok(Team);
             }
-            return Ok(Team);
-
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpGet]
         [Route("{teamId}/members")]
         public async Task<IActionResult> GetTeamMembers(int teamId)
         {
+            try
+            {
+                var members = await teamService.GetMembersOfTeam(teamId);
+                return Ok(members);
 
-            var members = await teamService.GetMembersOfTeam(teamId);
-            return Ok(members);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
         }
 
@@ -93,9 +90,16 @@ namespace work_platform_backend.Controllers
         [Route("{teamId}/projects")]
         public async Task<IActionResult> GetTeamProjects(int teamId)
         {
+            try
+            {
+                var projects = await teamService.GetProjectsOfTeam(teamId);
+                return Ok(projects);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
-            var projects = await teamService.GetProjectsOfTeam(teamId);
-            return Ok(projects);
 
         }
 
@@ -103,14 +107,22 @@ namespace work_platform_backend.Controllers
         [Route("{teamId}/tasks")]
         public async Task<IActionResult> GetTeamTasks(int teamId)
         {
+             try
+            {
+                var projects = await teamService.GetTasksOfTeam(teamId);
+                return Ok(projects);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
-            var projects = await teamService.GetTasksOfTeam(teamId);
-            return Ok(projects);
+          
 
         }
 
 
-
+        // this will alter later(to add permission feature)
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("{roomId}")]
         public async Task<IActionResult> AddTeam(Team team, int roomId)
@@ -118,15 +130,11 @@ namespace work_platform_backend.Controllers
             try
             {
                 var newTeam = await teamService.AddTeam(team, roomId, userService.GetUserId());
-                if (newTeam != null)
-                {
-                    return Ok(newTeam);
-                }
-                return BadRequest();
+                    return Ok();
             }
-            catch (DbUpdateException e)
+            catch(Exception e)
             {
-                return BadRequest("Room Does not exist");
+               return NotFound(e.Message);
             }
 
         }
@@ -134,13 +142,14 @@ namespace work_platform_backend.Controllers
         [HttpPut("{TeamId}")]
         public async Task<IActionResult> UpdateTeam(int TeamId, Team team)
         {
-            Team UpdatedTeam = await teamService.UpdateTeam(TeamId, team);
-            if (UpdatedTeam == null)
-            {
-                return NotFound();
+            try
+            {   Team UpdatedTeam = await teamService.UpdateTeam(TeamId, team);
+                return Ok();
             }
-            return Ok(UpdatedTeam);
-
+            catch(Exception e)
+            {
+               return NotFound(e.Message);
+            }
         }
 
 
@@ -151,14 +160,14 @@ namespace work_platform_backend.Controllers
             try
             {
                 await teamService.DeleteTeam(teamId);
+                return Ok();
             }
             catch (DbUpdateException ex)
             {
-                
-                return NotFound("You cannot delete this team because it has subteams, go and delete subteams before deleting it.");
+
+                return Unauthorized("You cannot delete this team because it has subteams, go and delete subteams before deleting it.");
             }
 
-            return Ok($"Object with id = {teamId} was  Deleted");
         }
 
 
@@ -168,23 +177,24 @@ namespace work_platform_backend.Controllers
         {
             try
             {
-                var newTask = await taskService.AddTaskInTeam(userService.GetUserId(), teamId, task);
-
-                if (newTask != null)
-                {
-                    return Ok(newTask);
-                }
+                await taskService.AddTaskInTeam(userService.GetUserId(), teamId, task);
+                    return Ok();
             }
-            catch (DateTimeException e)
+            catch(NullReferenceException e)
             {
                 return BadRequest(e.Message);
             }
-            return BadRequest();
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
+
+
 
     }
 
- 
+
 
 
 

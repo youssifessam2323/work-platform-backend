@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace work_platform_backend.Models
 {
@@ -41,7 +42,7 @@ namespace work_platform_backend.Models
 
         public override string ToString()
         {
-            return "ID = " + Id + " ,Name = " + Name;
+            return "ID = " + Id + " ,Name = " + Name + "  " + Sessions.Select( c => c.ToString());
         }
     }
 }

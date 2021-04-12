@@ -25,6 +25,13 @@ namespace work_platform_backend.Repos
             return  await context.Comments.Include(c => c.Replies).Where(c => c.TaskId == taskId).ToListAsync();
         }
 
+        public async Task<bool> isTaskExist(int commentId)
+        {
+           var comment = await context.Comments.FindAsync(commentId);
+
+           return comment != null ? true : false;
+        }
+
         public async Task SaveChanges()
         {
             await context.SaveChangesAsync();

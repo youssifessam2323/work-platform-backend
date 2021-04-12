@@ -33,6 +33,24 @@ namespace work_platform_backend.Controllers
             this.taskService = taskService;
         }
         
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet]
+        [Route("creator/teams")]
+        public async Task<IActionResult> GetTeamsCreator()
+        {
+            string teamCreatorId = userService.GetUserId();
+
+            var GetTeamsByCreator = await teamService.GetTeamsByCreator(teamCreatorId);
+            if (GetTeamsByCreator == null)
+            {
+                return Ok(new List<Team>());
+
+            }
+            return Ok(GetTeamsByCreator);
+
+        }
+
         
      
         /// <summary>

@@ -10,6 +10,6 @@ namespace work_platform_backend.Repos
         Task AddComment(Comment comment);
 
         Task SaveChanges();
-
+        Task<bool> isTaskExist(int commentId);
     }
 }

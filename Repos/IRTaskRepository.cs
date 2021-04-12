@@ -6,7 +6,6 @@ namespace work_platform_backend.Repos
 {
     public interface IRTaskRepository
     {
-         Task<IEnumerable<RTask>> GetAllTasksByTeam(int teamId);
          Task<IEnumerable<RTask>> GetAllTasksByCreator(string userId);
          Task<IEnumerable<RTask>> GetAllTasksByProject(int projectId);
          Task<IEnumerable<RTask>> GetAllSubTasksByParentCheckPointId(int checkpointId);
@@ -21,5 +20,6 @@ namespace work_platform_backend.Repos
         Task<List<Comment>> GetTaskComments(int taskId);
         Task<List<RTask>> GetTasksByUserIdAndTeamId(string userId, int teamId);
         Task<List<User>> GetTaskAssignedUsers(int taskId);
+        Task<bool> isTaskExist(int taskId);
     }
 }

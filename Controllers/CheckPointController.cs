@@ -13,41 +13,65 @@ namespace work_platform_backend.Controllers
     [ApiController]
     public class CheckPointController : ControllerBase
     {
-        private readonly CheckPointService _checkPointService;
+        private readonly CheckPointService checkpointService;
+        private readonly TaskService taskService ;
 
-        public CheckPointController(CheckPointService checkPointService)
+
+
+        public CheckPointController(CheckPointService checkPointService, TaskService taskService)
         {
-            _checkPointService = checkPointService;
+            checkpointService = checkPointService;
+            this.taskService = taskService;
         }
 
 
         [HttpGet]
-        [Route("GetCheckPointsofParentTask/{ParentTaskId}")]
-        public async Task<IActionResult> GetCheckPointsofParentTask(int ParentTaskId)
+        [Route("parenttask/{parentTaskId}")]
+        public async Task<IActionResult> GetCheckPointsofParentTask(int parentTaskId)
         {
-
-            var GetCheckpointByParentTask = await _checkPointService.GetCheckPointsofParentTask(ParentTaskId);
-            if (GetCheckpointByParentTask == null)
+            try
             {
-                return NotFound();
-                
+            var getCheckpointByParentTask = await checkpointService.GetCheckPointsofParentTask(parentTaskId);
+             return Ok(getCheckpointByParentTask);
             }
-            return Ok(GetCheckpointByParentTask);
+            catch(Exception e )
+            {
+                return NotFound(e.Message);
+            }   
 
         }
 
         [HttpGet]
-        [Route("GetCheckpoint/{checkpointId}")]
+        [Route("{checkpointId}")]
         public async Task<IActionResult> GetCheckpoint(int checkpointId)
         {
-
-            var checkPoint = await _checkPointService.GetCheckPoint(checkpointId);
-            if (checkPoint == null)
+            try
             {
-                return NotFound();
-
+               var checkPoint = await checkpointService.GetCheckPoint(checkpointId);
+                return Ok(checkPoint);
             }
-            return Ok(checkPoint);
+            catch(Exception e )
+            {
+                return NotFound(e.Message);
+            }   
+
+         
+
+        }
+
+
+        [HttpGet]
+        [Route("{CheckPointId}/subtasks")]
+        public async Task<IActionResult> GetSubTasksOfParentCheckPoint(int checkPointId)
+        {
+            try
+            { 
+                return Ok(await taskService.GetSubTasksByParentCheckPoint(checkPointId));
+            }
+            catch(Exception e )
+            {
+                return NotFound(e.Message);
+            }   
 
         }
 
@@ -55,7 +79,7 @@ namespace work_platform_backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCheckPoint(int id, CheckPoint checkPoint)
         {
-            CheckPoint UpdatedCheckPoint = await _checkPointService.UpdateCheckPoint(id, checkPoint);
+            CheckPoint UpdatedCheckPoint = await checkpointService.UpdateCheckPoint(id, checkPoint);
             if (UpdatedCheckPoint == null)
             {
                 return NotFound();
@@ -70,7 +94,7 @@ namespace work_platform_backend.Controllers
         {
             try
             {
-                await _checkPointService.DeleteCheckPoint(id);
+                await checkpointService.DeleteCheckPoint(id);
                 
 
             }
