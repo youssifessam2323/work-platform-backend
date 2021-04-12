@@ -228,15 +228,23 @@ namespace work_platform_backend.Controllers
 
 
 
-
+        ///<summary>
+        /// add new  checkpoint to specific task
+        ///</summary>
+        ///<param name="taskId"></param>
+        ///<param name="checkPointDto"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(void),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [HttpPost]
         [Route("{taskId}/checkpoints")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> SaveNewCheckpointInTask(int taskId,CheckPoint checkPoint)
+        public async Task<IActionResult> SaveNewCheckpointInTask(int taskId,CheckPointDto checkPointDto)
         {
-                 try
+            try
             {
-               return Ok(await checkPointService.SaveNewCheckpointInTask(taskId,checkPoint));
+               return Ok(await checkPointService.SaveNewCheckpointInTask(taskId,checkPointDto));
             }
             catch(Exception e )
             {
@@ -245,7 +253,13 @@ namespace work_platform_backend.Controllers
 
         }
 
-
+        ///<summary>
+        /// get session of the task and the current auth user
+        ///</summary>
+        ///<param name="taskId"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(void),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [HttpGet]
         [Route("{taskId}/authuser/sessions")]
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -254,6 +268,16 @@ namespace work_platform_backend.Controllers
             return Ok(await sessionService.GetSessionsByTaskAndUser(userService.GetUserId(),taskId));
         }
 
+
+
+        ///<summary>
+        /// get assigned user for a task
+        ///</summary>
+        ///<param name="taskId"></param>
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ProducesResponseType(typeof(List<UserDto>),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)] 
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [HttpGet]
         [Route("{taskId}/assignedusers")]
         [Authorize(AuthenticationSchemes = "Bearer")]

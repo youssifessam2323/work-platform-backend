@@ -13,13 +13,13 @@ namespace work_platform_backend.Services
     public class ProjectService
     {
         private readonly IProjectRepository projectRepository;
-        private readonly IMapper _mapper;
+        private readonly IMapper mapper;
 
 
         public ProjectService(IProjectRepository projectRepository,  IMapper mapper)
         {
             this.projectRepository = projectRepository;
-            _mapper = mapper;
+            this.mapper = mapper;
 
         }
 
@@ -38,16 +38,16 @@ namespace work_platform_backend.Services
 
         public async Task<Project> UpdateProject(int id, Project project)
         {
-            Project NewProject = await projectRepository.UpdateProjectById(id, project);
+            Project newProject = await projectRepository.UpdateProjectById(id, project);
 
-            if (NewProject != null)
+            if (newProject != null)
             {
                 await projectRepository.SaveChanges();
-                return NewProject;
+                return newProject;
             }
 
 
-            return null;
+           throw new Exception("project not exist");
 
         }
 
@@ -59,14 +59,11 @@ namespace work_platform_backend.Services
 
         public async Task DeleteProject(int projectId)
         {
-            var project = await projectRepository.DeleteProjectById(projectId);
-            if (project == null)
+            if(! await projectRepository.IsProjectExist(projectId))
             {
-
-                throw new NullReferenceException();
-
+                throw new Exception("project not exist");
             }
-
+            var project = await projectRepository.DeleteProjectById(projectId);
             await projectRepository.SaveChanges();
 
 
@@ -92,17 +89,18 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<Project> GetProject(int projectId)
+        public async Task<ProjectDetailsDto> GetProject(int projectId)
         {
-            var Project = await projectRepository.GetProjectById(projectId);
-
-            if (Project==null)
+            if(! await projectRepository.IsProjectExist(projectId))
             {
-                return null;
-
+                throw new Exception("project not exist");
             }
 
-            return Project;
+            var project = await projectRepository.GetProjectById(projectId);
+
+           
+
+            return mapper.Map<ProjectDetailsDto>(project);
 
         }
 
@@ -115,9 +113,16 @@ namespace work_platform_backend.Services
             return project;
         }
 
-        public async Task<List<Team>> GetAssignedTeams(int projectId)
+        public async Task<List<TeamDto>> GetAssignedTeams(int projectId)
         {
-            return await projectRepository.GetProjectAssignedTeams(projectId);
+             if(! await projectRepository.IsProjectExist(projectId))
+            {
+                throw new Exception("project not exist");
+            }
+
+            var teams =  await projectRepository.GetProjectAssignedTeams(projectId);
+
+            return teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
         }
     }
 }

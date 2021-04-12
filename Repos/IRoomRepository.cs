@@ -19,5 +19,6 @@ namespace work_platform_backend.Repos
         Task<List<User>> GetRoomPorjectManagersByRoomId(int roomId);
         Task<Room> GetRoomByName(string name);
         Task<bool> IsProjectManagerExist(string userId,int roomId);
+        Task<bool> IsRoomExist(int roomId);
     }
 }

@@ -58,35 +58,29 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<IEnumerable<CheckPoint>> GetCheckPointsofParentTask(int ParentTaskId)
+        public async Task<IEnumerable<CheckPointDto>> GetCheckPointsofParentTask(int parentTaskId)
         {
-            var Checkpoints = await checkpointRepository.GetAllCheckpointsByParentTaskId(ParentTaskId);
-
-            if (Checkpoints.Count().Equals(0))
+            if(! await taskRepository.isTaskExist(parentTaskId))
             {
-                return null;
-
+                throw new Exception("task not exist");
             }
-
-            return Checkpoints;
+            var Checkpoints = await checkpointRepository.GetAllCheckpointsByParentTaskId(parentTaskId);
+            return Checkpoints.Select(c => mapper.Map<CheckPointDto>(c)).ToList();
 
           
 
         }
 
 
-        public async Task<CheckPoint> GetCheckPoint(int checkPointId)
+        public async Task<CheckPointDetailsDto> GetCheckPoint(int checkPointId)
         {
-            var Checkpoints = await checkpointRepository.DeleteCheckpointById(checkPointId);
-
-            if (Checkpoints!=null)
+            if(! await checkpointRepository.IsCheckpointExist(checkPointId))
             {
-                return Checkpoints;
-
+                throw new Exception("checkpoint not exist");
             }
-            return null;
-            
+            var checkPoint = await checkpointRepository.GetCheckPointById(checkPointId);            
 
+            return mapper.Map<CheckPointDetailsDto>(checkPoint);
         }
 
         public async Task<List<CheckPointDto>> GetCheckpointsByTask(int taskId)
@@ -101,12 +95,13 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<CheckPoint> SaveNewCheckpointInTask(int taskId,CheckPoint checkpoint)
+        public async Task<CheckPoint> SaveNewCheckpointInTask(int taskId,CheckPointDto checkpointDto)
         {
              if(!await taskRepository.isTaskExist(taskId))
             {
                 throw new Exception("task not exist");
             }
+            var checkpoint = mapper.Map<CheckPoint>(checkpointDto);
             await checkpointRepository.SaveCheckPoint(taskId,checkpoint);
             await checkpointRepository.SaveChanges();
             return checkpoint;

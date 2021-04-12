@@ -16,17 +16,25 @@ namespace work_platform_backend.Services
         private readonly IRTaskRepository taskRepository;
         private readonly IMapper mapper;
         private ITeamRepository teamRepository;
+        private IProjectRepository projectRepository;
+        private ICheckpointRepository checkpointRepository;
 
-        public TaskService(IRTaskRepository taskRepository, IMapper mapper, ITeamRepository teamRepository)
+        public TaskService(IRTaskRepository taskRepository, IMapper mapper, ITeamRepository teamRepository, IProjectRepository projectRepository, ICheckpointRepository checkpointRepository)
         {
             this.taskRepository = taskRepository;
             this.mapper = mapper;
             this.teamRepository = teamRepository;
+            this.projectRepository = projectRepository;
+            this.checkpointRepository = checkpointRepository;
         }
 
 
-        public async Task<RTask> AddTaskInTeam(string userId,int teamId,RTask newTask)
+        public async Task AddTaskInTeam(string userId,int teamId,RTask newTask)
         {
+            if(! await teamRepository.IsTeamExist(teamId))
+            {
+                throw new Exception("team not exist");
+            }
             if (newTask != null)
             {
                 if(DateTime.Compare(newTask.PlannedStartDate,newTask.PlannedEndDate) >= 0){
@@ -36,10 +44,8 @@ namespace work_platform_backend.Services
                 newTask.TeamId = teamId;
                 await taskRepository.SaveTask(newTask);
                 await taskRepository.SaveChanges();
-                return newTask;
             }
-            return null;
-
+            throw new NullReferenceException("insert valid task");
         }
 
         public async Task<RTask> UpdateTask(int id, TaskDetailsDto taskDetailsDto)
@@ -86,7 +92,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<RTask>> GetTasksByTeam(int TeamId)
         {
-            var Tasks = await taskRepository.GetAllTasksByTeam(TeamId);
+            var Tasks = await taskRepository.GetTasksByTeam(TeamId);
 
             if (Tasks.Count().Equals(0))
             {
@@ -99,10 +105,14 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<IEnumerable<RTask>> GetTasksByProject(int ProjectId)
+        public async Task<IEnumerable<TaskDto>> GetTasksByProject(int projectId)
         {
-            var tasks = await taskRepository.GetAllTasksByProject(ProjectId);
-            return tasks;
+            if(!await projectRepository.IsProjectExist(projectId))
+            {
+                throw new Exception("project not exist");
+            }
+            var tasks = await taskRepository.GetAllTasksByProject(projectId);
+            return tasks.Select(t => mapper.Map<TaskDto>(t));
 
         }
 
@@ -124,17 +134,14 @@ namespace work_platform_backend.Services
             return await taskRepository.GetTaskComments(taskId);
         }
 
-        public async Task<IEnumerable<RTask>> GetSubTasksByParentCheckPoint(int checkpointId)
+        public async Task<IEnumerable<TaskDto>> GetSubTasksByParentCheckPoint(int checkpointId)
         {
-            var Tasks = await taskRepository.GetAllSubTasksByParentCheckPointId(checkpointId);
-
-            if (Tasks.Count().Equals(0))
+            if(! await checkpointRepository.IsCheckpointExist(checkpointId))
             {
-                return null;
-
+                throw new Exception("checkpoint not exist");
             }
-
-            return Tasks;
+            var tasks = await taskRepository.GetAllSubTasksByParentCheckPointId(checkpointId);
+            return tasks.Select(t => mapper.Map<TaskDto>(t)).ToList();
 
         }
 
@@ -152,18 +159,15 @@ namespace work_platform_backend.Services
       
         public async Task<RTask> AddTaskInProject(string userId, int projectId, RTask newTask)
         {
-              if (newTask != null)
+            if (newTask != null)
             {
-                if(DateTime.Compare(newTask.PlannedStartDate,newTask.PlannedEndDate) >= 0){
-                    throw new DateTimeException(newTask.PlannedStartDate.Date.ToString(),newTask.PlannedEndDate.Date.ToString());
-                }
                 newTask.CreatorId = userId;
                 newTask.ProjectId = projectId;
                 await taskRepository.SaveTask(newTask);
                 await taskRepository.SaveChanges();
                 return newTask;
             }
-            return null;
+            throw new NullReferenceException("task must be valid");
         }
 
         public async Task<List<UserDto>> GetUsersAssignedToTaskByTaskId(int taskId)

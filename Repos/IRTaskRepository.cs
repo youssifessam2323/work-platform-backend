@@ -6,7 +6,6 @@ namespace work_platform_backend.Repos
 {
     public interface IRTaskRepository
     {
-         Task<IEnumerable<RTask>> GetAllTasksByTeam(int teamId);
          Task<IEnumerable<RTask>> GetAllTasksByCreator(string userId);
          Task<IEnumerable<RTask>> GetAllTasksByProject(int projectId);
          Task<IEnumerable<RTask>> GetAllSubTasksByParentCheckPointId(int checkpointId);

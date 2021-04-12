@@ -29,7 +29,7 @@ namespace work_platform_backend.Repos
         {
           return( await context.Projects
                                 .Include(p => p.Creator)
-                                .Include(p => p.Tasks)
+                                .Include(p => p.Tasks).ThenInclude(t => t.ChildCheckPoints)
                                 .Include(p => p.TeamProjects).ThenInclude(tp => tp.Team)
                                 .FirstOrDefaultAsync(P => P.Id == projectId));
         }
@@ -46,7 +46,9 @@ namespace work_platform_backend.Repos
             var NewProject = await context.Projects.FindAsync(projectId);
             if (NewProject != null)
             {
-                NewProject.Name = project.Name;
+               throw new Exception("project not exist");
+            }
+             NewProject.Name = project.Name;
                 NewProject.Description = project.Description;
                 NewProject.PlannedStartDate = project.PlannedStartDate;
                 NewProject.PlannedEndDate = project.PlannedEndDate;
@@ -54,9 +56,7 @@ namespace work_platform_backend.Repos
                 NewProject.ActualEndDate = project.ActualEndDate;
                 NewProject.IsFinished = project.IsFinished;
 
-                return NewProject;
-            }
-            return null;
+                return NewProject;  
         }
 
         public async Task<Project> DeleteProjectById(int projectId)
@@ -76,7 +76,12 @@ namespace work_platform_backend.Repos
 
         public async Task<List<Project>> GetProjectByTeam(int teamId)
         {
-            List<TeamProject> teamProjects = await context.TeamProjects.Include(tp => tp.Project).Where(tp => tp.TeamId == teamId ).ToListAsync();
+            List<TeamProject> teamProjects = await context.TeamProjects
+                                                .Include(tp => tp.Project)
+                                                .Where(tp => tp.TeamId == teamId )
+                                                .ToListAsync();
+
+                                                
             List<Project> projects = new List<Project>();
 
             teamProjects.ForEach(tp => projects.Add(tp.Project));
@@ -85,7 +90,16 @@ namespace work_platform_backend.Repos
 
         public async Task AddTeamToProject(int projectId, int teamId)
         {
-            TeamProject teamProject = new TeamProject();
+
+            TeamProject teamProject = await context.TeamProjects
+                                                    .Where(tp => tp.TeamId == teamId && tp.ProjectId == projectId)
+                                                    .SingleOrDefaultAsync();
+            
+            if(teamProject != null)
+            {
+                throw new Exception("this team is already in this project");
+            }
+            teamProject = new TeamProject();
             teamProject.TeamId = teamId;
             teamProject.ProjectId = projectId;
             await context.TeamProjects.AddAsync(teamProject);
@@ -94,20 +108,31 @@ namespace work_platform_backend.Repos
 
         public async Task<List<Team>> GetProjectAssignedTeams(int projectId)
         {
-            List<TeamProject> teamProjects = await context.TeamProjects.Include(tp => tp.Team).Where(tp => tp.ProjectId == projectId).ToListAsync();
+            List<TeamProject> teamProjects = await context.TeamProjects
+                                                        .Include(tp => tp.Team)
+                                                        .Where(tp => tp.ProjectId == projectId)
+                                                        .ToListAsync();
             return teamProjects.Select(tp => tp.Team).ToList();
         }
 
         public async Task RemoveTeamFromProject(int projectId, int teamId)
         {
-            Console.WriteLine(teamId + " " + projectId );
-            TeamProject task = await context.TeamProjects.Where(tp => tp.TeamId == teamId && tp.ProjectId == projectId).SingleOrDefaultAsync();
-            Console.WriteLine(task);
-            if(task == null )
+            TeamProject teamProject = await context.TeamProjects
+                                                    .Where(tp => tp.TeamId == teamId && tp.ProjectId == projectId)
+                                                    .SingleOrDefaultAsync();
+            
+            if(teamProject == null)
             {
-                throw new ResourceNotFoundException();
+                throw new Exception("this team not in the project");
             }
-            context.TeamProjects.Remove(task);
+            context.TeamProjects.Remove(teamProject);
+        }
+
+        public async Task<bool> IsProjectExist(int projectId)
+        {
+            var project = await context.Projects.FindAsync(projectId);
+
+            return project != null ? true : false;
         }
     }
 }

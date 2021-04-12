@@ -16,5 +16,6 @@ namespace work_platform_backend.Repos
         Task AddTeamToProject(int projectId, int teamId);
         Task<List<Team>> GetProjectAssignedTeams(int projectId);
         Task RemoveTeamFromProject(int projectId, int teamId);
+        Task<bool> IsProjectExist(int projectId);
     }
 }

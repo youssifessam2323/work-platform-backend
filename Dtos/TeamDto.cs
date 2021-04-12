@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace work_platform_backend.Dtos
 {
@@ -9,6 +10,8 @@ namespace work_platform_backend.Dtos
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
         public Guid TeamCode { get; set; }
-
+        public List<TeamDto> SubTeams { get; set; }
+        
+        
     }
 }

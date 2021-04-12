@@ -106,7 +106,19 @@ namespace work_platform_backend.Repos
 
         public async Task<List<Team>> GetTeamSubTeamsById(int teamId)
         {
-            Team team = await context.Teams.Include(t => t.SubTeams).Where(t => t.Id == teamId).FirstAsync();
+            Team team = await context.Teams
+                                .Include(t => t.SubTeams)
+                                .Where(t => t.Id == teamId)
+                                .FirstAsync();
+
+            team.SubTeams.ForEach( t =>{
+                if(t.SubTeams == null )
+                {
+                   t.SubTeams = GetTeamSubTeamsById(t.Id).Result;
+                }
+
+            });                             
+             
              return team.SubTeams;
         }
 
@@ -118,6 +130,13 @@ namespace work_platform_backend.Repos
             teamMembers.ForEach(tm => users.Add(tm.User));
 
             return users;
+        }
+
+        public async Task<bool> IsTeamExist(int teamId)
+        {
+            var team = await context.Teams.FindAsync(teamId);
+
+            return team != null ? true : false ; 
         }
     }
 }
