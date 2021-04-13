@@ -55,6 +55,13 @@ namespace work_platform_backend.Services
             await checkpointRepository.SaveChanges();
 
 
+          var rTask =   await taskRepository.DeleteTaskBy_ParentCheckPoint(checkPointId);
+
+            if(rTask!=null)
+            {
+                await taskRepository.SaveChanges();
+            }
+
         }
 
 

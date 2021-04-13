@@ -12,16 +12,14 @@ namespace work_platform_backend.Repos
 
 
         private readonly ApplicationContext context;
-        private readonly TeamChatRepository teamChatRepository;
-        private readonly TeamMembersRepository teamMembersRepository;
-        private readonly RTaskRepo rTaskRepo;
+        
+      
 
-        public TeamRepo(ApplicationContext context,TeamChatRepository teamChatRepository,TeamMembersRepository teamMembersRepository,RTaskRepo rTaskRepo)
+        public TeamRepo(ApplicationContext context)
         {
             this.context = context;
-            this.teamChatRepository = teamChatRepository;
-            this.teamMembersRepository = teamMembersRepository;
-            this.rTaskRepo = rTaskRepo;
+           
+           
         }
 
         public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId)
@@ -100,12 +98,7 @@ namespace work_platform_backend.Repos
             {
 
                 context.Teams.Remove(team);
-
-                await teamChatRepository.DeleteTeamChatById(teamId);
-                await teamMembersRepository.DeleteTeamsMembersByTeam(teamId);
-                await rTaskRepo.DeleteTaskByTeam(teamId);
-                
-                                             
+                                                          
             }
             return team;
         }
@@ -113,7 +106,7 @@ namespace work_platform_backend.Repos
         public async Task<List<Team>> DeleteTeamByRoom(int roomId)
         {
             var teams = await context.Teams.Where(T => T.RoomId == roomId).ToListAsync();
-            if (teams != null)
+            if (teams .Count()!=0)
             {
                 foreach (Team t in teams)
                 {

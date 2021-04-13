@@ -18,14 +18,18 @@ namespace work_platform_backend.Services
         private ITeamRepository teamRepository;
         private IProjectRepository projectRepository;
         private ICheckpointRepository checkpointRepository;
+        private readonly ISessionRepository sessionRepository;
+        private readonly IAttachmentRepository attachmentRepo;
 
-        public TaskService(IRTaskRepository taskRepository, IMapper mapper, ITeamRepository teamRepository, IProjectRepository projectRepository, ICheckpointRepository checkpointRepository)
+        public TaskService(IRTaskRepository taskRepository, IMapper mapper, ITeamRepository teamRepository, IProjectRepository projectRepository, ICheckpointRepository checkpointRepository, ISessionRepository sessionRepository, IAttachmentRepository attachmentRepo)
         {
             this.taskRepository = taskRepository;
             this.mapper = mapper;
             this.teamRepository = teamRepository;
             this.projectRepository = projectRepository;
             this.checkpointRepository = checkpointRepository;
+            this.sessionRepository = sessionRepository;
+            this.attachmentRepo = attachmentRepo;
         }
 
 
@@ -68,6 +72,28 @@ namespace work_platform_backend.Services
         {
             await taskRepository.DeleteTaskById(taskId);
             await taskRepository.SaveChanges();
+
+         var session =    await sessionRepository.DeleteSessionsByTask(taskId);
+
+          var attachment =   await attachmentRepo.DeleteAttachmentByTaskId(taskId);
+
+           var checkPoint =  await checkpointRepository.DeleteCheckpoint_ByParentTask(taskId);
+
+
+            if(session!=null)
+            {
+               await sessionRepository.SaveChanges();
+            }
+
+            if(attachment!=null)
+            {
+                await attachmentRepo.SaveChanges();
+            }
+
+            if(checkPoint!=null)
+            {
+               await checkpointRepository.SaveChanges();
+            }
         }
 
         public async Task<TaskDetailsDto> GetTask(int TaskId)

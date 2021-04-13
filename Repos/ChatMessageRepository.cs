@@ -42,7 +42,7 @@ namespace work_platform_backend.Repos
         public async Task<ICollection<ChatMessage>> DeleteAllMessageByTeamCHat(int ChatId)
         {
             var chatMessage = await context.ChatMessages.Where(Tc => Tc.ChatId == ChatId).ToListAsync();
-            if (chatMessage != null)
+            if (chatMessage.Count()!=0)
             {
                 foreach (ChatMessage message in chatMessage)
                 {

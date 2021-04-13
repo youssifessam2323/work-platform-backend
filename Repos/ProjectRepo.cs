@@ -11,12 +11,12 @@ namespace work_platform_backend.Repos
     public class ProjectRepo : IProjectRepository
     {
         private readonly ApplicationContext context;
-        private readonly RTaskRepo rTaskRepo;
+       
 
-        public ProjectRepo(ApplicationContext context,RTaskRepo rTaskRepo)
+        public ProjectRepo(ApplicationContext context)
         {
             this.context = context;
-            this.rTaskRepo = rTaskRepo;
+           
         }
         public async Task<IEnumerable<Project>> GetAllProjectsByRoom(int roomId)
         {
@@ -67,7 +67,7 @@ namespace work_platform_backend.Repos
             if (project != null)
             {
                 context.Projects.Remove(project);
-                await rTaskRepo.DeleteTaskByProject(projectId);
+                
             }
             return project;
         }
@@ -75,7 +75,7 @@ namespace work_platform_backend.Repos
         public async Task<List<Project>> DeleteProjectByRoom(int roomId)
         {
             var projects = await context.Projects.Where(p => p.RoomId == roomId).ToListAsync();
-            if (projects != null)
+            if (projects.Count()!=0)
             {
                 foreach (Project proj in projects)
                 {

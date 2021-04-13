@@ -10,12 +10,11 @@ namespace work_platform_backend.Repos
     public class CheckpointRepo : ICheckpointRepository
     {
         private readonly ApplicationContext context;
-        private readonly RTaskRepo rTaskRepo;
 
-        public CheckpointRepo(ApplicationContext context,RTaskRepo rTaskRepo)
+        public CheckpointRepo(ApplicationContext context)
         {
             this.context = context;
-            this.rTaskRepo = rTaskRepo;
+            
         }
 
     
@@ -66,7 +65,7 @@ namespace work_platform_backend.Repos
             {
                 context.CheckPoints.Remove(checkPoint);
 
-                await rTaskRepo.DeleteTaskBy_ParentCheckPoint(checkpointId);
+              
 
 
             }

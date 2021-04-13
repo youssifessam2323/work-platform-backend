@@ -19,17 +19,20 @@ namespace work_platform_backend.Services
         private readonly IMapper mapper;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly TeamService teamService;
-        private  IProjectRepository projectRepository { get; set; }
 
+        private readonly IProjectRepository projectRepository;
+        public readonly ITeamRepository teamRepo;
+        private readonly ISettingRepository settingRepository;
 
-
-        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null)
+        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null, ITeamRepository teamRepo=null,ISettingRepository settingRepository=null)
         {
             this.roomRepository = roomRepository;
             this.mapper = mapper;
             this.httpContextAccessor = httpContextAccessor;
             this.teamService = teamService;
             this.projectRepository = projectRepository;
+            this.teamRepo = teamRepo;
+            this.settingRepository = settingRepository;
         }
 
         private string GetUserId() => (httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -131,7 +134,29 @@ namespace work_platform_backend.Services
             if(await isRoomExist(roomId))
             {
                 await roomRepository.DeleteRoomById(roomId);
+               
+
+              var team =  await teamRepo.DeleteTeamByRoom(roomId);
+              var project = await projectRepository.DeleteProjectByRoom(roomId);
+                if (team.Count()!=0)
+                {
+                    await teamRepo.SaveChanges();
+                }
+              
+                if(project.Count() != 0)
+                {
+                    await projectRepository.SaveChanges();
+                }
+
+                //var RoomSettings = await settingRepository.GetAllSettingsByRoom(roomId);
+
+                //if(RoomSettings.Count()!=0)
+                //{
+                //    await settingRepository.DeleteSettingById(roomId);
+                //}
+                
                 await roomRepository.SaveChanges();
+
             }
             throw new RoomNotFoundException("room not exist");
 

@@ -10,17 +10,13 @@ namespace work_platform_backend.Repos
     public class RTaskRepo : IRTaskRepository
     {
         private readonly ApplicationContext context;
-        private readonly SessionRepository sessionRepository;
-        private readonly AttachmentRepo attachmentRepo;
-        private readonly CheckpointRepo checkpointRepo;
 
-        public RTaskRepo(ApplicationContext context, SessionRepository sessionRepository, AttachmentRepo attachmentRepo , CheckpointRepo checkpointRepo)
+
+        public RTaskRepo(ApplicationContext context)
         
         {
             this.context = context;
-            this.sessionRepository = sessionRepository;
-            this.attachmentRepo = attachmentRepo;
-            this.checkpointRepo = checkpointRepo;
+          
         }
       
         public async Task<IEnumerable<RTask>> GetAllSubTasksByParentCheckPointId(int checkpointId)
@@ -154,11 +150,7 @@ namespace work_platform_backend.Repos
 
             }
 
-            await sessionRepository.DeleteSessionsByTask(taskId);
-
-            await attachmentRepo.DeleteAttachmentByTaskId(taskId);
-
-            await checkpointRepo.DeleteCheckpoint_ByParentTask(taskId);
+          
 
 
             
@@ -168,7 +160,7 @@ namespace work_platform_backend.Repos
         public async Task<List<RTask>> DeleteTaskByTeam(int teamId)
         {
             var tasks = await context.Tasks.Where(r => r.TeamId == teamId).ToListAsync();
-            if (tasks != null)
+            if (tasks.Count()!=0)
             {
                 foreach (RTask t in tasks)
                 {
@@ -181,7 +173,7 @@ namespace work_platform_backend.Repos
         public async Task<List<RTask>> DeleteTaskByProject(int projectId)
         {
             var tasks = await context.Tasks.Where(r => r.ProjectId == projectId).ToListAsync();
-            if (tasks != null)
+            if (tasks.Count() != 0)
             {
                 foreach (RTask t in tasks)
                 {

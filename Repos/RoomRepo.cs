@@ -13,15 +13,13 @@ namespace work_platform_backend.Repos
     {
         private readonly ApplicationContext context;
         private readonly IMapper _mapper;
-        private readonly TeamRepo teamRepo;
-        private readonly ProjectRepo projectRepo;
+     
 
-        public RoomRepo(ApplicationContext context,IMapper mapper,TeamRepo teamRepo , ProjectRepo projectRepo)
+        public RoomRepo(ApplicationContext context,IMapper mapper)
         {
             this.context = context;
             _mapper = mapper;
-            this.teamRepo = teamRepo;
-            this.projectRepo = projectRepo;
+            
         }
 
         public async Task<Room> GetRoomById(int roomId)
@@ -58,14 +56,19 @@ namespace work_platform_backend.Repos
         {
             var newRoom = await context.Rooms.FindAsync(roomId);
             {
-                // var newRoom = _mapper.Map<Room>(roomRequest);
-                newRoom.Name = room.Name;
-                newRoom.Description= room.Description;
-                newRoom.CreatedAt = DateTime.Now;
-                
-                return newRoom;
+                if (newRoom != null)
+                {
+                    // var newRoom = _mapper.Map<Room>(roomRequest);
+                    newRoom.Name = room.Name;
+                    newRoom.Description = room.Description;
+                    newRoom.CreatedAt = DateTime.Now;
+
+                    return newRoom;
+                }
             }
             return null;
+
+
         }
 
         public async Task<Room> DeleteRoomById(int roomId)
@@ -74,8 +77,7 @@ namespace work_platform_backend.Repos
             if (room != null)
             {
                 context.Rooms.Remove(room);
-                await teamRepo.DeleteTeamByRoom(roomId);
-                await projectRepo.DeleteProjectByRoom(roomId);
+              
             }
             return room;
         }

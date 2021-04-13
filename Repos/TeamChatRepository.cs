@@ -10,12 +10,11 @@ namespace work_platform_backend.Repos
     public class TeamChatRepository : ITeamChatRepository
     {
         private readonly ApplicationContext context;
-        private readonly ChatMessageRepository chatMessageRepository;
-
-        public TeamChatRepository(ApplicationContext context,ChatMessageRepository chatMessageRepository)
+       
+        public TeamChatRepository(ApplicationContext context)
         {
             this.context = context;
-            this.chatMessageRepository = chatMessageRepository;
+           
         }
 
         public async Task SaveTeamChat(TeamChat teamChat)
@@ -27,8 +26,7 @@ namespace work_platform_backend.Repos
             TeamChat teamChat = await context.TeamChats.FindAsync(TeamChatId);
             if (teamChat != null)
             {
-                context.TeamChats.Remove(teamChat);
-                await chatMessageRepository.DeleteAllMessageByTeamCHat(TeamChatId);
+                context.TeamChats.Remove(teamChat);               
               
             }
             return teamChat;

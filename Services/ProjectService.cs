@@ -14,13 +14,15 @@ namespace work_platform_backend.Services
     {
         private readonly IProjectRepository projectRepository;
         private readonly IMapper mapper;
+        private readonly IRTaskRepository rTaskRepo;
+        private readonly ITeamRepository teamRepository;
 
-
-        public ProjectService(IProjectRepository projectRepository,  IMapper mapper)
+        public ProjectService(IProjectRepository projectRepository,  IMapper mapper, IRTaskRepository rTaskRepo,ITeamRepository teamRepository)
         {
             this.projectRepository = projectRepository;
             this.mapper = mapper;
-
+            this.rTaskRepo = rTaskRepo;
+            this.teamRepository = teamRepository;
         }
 
 
@@ -64,7 +66,20 @@ namespace work_platform_backend.Services
                 throw new Exception("project not exist");
             }
             var project = await projectRepository.DeleteProjectById(projectId);
+
+            var rTask = await rTaskRepo.DeleteTaskByProject(projectId);
+
+            if (rTask.Count()!=0)
+            {
+                await rTaskRepo.SaveChanges();
+            }
+
+            //Must Remove TeamProject & ProjectManager 
+
             await projectRepository.SaveChanges();
+
+
+
 
 
         }

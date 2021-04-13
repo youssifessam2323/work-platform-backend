@@ -8,5 +8,6 @@ namespace work_platform_backend.Repos
     {
         Task<TeamsMembers> GetTeamMembersByUserIdAndTeamId(string userId,int teamId);
         Task<ICollection<TeamsMembers>> DeleteTeamsMembersByTeam(int teamId);
+        Task SaveChanges();
     }
 }

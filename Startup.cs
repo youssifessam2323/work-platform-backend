@@ -87,6 +87,18 @@ namespace work_platform_backend
             services.AddScoped<ChatMessageTypeService>();
             services.AddScoped<TeamChatService>();
 
+
+            //services.AddScoped<ProjectRepo>();
+            //services.AddScoped<TeamRepo>();
+            //services.AddScoped<CheckpointRepo>();
+            //services.AddScoped<RTaskRepo>();
+            //services.AddScoped<TeamChatRepository>();
+            //services.AddScoped<RoomRepo>();
+
+
+
+
+
             services.AddDbContext<ApplicationContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             },ServiceLifetime.Transient);         

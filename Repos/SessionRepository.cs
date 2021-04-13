@@ -33,5 +33,10 @@ namespace work_platform_backend.Repos
             return await context.Sessions.Where(s => s.UserId == userId && s.TaskId == taskId).ToListAsync();
 
         }
+
+        public async Task SaveChanges()
+        {
+            await context.SaveChangesAsync();
+        }
     }
 }

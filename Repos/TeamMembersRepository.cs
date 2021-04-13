@@ -18,7 +18,7 @@ namespace work_platform_backend.Repos
         public async Task<ICollection<TeamsMembers>> DeleteTeamsMembersByTeam(int teamId)
         {
             var teamsMember = await context.TeamsMembers.Where(Tm => Tm.TeamId == teamId).ToListAsync();
-            if (teamsMember != null)
+            if (teamsMember.Count()!=0)
             {
                 foreach (TeamsMembers teamsMembers in teamsMember)
                 {
@@ -33,6 +33,11 @@ namespace work_platform_backend.Repos
             return await  context.TeamsMembers
                             .Where(tm => tm.UserId == userId && tm.TeamId == teamId)
                             .FirstOrDefaultAsync();
+        }
+
+        public async Task SaveChanges()
+        {
+            await context.SaveChangesAsync();
         }
     }
 }
