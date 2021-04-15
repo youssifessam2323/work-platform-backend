@@ -155,12 +155,15 @@ namespace work_platform_backend.Controllers
 
         [HttpDelete]
         [Route("{teamId}")]
-        public async Task<IActionResult> DeletTeam(int teamId)
+        public async Task<IActionResult> DeleteTeam(int teamId)
         {
             try
             {
-                await teamService.DeleteTeam(teamId);
-                return Ok();
+               if (await teamService.DeleteTeam(teamId))
+                {
+                    return Ok();
+                }
+                throw new NullReferenceException();
             }
             catch (DbUpdateException ex)
             {

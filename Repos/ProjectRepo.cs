@@ -144,6 +144,24 @@ namespace work_platform_backend.Repos
             context.TeamProjects.Remove(teamProject);
         }
 
+
+        public async Task<bool> RemoveTeamProjectbyProject(int projectId)
+        {
+            var teamProjects = await context.TeamProjects
+                                                    .Where(tp => tp.ProjectId == projectId)
+                                                    .ToListAsync();
+
+            if (teamProjects.Count().Equals(0))
+            {
+                return false;
+            }
+            foreach (TeamProject tp in teamProjects)
+            {
+                context.TeamProjects.Remove(tp);
+            }
+
+            return true;
+        }
         public async Task<bool> IsProjectExist(int projectId)
         {
             var project = await context.Projects.FindAsync(projectId);

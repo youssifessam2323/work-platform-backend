@@ -38,22 +38,18 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task DeleteTeamChat(int teamChatId)
+        public async Task<bool> DeleteTeamChat(int teamChatId)
         {
             var teamChat = await teamChatRepository.DeleteTeamChatById(teamChatId);
             if (teamChat == null)
             {
 
-                throw new NullReferenceException();
+                return false; 
 
             }
            await chatMessageService.DeleteAllMessageByTeamCHat(teamChatId);
 
-            await teamChatRepository.SaveChanges();
-
-          
-
-
+           return await teamChatRepository.SaveChanges();      
 
         }
 
@@ -67,11 +63,9 @@ namespace work_platform_backend.Services
 
             }
 
+            return await DeleteTeamChat(teamChat.Id);
 
-
-            await chatMessageService.DeleteAllMessageByTeamCHat(teamChat.Id);
-
-            return await teamChatRepository.SaveChanges();
+            
         }
 
 

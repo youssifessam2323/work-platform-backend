@@ -22,9 +22,10 @@ namespace work_platform_backend.Services
 
         private readonly IProjectRepository projectRepository;
         public readonly ITeamRepository teamRepo;
-        private readonly ISettingRepository settingRepository;
+        private readonly SettingService settingService;
+        private readonly ProjectService projectService;
 
-        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null, ITeamRepository teamRepo=null,ISettingRepository settingRepository=null)
+        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null, ITeamRepository teamRepo=null,SettingService settingService=null,ProjectService projectService=null)
         {
             this.roomRepository = roomRepository;
             this.mapper = mapper;
@@ -32,7 +33,8 @@ namespace work_platform_backend.Services
             this.teamService = teamService;
             this.projectRepository = projectRepository;
             this.teamRepo = teamRepo;
-            this.settingRepository = settingRepository;
+            this.settingService = settingService;
+            this.projectService = projectService;
         }
 
         private string GetUserId() => (httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -133,27 +135,26 @@ namespace work_platform_backend.Services
         {
             if(await isRoomExist(roomId))
             {
+
+                //Must Delete Projectmanager
+
+            
                 await roomRepository.DeleteRoomById(roomId);
-               
 
-              var team =  await teamRepo.DeleteTeamByRoom(roomId);
-              var project = await projectRepository.DeleteProjectByRoom(roomId);
-                if (team.Count()!=0)
+                await teamService.DeleteTeamByRoom(roomId);
+
+                await projectService.DeleteProjectByRoom(roomId);  //Delete on Project not working
+                var settingsofRoom =  await settingService.GetSettingsOfRoom(roomId);
+
+                if(settingsofRoom!=null)
                 {
-                    await teamRepo.SaveChanges();
+                    foreach(Setting setting in settingsofRoom)
+                    {
+                        await settingService.RemoveSettingfromRoom(roomId, setting.Id);
+                    }
                 }
-              
-                if(project.Count() != 0)
-                {
-                    await projectRepository.SaveChanges();
-                }
-
-                //var RoomSettings = await settingRepository.GetAllSettingsByRoom(roomId);
-
-                //if(RoomSettings.Count()!=0)
-                //{
-                //    await settingRepository.DeleteSettingById(roomId);
-                //}
+                
+                
                 
                 await roomRepository.SaveChanges();
 

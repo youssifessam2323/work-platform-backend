@@ -75,7 +75,7 @@ namespace work_platform_backend.Repos
         public async Task<CheckPoint> DeleteCheckpoint_ByParentTask(int parentTaskId)
         {
             CheckPoint checkPoint = await context.CheckPoints.Where(c=>c.ParentRTaskId==parentTaskId).FirstOrDefaultAsync();
-            if (checkPoint != null)
+            if (checkPoint!=null)
             {
                 context.CheckPoints.Remove(checkPoint);
 

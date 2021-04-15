@@ -18,7 +18,7 @@ namespace work_platform_backend.Repos
         public async Task<List<Session>> DeleteSessionsByTask(int taskId)
         {
             var sessions = await context.Sessions.Where(s => s.TaskId == taskId).ToListAsync();
-            if (sessions != null)
+            if (sessions.Count()!=0)
             {
                 foreach (Session session in sessions)
                 {
@@ -34,9 +34,9 @@ namespace work_platform_backend.Repos
 
         }
 
-        public async Task SaveChanges()
+        public async Task<bool> SaveChanges()
         {
-            await context.SaveChangesAsync();
+            return (await context.SaveChangesAsync() >= 0);
         }
     }
 }

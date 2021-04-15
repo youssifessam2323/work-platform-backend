@@ -15,10 +15,12 @@ namespace work_platform_backend.Repos
         Task<Team> DeleteTeamById(int teamId);
         Task<List<Team>> DeleteTeamByRoom(int roomId);
         //Task<List<Team>> DeleteSubTeamsByParentTeam(int parentTeamId);
+        public Task<bool> RemoveTeamProjectbyTeam(int teamId);
         Task<bool> SaveChanges();
         Task<Team> GetTeamByTeamCode(string teamCode);
         Task<List<Team>> GetTeamSubTeamsById(int teamId);
         Task<List<User>> GetMembersOfTeam(int teamId);
+        public Task<List<Team>> GetTeamByProject(int projectId);
         Task<bool> IsTeamExist(int teamId);
     }
 }

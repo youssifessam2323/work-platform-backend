@@ -14,7 +14,7 @@ namespace work_platform_backend.Repos
          Task<RTask> GetTaskById(int taskId);
          Task SaveTask(RTask task);
          Task<RTask> UpdateTaskById(int taskId, RTask task);
-         Task  DeleteTaskById(int taskId);
+         Task<RTask> DeleteTaskById(int taskId);
         Task<List<RTask>> DeleteTaskByTeam(int teamId);
         Task<List<RTask>> DeleteTaskByProject(int projectId);
         Task<List<RTask>> DeleteTaskBy_ParentCheckPoint(int parentCheckPointId);

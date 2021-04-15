@@ -122,16 +122,19 @@ namespace work_platform_backend.Repos
 
 
         //not completed
-        public async Task DeleteTaskById(int taskId)
+        public async Task<RTask> DeleteTaskById(int taskId)
         {
-
+            
 
             RTask task = await context.Tasks.Include(t => t.DependantTasks)
                                     .Include(t => t.Comments)
                                     .ThenInclude(c => c.Replies)
                                     .Where(t => t.Id == taskId)
-                                    .FirstAsync();
-            
+                                    .FirstOrDefaultAsync();
+
+
+
+
             Console.WriteLine(task);
             task.Comments.ForEach(c => Console.WriteLine(c));
             task.Comments.ForEach( async c => {
@@ -149,6 +152,8 @@ namespace work_platform_backend.Repos
                 context.Tasks.Remove(task);
 
             }
+
+            return task;
 
           
 
@@ -186,7 +191,7 @@ namespace work_platform_backend.Repos
         public async Task<List<RTask>> DeleteTaskBy_ParentCheckPoint(int parentCheckPointId)
         {
             var tasks = await context.Tasks.Where(r => r.ParentCheckPointId == parentCheckPointId).ToListAsync();
-            if (tasks != null)
+            if (tasks.Count()!=0)
             {
                 foreach (RTask t in tasks)
                 {

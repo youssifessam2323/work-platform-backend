@@ -14,7 +14,7 @@ namespace work_platform_backend.Repos
         Task<List<Comment>> DeleteCommentsByParentComment(int parentCommentId);
 
 
-        Task SaveChanges();
+        Task<bool> SaveChanges();
         Task<bool> isTaskExist(int commentId);
     }
 }

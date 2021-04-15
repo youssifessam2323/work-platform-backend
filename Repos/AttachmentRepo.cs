@@ -56,7 +56,7 @@ namespace work_platform_backend.Repos
         public async Task<List<Attachment>> DeleteAttachmentByTaskId(int taskId)
         {
             var attachments = await context.Attachments.Where(a => a.TaskId == taskId).ToListAsync();
-            if (attachments != null)
+            if (attachments.Count()!=0)
             {
                 foreach (Attachment attach in attachments)
                 {

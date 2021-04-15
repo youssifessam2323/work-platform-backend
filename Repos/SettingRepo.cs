@@ -70,6 +70,22 @@ namespace work_platform_backend.Repos
         }
 
 
+
+        public async Task<RoomSettings> RemoveSettingfromRoom(int roomId,int settingId)
+        {
+            RoomSettings roomSettings = await _context.RoomSettings.Where(rs => rs.RoomId == roomId && rs.SettingId==settingId)
+                                                    .SingleOrDefaultAsync();
+            if (roomSettings != null)
+            {
+                _context.RoomSettings.Remove(roomSettings);
+
+            }
+            return roomSettings;
+            
+        }
+
+
+
         public async Task<bool> SaveChanges()
         {
             return (await _context.SaveChangesAsync() >= 0);

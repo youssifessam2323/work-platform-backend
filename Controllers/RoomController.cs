@@ -161,7 +161,7 @@ namespace work_platform_backend.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)] 
         [HttpDelete("{roomId}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+       
 
         public async Task<IActionResult> DeletRoom(int roomId)
         {

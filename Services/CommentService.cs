@@ -71,17 +71,65 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task DeleteComment(int commentId)
+        public async Task<List<Comment>> DeleteCommentByParentComment(int parentCommentId)
+        {
+            var comments = await commentRepository.DeleteCommentsByParentComment(parentCommentId);
+            if (comments.Count().Equals(0))
+            {
+
+                return null;
+
+            }
+
+            return comments;
+
+
+        }
+
+
+        public async Task<bool> DeleteComment(int commentId)
         {
             var comment = await commentRepository.DeleteCommentById(commentId);
             if (comment == null)
             {
 
-                throw new NullReferenceException();
+                return false;
+
+            }
+            
+          var subComments =  await DeleteCommentByParentComment(commentId);
+
+            if (subComments != null)
+            {
+
+                foreach (Comment c in subComments)
+                {
+                    await commentRepository.DeleteCommentById(c.Id);                  
+                }
+                await commentRepository.SaveChanges();
+            }
+
+           return await commentRepository.SaveChanges();
+
+
+        }
+
+        public async Task<bool> DeleteCommentByTask(int taskId)
+        {
+            var comments = await commentRepository.DeleteCommentsByTask(taskId);
+            if (comments.Count().Equals(0))
+            {
+
+                return false;
 
             }
 
-            await commentRepository.SaveChanges();
+           foreach(Comment c in comments)
+            {
+                await DeleteComment(c.Id);
+            }
+
+            return true;
 
 
         }

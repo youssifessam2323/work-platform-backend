@@ -27,5 +27,22 @@ namespace work_platform_backend.Services
 
             return sessions.Select(s => mapper.Map<SessionDto>(s)).ToList();
         }
+
+
+
+        public async Task<bool> DeleteSessionByTask(int taskId)
+        {
+            var sessions = await sessionRepository.DeleteSessionsByTask(taskId);
+
+
+            if (sessions.Count()!=0)
+            {
+                return false;
+            }
+
+            return await sessionRepository.SaveChanges();
+        }
+
+
     }
 }

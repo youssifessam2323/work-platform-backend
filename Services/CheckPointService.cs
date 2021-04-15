@@ -13,11 +13,12 @@ namespace work_platform_backend.Services
     {
        
         private readonly ICheckpointRepository checkpointRepository;
-        private readonly IRTaskRepository taskRepository;
+        
+        
         private readonly IMapper mapper;
+        private readonly IRTaskRepository taskRepository;
 
-
-        public CheckPointService(ICheckpointRepository checkpointRepository, IMapper mapper, IRTaskRepository taskRepository)
+        public CheckPointService(ICheckpointRepository checkpointRepository, IMapper mapper,IRTaskRepository taskRepository)
         {
             this.checkpointRepository = checkpointRepository;
             this.mapper = mapper;
@@ -42,32 +43,51 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task DeleteCheckPoint(int checkPointId)
+        public async Task<bool> DeleteCheckPoint(int checkPointId)
         {
             var CheckPoint = await checkpointRepository.DeleteCheckpointById(checkPointId);
             if (CheckPoint == null)
             {
 
-                throw new NullReferenceException();
+                return false;
 
             }
 
-            await checkpointRepository.SaveChanges();
 
 
-          var rTask =   await taskRepository.DeleteTaskBy_ParentCheckPoint(checkPointId);
-
-            if(rTask!=null)
+          var tasks =   await taskRepository.DeleteTaskBy_ParentCheckPoint(checkPointId);
+            if (tasks.Count() != 0)
             {
-                await taskRepository.SaveChanges();
+                foreach (RTask r in tasks)
+                {
+                    await taskRepository.DeleteTaskById(r.Id);
+                }
+               await taskRepository.SaveChanges();
             }
+
+
+            return  await checkpointRepository.SaveChanges();
 
         }
+
+        public async Task<bool> DeleteCheckPointByParentTask(int parentTaskId)
+        {
+          var checkPoints =  await checkpointRepository.DeleteCheckpoint_ByParentTask(parentTaskId);
+
+
+            if(checkPoints!=null)
+            {
+                return false;
+            }
+
+           return await DeleteCheckPoint(checkPoints.Id);
+        }
+
 
 
         public async Task<IEnumerable<CheckPointDto>> GetCheckPointsofParentTask(int parentTaskId)
         {
-            if(! await taskRepository.isTaskExist(parentTaskId))
+            if (!await taskRepository.isTaskExist(parentTaskId))
             {
                 throw new Exception("task not exist");
             }
@@ -77,6 +97,14 @@ namespace work_platform_backend.Services
           
 
         }
+
+        public async Task<bool> IsCheckpointExist(int checkPointId)
+        {
+         return  await checkpointRepository.IsCheckpointExist(checkPointId);
+
+        }
+
+
 
 
         public async Task<CheckPointDetailsDto> GetCheckPoint(int checkPointId)
@@ -92,11 +120,11 @@ namespace work_platform_backend.Services
 
         public async Task<List<CheckPointDto>> GetCheckpointsByTask(int taskId)
         {
-            if(!await taskRepository.isTaskExist(taskId))
+            if (!await taskRepository.isTaskExist(taskId))
             {
                 throw new Exception("task not exist");
             }
-           var checkpoints =  (List<CheckPoint>)await checkpointRepository.GetAllCheckpointsByParentTaskId(taskId);
+            var checkpoints =  (List<CheckPoint>)await checkpointRepository.GetAllCheckpointsByParentTaskId(taskId);
 
            return checkpoints.Select(c => mapper.Map<CheckPointDto>(c)).ToList(); 
 
@@ -104,7 +132,7 @@ namespace work_platform_backend.Services
 
         public async Task<CheckPoint> SaveNewCheckpointInTask(int taskId,CheckPointDto checkpointDto)
         {
-             if(!await taskRepository.isTaskExist(taskId))
+            if (!await taskRepository.isTaskExist(taskId))
             {
                 throw new Exception("task not exist");
             }

@@ -23,7 +23,7 @@ namespace work_platform_backend.Repos
         public async Task<List<Comment>> DeleteCommentsByParentComment(int parentCommentId)
         {
             var comment = await context.Comments.Where(c => c.ParentCommentId == parentCommentId).ToListAsync();
-            if (comment != null)
+            if (comment.Count()!=0)
             {
                 foreach (Comment com in comment)
                 {
@@ -70,9 +70,9 @@ namespace work_platform_backend.Repos
            return comment != null ? true : false;
         }
 
-        public async Task SaveChanges()
+        public async Task<bool>  SaveChanges()
         {
-            await context.SaveChangesAsync();
+            return (await context.SaveChangesAsync() >= 0);
         }
 
       

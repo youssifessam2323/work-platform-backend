@@ -34,20 +34,26 @@ namespace work_platform_backend.Controllers
         [Route("{commentId}")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> DeleteComment(int commentId)
         {
             try
             {
-                await commentService.DeleteComment(commentId);
+                if (await commentService.DeleteComment(commentId))
+                {
+                    return Ok();
+                }
+                throw new NullReferenceException();
+
+
             }
             catch (Exception Ex)
             {
 
-                return NotFound(Ex.Message);
+                return BadRequest(Ex.Message);
             }
 
-            return Ok("Comment deleted successfully");
+        
         }
 
     }

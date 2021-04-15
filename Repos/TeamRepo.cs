@@ -66,6 +66,38 @@ namespace work_platform_backend.Repos
                         .FirstOrDefaultAsync(T => T.Id == teamId));
         }
 
+        public async Task<List<Team>> GetTeamByProject(int projectId)
+        {
+            List<TeamProject> teamProjects = await context.TeamProjects
+                                                .Include(tp => tp.Team)
+                                                .Where(tp => tp.ProjectId == projectId)
+                                                .ToListAsync();
+
+
+            List<Team> teams = new List<Team>();
+
+            teamProjects.ForEach(tp => teams.Add(tp.Team));
+            return teams;
+        }
+
+        public async Task<bool> RemoveTeamProjectbyTeam(int teamId)
+        {
+            var teamProjects = await context.TeamProjects
+                                                    .Where(tp => tp.TeamId == teamId)
+                                                    .ToListAsync();
+
+            if (teamProjects.Count().Equals(0))
+            {
+                return false;
+            }
+            foreach(TeamProject tp in teamProjects) 
+            {
+                context.TeamProjects.Remove(tp);
+            }
+                          
+            return true;
+        }
+
         public async Task<bool> SaveChanges()
         {
             return (await context.SaveChangesAsync() >= 0);
