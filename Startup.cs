@@ -86,6 +86,8 @@ namespace work_platform_backend
             services.AddScoped<ChatMessageService>();
             services.AddScoped<ChatMessageTypeService>();
             services.AddScoped<TeamChatService>();
+            services.AddScoped<NotificationService>();
+            services.AddScoped<INotificationRepository,NotificationRepository>();
 
             services.AddDbContext<ApplicationContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));

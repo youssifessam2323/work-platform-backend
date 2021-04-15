@@ -36,6 +36,7 @@ namespace work_platform_backend.Models
         public DbSet<TeamChat> TeamChats { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<ChatMessageType> ChatMessageTypes { get; set; }
+        public DbSet<Notification> Notification { get; set; }
 
 
 
@@ -53,6 +54,13 @@ namespace work_platform_backend.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
+                modelBuilder.Entity<Notification>()
+                    .HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey(n => n.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<Room>()
                 .HasOne(r => r.Creator)
