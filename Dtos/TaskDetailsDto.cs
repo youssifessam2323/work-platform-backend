@@ -22,7 +22,7 @@ namespace work_platform_backend.Dtos
         public CheckPointDto ParentCheckPoint { get; set; }
         public List<UserDto> AssignedUsers { get; set; }
         public List<CommentDto> Comments { get; set; }
-        public List<Session> Sessions { get; set; }
+        public List<SessionDto> Sessions { get; set; }
         public List<CheckPointDto> ChildCheckPoints { get; internal set; }
 
 

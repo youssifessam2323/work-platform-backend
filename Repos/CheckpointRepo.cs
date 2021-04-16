@@ -26,7 +26,10 @@ namespace work_platform_backend.Repos
 
         public async Task<CheckPoint> GetCheckPointById(int checkpointId)
         {
-            return (await context.CheckPoints.FirstOrDefaultAsync(C => C.Id == checkpointId));
+            return (await context.CheckPoints
+                                            .Include(c => c.ParentRTask)
+                                            .Include(c => c.SubTasks)
+                                            .FirstOrDefaultAsync(C => C.Id == checkpointId));
         }
 
 
@@ -71,6 +74,11 @@ namespace work_platform_backend.Repos
             return (await context.SaveChangesAsync() >= 0);
         }
 
-       
+        public async Task<bool> IsCheckpointExist(int checkPointId)
+        {
+            var c = await context.CheckPoints.FindAsync(checkPointId);
+
+            return c != null ? true : false ;
+        }
     }
 }

@@ -29,42 +29,38 @@ namespace work_platform_backend.Controllers
         }
 
 
-        [HttpPost]
-        [Route("{projectId}/teams/{teamId}")]
+        [HttpGet]
+        [Route("{projectId}/add/teams/{teamId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> AddTeamToProject(int projectId,int teamId)
         {   
             try
             {
             await projectService.AddTeamToProject(projectId,teamId);
-            }
-            catch(DbUpdateException e)
-            {
-                return BadRequest("this team is already in this project");
-            }
             return Ok();
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
 
         
-        [HttpDelete]
-        [Route("{projectId}/teams/{teamId}")]
+        [HttpGet]
+        [Route("{projectId}/remove/teams/{teamId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> RemoveTeamToProject(int projectId,int teamId)
+        public async Task<IActionResult> RemoveTeamFromProject(int projectId,int teamId)
         {   
             try
             {
             await projectService.RemoveTeamToProject(projectId,teamId);
-            }
-            catch(DbUpdateException e)
-            {
-                return BadRequest("this team is already in this project");
-            }
-            catch(ResourceNotFoundException e )
-            {
-                return NotFound(e.Message);
-            }
             return Ok();
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
 
@@ -74,48 +70,54 @@ namespace work_platform_backend.Controllers
         [Route("{projectId}")]
         public async Task<IActionResult> GetSingleProject(int projectId)
         {
-
-            var project = await projectService.GetProject(projectId);
-            if (project == null)
+            try
             {
-                return NotFound();
-
+                var project = await projectService.GetProject(projectId);
+                return Ok(project);
             }
-            return Ok(project);
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
+            
 
         }
 
 
        
 
-        [HttpPut("{ProjectId}")]
-        public async Task<IActionResult> UpdateProject(int ProjectId, Project project)
+        [HttpPut("{projectId}")]
+        public async Task<IActionResult> UpdateProject(int projectId, Project project)
         {
-            Project UpdatedProject = await projectService.UpdateProject(ProjectId, project);
-            if (UpdatedProject == null)
+            try
             {
-                return NotFound();
+                Project UpdatedProject = await projectService.UpdateProject(projectId, project);
+               return Ok(UpdatedProject);
             }
-            return Ok(UpdatedProject);
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
         }
 
-
+        // not working
         [HttpDelete]
         [Route("{projectId}")]
-        public async Task<IActionResult> DeletProject(int projectId)
+        public async Task<IActionResult> DeleteProject(int projectId)
         {
             try
             {
                 await projectService.DeleteProject(projectId);
+                return Ok();
             }
-            catch (Exception Ex)
+            catch (Exception e)
             {
 
-                return NotFound(Ex.InnerException);
+                return NotFound(e.Message);
             }
 
-            return Ok($"Object with id = {projectId} was  Deleted");
+            
         }
 
 
@@ -126,25 +128,31 @@ namespace work_platform_backend.Controllers
             try
             {
                 var newTask = await taskService.AddTaskInProject(userService.GetUserId(), projectId, task);
-
-                if (newTask != null)
-                {
                     return Ok(newTask);
-                }
             }
-            catch (DateTimeException e)
+            catch (NullReferenceException e)
             {
                 return BadRequest(e.Message);
             }
-            return BadRequest();
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
 
-         [HttpGet("{projectId}/tasks")]
+        [HttpGet("{projectId}/tasks")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetTaskInProject(int projectId)
+        public async Task<IActionResult> GetTasksInProject(int projectId)
         {
+            try
+            {
             return Ok(await taskService.GetTasksByProject(projectId));
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
 

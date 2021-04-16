@@ -15,20 +15,25 @@ namespace work_platform_backend.Services
         private readonly IMapper mapper;
         private readonly IProjectRepository projectRepository;
         private readonly IRTaskRepository taskRepository;
+        private readonly IRoomRepository roomRepository;
         private readonly TeamChatService teamChatService;
 
-        public TeamService(ITeamRepository teamRepository, IMapper mapper, IProjectRepository projectRepository, IRTaskRepository taskRepository , TeamChatService teamChatService)
+        public TeamService(ITeamRepository teamRepository, IMapper mapper, IProjectRepository projectRepository, IRTaskRepository taskRepository, TeamChatService teamChatService, IRoomRepository roomRepository)
         {
             this.teamRepository = teamRepository;
             this.mapper = mapper;
             this.projectRepository = projectRepository;
             this.taskRepository = taskRepository;
             this.teamChatService = teamChatService;
+            this.roomRepository = roomRepository;
         }
 
 
         public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId,int parentTeamId = 0)
         {
+
+
+   
                 newTeam.RoomId = roomId;
                 newTeam.LeaderId = creatorId;
                 newTeam.CreatedAt = DateTime.Now;
@@ -54,6 +59,10 @@ namespace work_platform_backend.Services
 
         public async Task<Team> UpdateTeam(int id, Team Team)
         {
+            if(! await teamRepository.IsTeamExist(id))
+            {
+                throw new Exception("team not exist");
+            }
             Team NewTeam = await teamRepository.UpdateTeamById(id,Team);
 
             if (NewTeam != null)
@@ -61,10 +70,7 @@ namespace work_platform_backend.Services
                await teamRepository.SaveChanges();
                 return NewTeam;
             }
-
-
-            return null;
-
+            throw new Exception("something goes wrong, please try again");
         }
 
 
@@ -88,17 +94,11 @@ namespace work_platform_backend.Services
 
   
 
-        public async Task<IEnumerable<Team>> GetTeamsByCreator(string CreatorId)
+        public async Task<IEnumerable<TeamDto>> GetTeamsByCreator(string CreatorId)
         {
-            var Teams = await teamRepository.GetAllTeamsByCreator(CreatorId);
+            var teams = await teamRepository.GetAllTeamsByCreator(CreatorId);
 
-            if (Teams.Count().Equals(0))
-            {
-                return null;
-
-            }
-
-            return Teams;
+            return teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
 
         }
 
@@ -130,38 +130,65 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<List<User>> GetMembersOfTeam(int teamId)
+        public async Task<List<UserDto>> GetMembersOfTeam(int teamId)
         {
-            return await teamRepository.GetMembersOfTeam(teamId);
+            if(! await teamRepository.IsTeamExist(teamId))
+            {
+                throw new Exception("team not exist");
+            }
+            var members =  await teamRepository.GetMembersOfTeam(teamId);
+       
+            return members.Select(u => mapper.Map<UserDto>(u)).ToList();
         }
 
      
-        public async Task<List<Team>> GetTeamSubTeams(int teamId)
+        public async Task<List<TeamDto>> GetTeamSubTeams(int teamId)
         {
-            return await teamRepository.GetTeamSubTeamsById(teamId);
+            if(! await teamRepository.IsTeamExist(teamId))
+            {
+                throw new Exception("team not exist");
+            }
+            var subteams = await teamRepository.GetTeamSubTeamsById(teamId);
+
+            return subteams.Select(t => mapper.Map<TeamDto>(t)).ToList();
         }
 
-        public async Task<List<Project>> GetProjectsOfTeam(int teamId)
+        public async Task<List<ProjectDto>> GetProjectsOfTeam(int teamId)
         {   
-            return await projectRepository.GetProjectByTeam(teamId);
+            if(! await teamRepository.IsTeamExist(teamId))
+            {
+                throw new Exception("team not exist");
+            }
+
+            var projects = await projectRepository.GetProjectByTeam(teamId);
+
+            return projects.Select(p => mapper.Map<ProjectDto>(p)).ToList();
         }
 
-        public async Task<List<RTask>> GetTasksOfTeam(int teamId)
+        public async Task<List<TaskDto>> GetTasksOfTeam(int teamId)
         {
-                return await taskRepository.GetTasksByTeam(teamId);
+            if(! await teamRepository.IsTeamExist(teamId))
+            {
+                throw new Exception("team not exist");
+            }
+
+            var tasks =  await taskRepository.GetTasksByTeam(teamId);
+
+            return tasks.Select(t => mapper.Map<TaskDto>(t)).ToList();
         }
 
-        public async Task<Team> GetTeam(int TeamId)
+        public async Task<TeamDetailsDto> GetTeam(int TeamId)
         {
-            var Teams = await teamRepository.GetTeamById(TeamId);
+            var team = await teamRepository.GetTeamById(TeamId);
 
-            if (Teams==null)
+            if (team== null)
             {
                 throw new Exception("team not exist");
 
             }
 
-            return Teams;
+
+            return mapper.Map<TeamDetailsDto>(team);
 
         }
           public async Task<Team> GetTeamOnlyById(int TeamId)

@@ -18,7 +18,9 @@ namespace work_platform_backend.Repos
       
         public async Task<IEnumerable<RTask>> GetAllSubTasksByParentCheckPointId(int checkpointId)
         {
-           return( await context.Tasks.Where(T => T.ParentCheckPointId == checkpointId).ToListAsync());
+           return( await context.Tasks
+                                    .Include(t => t.ChildCheckPoints)
+                                    .Where(T => T.ParentCheckPointId == checkpointId).ToListAsync());
         }
 
         public async Task<IEnumerable<RTask>> GetAllTasksByCreator(string userId)
@@ -46,14 +48,32 @@ namespace work_platform_backend.Repos
                             .ToListAsync());
         }
 
-        public async Task<IEnumerable<RTask>> GetAllTasksByTeam(int teamId)
+        public async Task<List<RTask>> GetTasksByTeam(int teamId)
         {
-            return (await context.Tasks.Where(T => T.Team.Id == teamId).ToListAsync());
+            return (await context.Tasks
+                                    .Include(t => t.ChildCheckPoints)
+                                    .Where(T => T.Team.Id == teamId)
+                                    .ToListAsync());
         }
+
+        
+
+
 
         public async Task<RTask> GetTaskById(int taskId)
         {
-            return (await context.Tasks.FirstOrDefaultAsync(T => T.Id == taskId));
+            return (await context.Tasks
+                                    .Include(t => t.Attachments)
+                                    .Include(t => t.Creator)
+                                    .Include(t => t.Project)
+                                    .Include(t =>  t.DependantTasks)
+                                    .Include(t => t.ParentCheckPoint)
+                                    .Include(t => t.UserTasks)
+                                    .Include(t => t.Comments)
+                                    .Include(t => t.Sessions)
+                                    .Include(t => t.ChildCheckPoints)
+                                    .Include(t => t.Team)
+                                    .FirstOrDefaultAsync(t => t.Id == taskId));
         }
 
       
@@ -62,6 +82,8 @@ namespace work_platform_backend.Repos
            await context.Tasks.AddAsync(task);
         }
 
+
+        // not working
         public async Task<RTask> UpdateTaskById(int taskId, RTask task)
         {
             var newTask = await context.Tasks.FindAsync(taskId);
@@ -76,6 +98,19 @@ namespace work_platform_backend.Repos
                 newTask.IsFinished = task.IsFinished;
                 newTask.ParentCheckPointId = task.ParentCheckPointId;
                 
+                if(task.ChildCheckPoints != null)
+                {
+                    task.ChildCheckPoints.ForEach(async c =>
+                    {
+                         var isCheckpointExists =  context.CheckPoints.Find(c.Id);
+                         if(isCheckpointExists != null)
+                         {
+                          context.CheckPoints.Update(c);
+  
+                         }
+                         await context.CheckPoints.AddAsync(c);
+                    });
+                }
                context.Tasks.Update(newTask);
                return newTask;
             }
@@ -118,10 +153,6 @@ namespace work_platform_backend.Repos
             return (await context.SaveChangesAsync() >= 0);
         }
 
-        public async Task<List<RTask>> GetTasksByTeam(int teamId)
-        {
-            return await context.Tasks.Where(t => t.TeamId == teamId).ToListAsync();
-        }
 
         public Task<List<Comment>> GetTaskComments(int taskId)
         {
@@ -142,5 +173,14 @@ namespace work_platform_backend.Repos
         {
             return await context.UserTasks.Where(ut => ut.TaskId ==  taskId).Select(ut => ut.User).ToListAsync();
         }
+
+        public async Task<bool> isTaskExist(int taskId)
+        {
+            var task = await context.Tasks.FindAsync(taskId);
+
+            return task != null ? true : false ; 
+        }
+
+     
     }
 }

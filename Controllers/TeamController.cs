@@ -23,20 +23,32 @@ namespace work_platform_backend.Controllers
         private readonly TeamService teamService;
         private readonly UserService userService;
         private readonly TaskService taskService;
+
         private readonly NotificationService notificationService;
         private readonly IHubContext<NotificationHub> hub;
 
 
         public TeamController(TeamService teamService, UserService userService, TaskService taskService, NotificationService notificationService, IHubContext<NotificationHub> hub)
+
+
+        public TeamController(TeamService teamService, UserService userService, TaskService taskService)
+
         {
             this.teamService = teamService;
             this.userService = userService;
             this.taskService = taskService;
+
             this.notificationService = notificationService;
             this.hub = hub;
         }
 
       
+
+
+        }
+
+
+
 
 
         [HttpGet]
@@ -45,37 +57,48 @@ namespace work_platform_backend.Controllers
         {
             try
             {
-            var Team = await teamService.GetTeam(teamId);
-            return Ok(Team);
+                var team = await teamService.GetTeam(teamId);
+                return Ok(team);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return NotFound(e.Message);
+
             }
+
         }
+
 
 
         [HttpGet]
         [Route("{teamId}/subteams")]
         public async Task<IActionResult> GetTeamSubTeams(int teamId)
         {
-
-            var Team = await teamService.GetTeamSubTeams(teamId);
-            if (Team.Count == 0)
+            try
             {
-                return Ok(new List<Team>());
+                var Team = await teamService.GetTeamSubTeams(teamId);
+                return Ok(Team);
             }
-            return Ok(Team);
-
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         [HttpGet]
         [Route("{teamId}/members")]
         public async Task<IActionResult> GetTeamMembers(int teamId)
         {
+            try
+            {
+                var members = await teamService.GetMembersOfTeam(teamId);
+                return Ok(members);
 
-            var members = await teamService.GetMembersOfTeam(teamId);
-            return Ok(members);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
         }
 
@@ -83,9 +106,16 @@ namespace work_platform_backend.Controllers
         [Route("{teamId}/projects")]
         public async Task<IActionResult> GetTeamProjects(int teamId)
         {
+            try
+            {
+                var projects = await teamService.GetProjectsOfTeam(teamId);
+                return Ok(projects);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
-            var projects = await teamService.GetProjectsOfTeam(teamId);
-            return Ok(projects);
 
         }
 
@@ -93,11 +123,20 @@ namespace work_platform_backend.Controllers
         [Route("{teamId}/tasks")]
         public async Task<IActionResult> GetTeamTasks(int teamId)
         {
+             try
+            {
+                var projects = await teamService.GetTasksOfTeam(teamId);
+                return Ok(projects);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
-            var projects = await teamService.GetTasksOfTeam(teamId);
-            return Ok(projects);
+          
 
         }
+
 
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -106,6 +145,7 @@ namespace work_platform_backend.Controllers
         {
             try
             {
+
                 var team = await teamService.GetTeamOnlyById(parentTeamId);
                 var parentTeamLeaderId = team.LeaderId;
                 var userId = userService.GetUserId();
@@ -153,10 +193,13 @@ namespace work_platform_backend.Controllers
 
                 await hub.Clients.User(userId).SendAsync("recievenotification",notification);
                 return Ok();
+
+
             }
-            catch (DbUpdateException e)
+            catch(Exception e)
             {
                 return BadRequest(e.Message);
+
             }
 
         }
@@ -164,13 +207,14 @@ namespace work_platform_backend.Controllers
         [HttpPut("{TeamId}")]
         public async Task<IActionResult> UpdateTeam(int TeamId, Team team)
         {
-            Team UpdatedTeam = await teamService.UpdateTeam(TeamId, team);
-            if (UpdatedTeam == null)
-            {
-                return NotFound();
+            try
+            {   Team UpdatedTeam = await teamService.UpdateTeam(TeamId, team);
+                return Ok();
             }
-            return Ok(UpdatedTeam);
-
+            catch(Exception e)
+            {
+               return NotFound(e.Message);
+            }
         }
 
 
@@ -181,14 +225,14 @@ namespace work_platform_backend.Controllers
             try
             {
                 await teamService.DeleteTeam(teamId);
+                return Ok();
             }
             catch (DbUpdateException ex)
             {
-                
-                return NotFound("You cannot delete this team because it has subteams, go and delete subteams before deleting it.");
+
+                return Unauthorized("You cannot delete this team because it has subteams, go and delete subteams before deleting it.");
             }
 
-            return Ok($"Object with id = {teamId} was  Deleted");
         }
 
 
@@ -198,23 +242,24 @@ namespace work_platform_backend.Controllers
         {
             try
             {
-                var newTask = await taskService.AddTaskInTeam(userService.GetUserId(), teamId, task);
-
-                if (newTask != null)
-                {
-                    return Ok(newTask);
-                }
+                await taskService.AddTaskInTeam(userService.GetUserId(), teamId, task);
+                    return Ok();
             }
-            catch (DateTimeException e)
+            catch(NullReferenceException e)
             {
                 return BadRequest(e.Message);
             }
-            return BadRequest();
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
+
+
 
     }
 
- 
+
 
 
 

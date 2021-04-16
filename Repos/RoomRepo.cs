@@ -116,5 +116,11 @@ namespace work_platform_backend.Repos
             
             return  room != null ?  true : false;  
         }
+
+        public async Task<bool> IsRoomExist(int roomId)
+        {
+            var room = await context.Rooms.FindAsync(roomId);
+            return room != null ? true : false ; 
+        }
     }
 }

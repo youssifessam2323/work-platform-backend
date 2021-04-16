@@ -57,7 +57,7 @@ namespace work_platform_backend.Services
             if (teamChat == null)
             {
 
-                throw new NullReferenceException();
+                throw new Exception("teamChat not exist");
 
             }
 

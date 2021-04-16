@@ -39,6 +39,7 @@ namespace work_platform_backend.Controllers
 
 
 
+
         /// <summary>
         /// Get the Current Authenticated user, used for development purpose 
         /// </summary>

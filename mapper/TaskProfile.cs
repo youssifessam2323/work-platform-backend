@@ -13,6 +13,8 @@ namespace work_platform_backend.mapper
             CreateMap<RTask,TaskDetailsDto>()
             .ForMember(dest => dest.AssignedUsers
             ,x => x.MapFrom(src => src.UserTasks.Select(ut => ut.User)));
+
+            CreateMap<TaskDetailsDto,RTask>();
         
             CreateMap<RTask,TaskDto>().ReverseMap();
             
