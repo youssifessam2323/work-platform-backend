@@ -28,10 +28,8 @@ namespace work_platform_backend.Controllers
         private readonly IHubContext<NotificationHub> hub;
 
 
-        public TeamController(TeamService teamService, UserService userService, TaskService taskService, NotificationService notificationService, IHubContext<NotificationHub> hub)
 
-
-        public TeamController(TeamService teamService, UserService userService, TaskService taskService)
+        public TeamController(TeamService teamService, UserService userService, TaskService taskService,NotificationService notificationService, IHubContext<NotificationHub> hub)
 
         {
             this.teamService = teamService;
@@ -45,7 +43,7 @@ namespace work_platform_backend.Controllers
       
 
 
-        }
+        
 
 
 
@@ -254,15 +252,15 @@ namespace work_platform_backend.Controllers
                 return NotFound(e.Message);
             }
         }
-
-
-
-    }
-
-
-
-
-
-
+  }
 }
+
+
+
+
+
+
+
+
+
 

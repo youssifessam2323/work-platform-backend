@@ -150,5 +150,13 @@ namespace work_platform_backend.Repos
 
 
         }
+
+        public async Task<bool> IsTeamExist(int teamId)
+        {
+            var team = await context.Teams.FindAsync(teamId);
+
+            return team != null ? true : false;
+
+        }
     }
 }
