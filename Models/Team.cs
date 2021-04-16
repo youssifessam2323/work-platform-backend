@@ -29,6 +29,9 @@ namespace work_platform_backend.Models
 
         public Room Room { get; set; }
         
+        public int? ParentTeamId { get; set; }
+        public Team ParentTeam { get; set; }
+        
         public List<Team> SubTeams { get; set; }
 
         [JsonIgnore]

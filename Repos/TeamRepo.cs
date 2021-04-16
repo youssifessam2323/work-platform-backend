@@ -51,6 +51,13 @@ namespace work_platform_backend.Repos
 
         }
 
+        //get team without any joins (trying to improve the performance)
+          public async Task<Team> GetTeamOnlyById(int teamId)
+        {
+           return( await context.Teams
+                        .FirstOrDefaultAsync(T => T.Id == teamId));
+        }
+
         public async Task<Team> GetTeamById(int teamId)
         {
            return( await context.Teams
@@ -132,11 +139,16 @@ namespace work_platform_backend.Repos
             return users;
         }
 
-        public async Task<bool> IsTeamExist(int teamId)
-        {
-            var team = await context.Teams.FindAsync(teamId);
 
-            return team != null ? true : false ; 
+        public async Task<bool> isUserinThisTeamExist(int teamId, string userId)
+        {
+            var teamMember = context.TeamsMembers
+                                        .Where(tm => tm.TeamId == teamId && tm.UserId == userId)
+                                        .SingleOrDefaultAsync();
+
+            return await teamMember != null ? true : false ;                                   
+
+
         }
     }
 }

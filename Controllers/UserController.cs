@@ -4,11 +4,14 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using work_platform_backend.Dtos;
 using work_platform_backend.Exceptions;
 using work_platform_backend.Exceptions.Team;
+using work_platform_backend.Hubs;
 using work_platform_backend.Models;
 using work_platform_backend.Services;
 
@@ -21,38 +24,22 @@ namespace work_platform_backend.Controllers
     {
         private readonly UserService userService ;
         private readonly TaskService taskService;
+        private readonly TeamService teamService;
+        private readonly NotificationService notificationService;
+        private readonly IHubContext<NotificationHub> hub;
 
-        private TeamService teamService { get; set; }
-
-
-
-        public UserController(UserService userService, TeamService teamService, TaskService taskService)
+        public UserController(UserService userService, TeamService teamService, TaskService taskService, NotificationService notificationService, IHubContext<NotificationHub> hub)
         {
             this.userService = userService;
             this.teamService = teamService;
             this.taskService = taskService;
-        }
-        
-
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpGet]
-        [Route("creator/teams")]
-        public async Task<IActionResult> GetTeamsCreator()
-        {
-            string teamCreatorId = userService.GetUserId();
-
-            var GetTeamsByCreator = await teamService.GetTeamsByCreator(teamCreatorId);
-            if (GetTeamsByCreator == null)
-            {
-                return Ok(new List<Team>());
-
-            }
-            return Ok(GetTeamsByCreator);
-
+            this.notificationService = notificationService;
+            this.hub = hub;
         }
 
-        
-     
+
+
+
         /// <summary>
         /// Get the Current Authenticated user, used for development purpose 
         /// </summary>
@@ -95,13 +82,20 @@ namespace work_platform_backend.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.Unauthorized)]     
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]     
         [HttpGet]
-        [Route("join/teams/{teamCode}")]
+        [Route("{userId}/join/teams/{teamCode}")] //{userId}/join/teams/{teamCode}
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> JoinTeam(string teamCode)
+        public async Task<IActionResult> JoinTeam(string userId, string teamCode)
         {
             try
             {
-                await userService.JoinTeam(teamCode,userService.GetUserId());
+                var team = await teamService.GetTeamByTeamCode(teamCode);
+                await userService.JoinTeam(teamCode,userId);
+                var notification = await notificationService.CreateNewNotificaition(new Notification
+                {
+                    Content = $"the leader of team {team.Name} approved your request and you have joined the team successfully",
+                    UserId = userId,
+                });
+                    await hub.Clients.User(userId).SendAsync("recievenotification",notification);                                    
             }
             catch(Exception e)
             {
@@ -257,6 +251,52 @@ namespace work_platform_backend.Controllers
             var TaskByCreator = await taskService.GetTaskByCreator(userService.GetUserId());
             return Ok(TaskByCreator);
 
+        }
+
+
+
+        [HttpGet("request/jointeam/{teamCode}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> RequestJoinTeam(string teamCode)
+        {
+            try
+            {
+                var team = await teamService.GetTeamByTeamCode(teamCode);
+
+                var teamLeaderId = team.LeaderId;
+
+                var userId = userService.GetUserId();
+
+                 if(userId == teamLeaderId)
+                {
+                    throw new Exception("you are the leader of the team");
+                }
+
+                if(await teamService.isUserinThisTeamExist(team.Id,userId))
+                {
+                    throw new Exception("user is already in this team");
+                }
+
+                var user = await userService.getUserById(userId);
+
+                var notification = new Notification
+                {
+                    Content = $"a new user {user.Name} wants to join the team {team.Name} that you lead",
+                    Url  = $"{this.Request.Host}/api/v1/users/{userId}/join/teams/{teamCode}",
+                    UserId = teamLeaderId
+                }; 
+
+                var newNotification = await notificationService.CreateNewNotificaition(notification);
+                Console.WriteLine("no id ===========================>" + newNotification.Id); 
+                await hub.Clients.User(teamLeaderId).SendAsync("recievenotification",notification);                                    
+                
+
+                return Ok();
+            }
+            catch(Exception e)
+            {
+                return NotFound(e.Message);
+            }
         }
     }
 }
