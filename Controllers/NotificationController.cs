@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using work_platform_backend.Hubs;
 using work_platform_backend.Services;
 
 namespace work_platform_backend.Controllers
@@ -12,11 +14,13 @@ namespace work_platform_backend.Controllers
     {
         private readonly NotificationService notificationService;
         private readonly UserService userService;
+        private readonly IHubContext<NotificationHub> notificationHub;
 
-        public NotificationController(NotificationService notificationService, UserService userService)
+        public NotificationController(NotificationService notificationService, UserService userService, IHubContext<NotificationHub> notificationHub)
         {
             this.notificationService = notificationService;
             this.userService = userService;
+            this.notificationHub = notificationHub;
         }
 
 
@@ -29,6 +33,9 @@ namespace work_platform_backend.Controllers
             var userId = userService.GetUserId();
             return Ok( await notificationService.getAllNotificationByUser(userId));
         }
+
+
+      
 
     }
 }

@@ -27,15 +27,18 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId)
+        public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId,int parentTeamId = 0)
         {
-
-            if (newTeam != null)
-            {
                 newTeam.RoomId = roomId;
                 newTeam.LeaderId = creatorId;
                 newTeam.CreatedAt = DateTime.Now;
                 newTeam.TeamCode = Guid.NewGuid();
+                
+                if(parentTeamId != 0)
+                {
+                    newTeam.ParentTeamId = parentTeamId;
+                }
+
                 await teamRepository.SaveTeam(newTeam);
                 await teamRepository.SaveChanges();
 
@@ -44,12 +47,9 @@ namespace work_platform_backend.Services
                     ChatName = $" {newTeam.Name}/GroupChat ",
                 };
 
-                await teamChatService.CreateTeamChat(newTeamChat, newTeam.LeaderId, newTeam.Id);
+                await teamChatService.CreateTeamChat(newTeamChat, newTeam.LeaderId, newTeam.Id);  
 
                 return newTeam;
-            }
-            return null;
-
         }
 
         public async Task<Team> UpdateTeam(int id, Team Team)
@@ -157,7 +157,20 @@ namespace work_platform_backend.Services
 
             if (Teams==null)
             {
-                return null;
+                throw new Exception("team not exist");
+
+            }
+
+            return Teams;
+
+        }
+          public async Task<Team> GetTeamOnlyById(int TeamId)
+        {
+            var Teams = await teamRepository.GetTeamOnlyById(TeamId);
+
+            if (Teams==null)
+            {
+                throw new Exception("team not exist");
 
             }
 
@@ -165,24 +178,23 @@ namespace work_platform_backend.Services
 
         }
 
-
         public async Task<Team> GetTeamByTeamCode(string teamCode)
         {
             var team = await teamRepository.GetTeamByTeamCode(teamCode);
 
             if (team == null)
             {
-                return null;
-
+                throw  new Exception("team not exist");
             }
 
             return team;
 
         }
 
-
-
-
+        public async Task<bool> isUserinThisTeamExist(int teamId, string userId)
+        {
+            return await teamRepository.isUserinThisTeamExist(teamId,userId);
+        }
     }
 }
 

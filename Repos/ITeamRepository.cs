@@ -17,5 +17,7 @@ namespace work_platform_backend.Repos
         Task<Team> GetTeamByTeamCode(string teamCode);
         Task<List<Team>> GetTeamSubTeamsById(int teamId);
         Task<List<User>> GetMembersOfTeam(int teamId);
+        Task<bool> isUserinThisTeamExist(int teamId, string userId);
+        Task<Team> GetTeamOnlyById(int teamId);
     }
 }

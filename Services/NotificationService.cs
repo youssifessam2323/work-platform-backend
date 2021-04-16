@@ -19,5 +19,10 @@ namespace work_platform_backend.Services
         {
             return await notificationRepository.getNotificationByUser(userId);   
         }
+
+        public async Task<Notification> CreateNewNotificaition(Notification notification)
+        {
+            return await  notificationRepository.CreateNewNotification(notification);
+        }
     }
 }

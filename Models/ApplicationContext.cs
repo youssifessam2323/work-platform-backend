@@ -190,8 +190,16 @@ namespace work_platform_backend.Models
                 .WithMany(r => r.Teams)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-            
 
+
+            modelBuilder.Entity<Team>()
+                .HasOne(t =>t.ParentTeam)
+                .WithMany(t => t.SubTeams)
+                .HasForeignKey(t => t.ParentTeamId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+                    
+            
 
 
 

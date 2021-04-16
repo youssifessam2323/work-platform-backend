@@ -89,6 +89,8 @@ namespace work_platform_backend
             services.AddScoped<NotificationService>();
             services.AddScoped<INotificationRepository,NotificationRepository>();
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddDbContext<ApplicationContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             },ServiceLifetime.Transient);         
@@ -134,12 +136,11 @@ namespace work_platform_backend
 
             services.AddCors(opt =>
             {
-                opt.AddPolicy("AllowAllHeaders",builder => 
-                {
-                    builder.AllowAnyOrigin()
-                            .AllowAnyHeader()
-                            .AllowAnyMethod();
-                });
+                opt.AddPolicy("CorsPolicy", builder => builder
+                .WithOrigins()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
             });
         
                 services.AddSignalR();               
@@ -172,6 +173,8 @@ namespace work_platform_backend
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });      
 
+            app.UseCors("CorsPolicy");
+
             app.UseAuthentication();
 
             app.UseAuthorization();
@@ -181,6 +184,7 @@ namespace work_platform_backend
             //    endpoints.MapRazorPages();
                endpoints.MapControllers();
                endpoints.MapHub<ChatHub>("/chathub");
+               endpoints.MapHub<NotificationHub>("/notificationHub");
             });
         }
     }

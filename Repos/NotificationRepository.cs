@@ -15,6 +15,13 @@ namespace work_platform_backend.Repos
             this.context = context;
         }
 
+        public async Task<Notification> CreateNewNotification(Notification notification)
+        {
+             await context.Notification.AddAsync(notification);
+             await context.SaveChangesAsync();
+             return notification;
+        }
+
         public async Task<List<Notification>> getNotificationByUser(string userId)
         {
             return await context.Notification.Where(n => n.UserId == userId).ToListAsync();
