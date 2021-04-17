@@ -25,11 +25,11 @@ namespace work_platform_backend.Controllers
         private readonly TaskService taskService;
 
         private readonly NotificationService notificationService;
-        private readonly IHubContext<NotificationHub> hub;
+        private readonly IHubContext<NotificationHub> notificationHub;
+        private readonly IHubContext<ChatHub> chatHub;
+        private readonly TeamChatService teamChatService;
 
-
-
-        public TeamController(TeamService teamService, UserService userService, TaskService taskService,NotificationService notificationService, IHubContext<NotificationHub> hub)
+        public TeamController(TeamService teamService, UserService userService, TaskService taskService, NotificationService notificationService, TeamChatService teamChatService, IHubContext<ChatHub> chatHub, IHubContext<NotificationHub> notificationHub)
 
         {
             this.teamService = teamService;
@@ -37,13 +37,15 @@ namespace work_platform_backend.Controllers
             this.taskService = taskService;
 
             this.notificationService = notificationService;
-            this.hub = hub;
+            this.teamChatService = teamChatService;
+            this.chatHub = chatHub;
+            this.notificationHub = notificationHub;
         }
 
-      
 
 
-        
+
+
 
 
 
@@ -163,7 +165,7 @@ namespace work_platform_backend.Controllers
                 };
 
                 notification = await notificationService.CreateNewNotificaition(notification);
-                await hub.Clients.User(parentTeamLeaderId).SendAsync("recievenotification",notification);
+                await notificationHub.Clients.User(parentTeamLeaderId).SendAsync("recievenotification",notification);
 
                 return Ok();
             }   
@@ -182,6 +184,9 @@ namespace work_platform_backend.Controllers
             try
             {
                 var newTeam = await teamService.AddTeam(team, roomId, userService.GetUserId(),parentTeamId);
+
+                var JoinChatOfTeamByDefault = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
+                
                 var parentTeam = await teamService.GetTeamOnlyById(parentTeamId);
                 var notification = notificationService.CreateNewNotificaition(new Notification
                 {
@@ -189,7 +194,7 @@ namespace work_platform_backend.Controllers
                     UserId = userId
                 });
 
-                await hub.Clients.User(userId).SendAsync("recievenotification",notification);
+                await notificationHub.Clients.User(userId).SendAsync("recievenotification",notification);
                 return Ok();
 
 

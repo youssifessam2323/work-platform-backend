@@ -47,14 +47,15 @@ namespace work_platform_backend.Controllers
                 };
             }
             AuthenticationResponse authenticationResponse = null ;
-            try
-            {
+            // try
+            // {
                 authenticationResponse = await authService.SignUp(registerRequest);
-            }
-            catch(MailKit.Security.AuthenticationException e) 
-            {
-                return BadRequest("Email Created but it will be act as i nothing because it is not existing Email");
-            }
+            // }
+            // catch(MailKit.Security.AuthenticationException e) 
+            // {
+            //     return BadRequest("Email Created but it will be act as i nothing because it is not existing Email");
+            // }
+
             
             
             if(!authenticationResponse.IsSuccess)

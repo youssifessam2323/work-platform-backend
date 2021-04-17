@@ -40,43 +40,7 @@ namespace work_platform_backend.Hubs
             }
 
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task CreateTeam(Team team, int roomId)    //Change => Enter Team{Name , Description}
-        {
-            try
-            {
-
-                var userId = userService.GetUserId();
-
-                var newTeam = await teamService.AddTeam(team, roomId, userId);
-                if (newTeam != null)
-                {
-
-                    var JoinChatOfTeamByDefault = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
-
-                    if (JoinChatOfTeamByDefault != null)
-                    {
-                        //await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeamByDefault.ChatName);
-                        await Clients.Caller.SendAsync("ReceiveMessageOnAdd", $" Chat Group Called {JoinChatOfTeamByDefault} Created");
-
-                    }
-
-                    var teamViewModel = mapper.Map<Team, TeamViewModel>(newTeam);
-                  
-                    await Clients.All.SendAsync("addTeam", teamViewModel);  //Change soon Tell all Clients on Hub That a New Team Added
-                }
-                
-
-               
-                
-            
-            }
-            catch (Exception ex)
-            {
-                await Clients.Caller.SendAsync("onError", "Couldn't create team: " + ex.Message);
-            }
-        }
-
+      
 
 
         [Authorize(AuthenticationSchemes = "Bearer")]

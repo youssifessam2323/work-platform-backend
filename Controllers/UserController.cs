@@ -26,15 +26,20 @@ namespace work_platform_backend.Controllers
         private readonly TaskService taskService;
         private readonly TeamService teamService;
         private readonly NotificationService notificationService;
-        private readonly IHubContext<NotificationHub> hub;
+        private readonly IHubContext<NotificationHub> notificationHub;
+        private readonly TeamChatService teamChatService;
+        private readonly IHubContext<ChatHub> chatHub;
 
-        public UserController(UserService userService, TeamService teamService, TaskService taskService, NotificationService notificationService, IHubContext<NotificationHub> hub)
+
+        public UserController(UserService userService, TeamService teamService, TaskService taskService, NotificationService notificationService, IHubContext<NotificationHub> hub, TeamChatService teamChatService, IHubContext<ChatHub> chatHub, IHubContext<NotificationHub> notificationHub)
         {
             this.userService = userService;
             this.teamService = teamService;
             this.taskService = taskService;
             this.notificationService = notificationService;
-            this.hub = hub;
+            this.teamChatService = teamChatService;
+            this.chatHub = chatHub;
+            this.notificationHub = notificationHub;
         }
 
 
@@ -75,34 +80,35 @@ namespace work_platform_backend.Controllers
 
 
 
-         /// <summary>
-        ///  request user to join team (currently it make him join automatically, after adding notification feature we will alter this)
-        /// </summary>
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.Unauthorized)]     
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]     
-        [HttpGet]
-        [Route("{userId}/join/teams/{teamCode}")] //{userId}/join/teams/{teamCode}
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> JoinTeam(string userId, string teamCode)
-        {
-            try
-            {
-                var team = await teamService.GetTeamByTeamCode(teamCode);
-                await userService.JoinTeam(teamCode,userId);
-                var notification = await notificationService.CreateNewNotificaition(new Notification
-                {
-                    Content = $"the leader of team {team.Name} approved your request and you have joined the team successfully",
-                    UserId = userId,
-                });
-                    await hub.Clients.User(userId).SendAsync("recievenotification",notification);                                    
-            }
-            catch(Exception e)
-            {
-                return NotFound(e.Message);
-            }
-            return Ok();
-        }
+        //  /// <summary>
+        // ///  request user to join team (currently it make him join automatically, after adding notification feature we will alter this)
+        // /// </summary>
+        // [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        // [ProducesResponseType(typeof(void), (int)HttpStatusCode.Unauthorized)]     
+        // [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]     
+        // [HttpGet]
+        // [Route("{userId}/join/teams/{teamCode}")] //{userId}/join/teams/{teamCode}
+        // [Authorize(AuthenticationSchemes = "Bearer")]
+        // public async Task<IActionResult> JoinTeam(string userId, string teamCode)
+        // {
+        //     try
+        //     {
+        //         var team = await teamService.GetTeamByTeamCode(teamCode);
+        //         await userService.JoinTeam(teamCode,userId);
+                
+        //         var notification = await notificationService.CreateNewNotificaition(new Notification
+        //         {
+        //             Content = $"the leader of team {team.Name} approved your request and you have joined the team successfully",
+        //             UserId = userId,
+        //         });
+        //             await notificationHub.Clients.User(userId).SendAsync("recievenotification",notification);                                    
+        //     }
+        //     catch(Exception e)
+        //     {
+        //         return NotFound(e.Message);
+        //     }
+        //     return Ok();
+        // }
 
 
         /// <summary>
@@ -288,7 +294,7 @@ namespace work_platform_backend.Controllers
 
                 var newNotification = await notificationService.CreateNewNotificaition(notification);
                 Console.WriteLine("no id ===========================>" + newNotification.Id); 
-                await hub.Clients.User(teamLeaderId).SendAsync("recievenotification",notification);                                    
+                await notificationHub.Clients.User(teamLeaderId).SendAsync("recievenotification",notification);                                    
                 
 
                 return Ok();

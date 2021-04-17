@@ -14,7 +14,7 @@ namespace work_platform_backend.Models
         
         public Message(string to , string subject , string content , string confirmationLink )
         {
-            To = new MailboxAddress(to) ;
+            To = MailboxAddress.Parse(to) ;
             Subject = subject ; 
             Content = content; 
             ConfirmationLink = confirmationLink;
