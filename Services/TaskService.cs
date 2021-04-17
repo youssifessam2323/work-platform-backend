@@ -77,30 +77,32 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task<bool> DeleteTask(int taskId)   //not Working
+        public async Task<bool> DeleteTask(int taskId) 
         {
-          var task =   await taskRepository.DeleteTaskById(taskId);
-            if (task == null)
+            
+           
+            if (await IsTaskExist(taskId))
             {
-                return false;
+                await checkPointService.DeleteCheckPointByParentTask(taskId);
+                var task = await taskRepository.DeleteTaskById(taskId);
+                await sessionService.DeleteSessionByTask(taskId);
+                await attachmentService.DeleteAttachmentByTask(taskId);
+                await commentService.DeleteCommentByTask(taskId);
+                await taskRepository.RemoveUserTaksbyTask(taskId);
+                return await taskRepository.SaveChanges();
             }
 
 
-            await sessionService.DeleteSessionByTask(taskId);
-            await attachmentService.DeleteAttachmentByTask(taskId);
-            await commentService.DeleteCommentByTask(taskId);
-            await checkPointService.DeleteCheckPointByParentTask(taskId);
 
-
-            //Must Delete UserTask Also
-
-            return await taskRepository.SaveChanges();
+            return false;
+      
+           
         }
 
 
         public async Task<bool> DeleteTaskByTeam(int teamId)
         {
-          var Rtasks = await taskRepository.DeleteTaskByTeam(teamId);
+          var Rtasks = await taskRepository.GetTasksByTeam(teamId);  
 
             if(Rtasks.Count().Equals(0))
             {
@@ -118,7 +120,7 @@ namespace work_platform_backend.Services
 
         public async Task<bool> DeleteTaskByProject(int projectId)
         {
-            var Rtasks = await taskRepository.DeleteTaskByProject(projectId);
+            var Rtasks = await taskRepository.GetAllTasksByProject(projectId);
 
             if (Rtasks.Count().Equals(0))
             {

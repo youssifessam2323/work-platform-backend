@@ -76,7 +76,7 @@ namespace work_platform_backend.Services
 
         public async Task<bool> DeleteAttachmentByTask(int taskId)
         {
-            var attachments = await attachmentRepository.DeleteAttachmentByTaskId(taskId);
+            var attachments = await attachmentRepository.GetAttachmentByTask(taskId);
             if (attachments.Count().Equals(0))
             {
 

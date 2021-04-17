@@ -126,22 +126,12 @@ namespace work_platform_backend.Repos
         {
             
 
-            RTask task = await context.Tasks.Include(t => t.DependantTasks)
-                                    .Include(t => t.Comments)
-                                    .ThenInclude(c => c.Replies)
+            RTask task = await context.Tasks.Include(t => t.DependantTasks)                              
                                     .Where(t => t.Id == taskId)
                                     .FirstOrDefaultAsync();
 
-
-
-
-            Console.WriteLine(task);
-            task.Comments.ForEach(c => Console.WriteLine(c));
-            task.Comments.ForEach( async c => {
-                c.Replies.ForEach(r =>  context.Comments.Remove(r));
-                await context.SaveChangesAsync();
-                context.Comments.Remove(c);
-            });
+           
+            
 
             foreach(var dependantTask in task.DependantTasks)
             {
@@ -162,43 +152,25 @@ namespace work_platform_backend.Repos
 
         }
 
-        public async Task<List<RTask>> DeleteTaskByTeam(int teamId)
-        {
-            var tasks = await context.Tasks.Where(r => r.TeamId == teamId).ToListAsync();
-            if (tasks.Count()!=0)
-            {
-                foreach (RTask t in tasks)
-                {
-                    context.Tasks.Remove(t);
-                }
-            }
-            return tasks;
-        }
+      
 
-        public async Task<List<RTask>> DeleteTaskByProject(int projectId)
-        {
-            var tasks = await context.Tasks.Where(r => r.ProjectId == projectId).ToListAsync();
-            if (tasks.Count() != 0)
-            {
-                foreach (RTask t in tasks)
-                {
-                    context.Tasks.Remove(t);
-                }
-            }
-            return tasks;
-        }
+    
 
-        public async Task<List<RTask>> DeleteTaskBy_ParentCheckPoint(int parentCheckPointId)
+
+        public async Task<bool> RemoveUserTaksbyTask(int taskId)
         {
-            var tasks = await context.Tasks.Where(r => r.ParentCheckPointId == parentCheckPointId).ToListAsync();
-            if (tasks.Count()!=0)
+            var userTasks = await context.UserTasks.Where(t => t.TaskId == taskId).ToListAsync();
+
+            if (userTasks.Count().Equals(0))
             {
-                foreach (RTask t in tasks)
-                {
-                    context.Tasks.Remove(t);
-                }
+                return false;
             }
-            return tasks;
+            foreach (UserTask t in userTasks)
+            {
+                context.UserTasks.Remove(t);
+            }
+
+            return true;
         }
 
 

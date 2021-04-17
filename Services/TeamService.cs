@@ -103,7 +103,7 @@ namespace work_platform_backend.Services
 
             await teamRepository.RemoveTeamProjectbyTeam(teamId);
 
-            await teamChatService.DeleteTeamChatByTeam(teamId);
+            await teamChatService.DeleteTeamChatByTeam(teamId);  
 
             await taskService.DeleteTaskByTeam(teamId);
 
@@ -117,7 +117,7 @@ namespace work_platform_backend.Services
 
         public async Task<bool> DeleteTeamByRoom(int roomId)
         {
-            var team = await teamRepository.DeleteTeamByRoom(roomId);
+            var team = await teamRepository.GetAllTeamsByRoom(roomId);
             if (team.Count().Equals(0))
             {
 

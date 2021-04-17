@@ -125,7 +125,16 @@ namespace work_platform_backend.Repos
 
         public async Task<Team> DeleteTeamById(int teamId)
         {
-            Team team = await context.Teams.FindAsync(teamId);
+            Team team = await context.Teams.Include(t => t.SubTeams)
+                                    .Where(t => t.Id == teamId)
+                                    .FirstOrDefaultAsync();
+
+
+            foreach (var subteam in team.SubTeams)
+            {
+                await DeleteTeamById(subteam.Id);
+            }
+
             if (team != null)
             {
 
@@ -135,18 +144,7 @@ namespace work_platform_backend.Repos
             return team;
         }
 
-        public async Task<List<Team>> DeleteTeamByRoom(int roomId)
-        {
-            var teams = await context.Teams.Where(T => T.RoomId == roomId).ToListAsync();
-            if (teams .Count()!=0)
-            {
-                foreach (Team t in teams)
-                {
-                    context.Teams.Remove(t);
-                }
-            }
-            return teams;
-        }
+      
 
         public async Task<Team> GetTeamByTeamCode(string teamCode)
         {

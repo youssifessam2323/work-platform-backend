@@ -82,6 +82,24 @@ namespace work_platform_backend.Repos
             return room;
         }
 
+        public async Task<bool> RemoveProjectManagerbyRoom(int roomId)
+        {
+            var projectManagers = await context.ProjectManagers
+                                                    .Where(r => r.RoomId == roomId)
+                                                    .ToListAsync();
+
+            if (projectManagers.Count().Equals(0))
+            {
+                return false;
+            }
+            foreach (ProjectManager pm in projectManagers)
+            {
+                context.ProjectManagers.Remove(pm);
+            }
+
+            return true;
+        }
+
         public async Task AddNewProjectManager(ProjectManager projectManager)
         {
             await context.ProjectManagers.AddAsync(projectManager);

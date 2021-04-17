@@ -54,33 +54,36 @@ namespace work_platform_backend.Services
             }
 
 
+            //var tasks = await taskRepository.GetAllSubTasksByParentCheckPointId(checkPointId);
+            //if (tasks.Count() != 0)
+            //{
+            //    foreach (RTask r in tasks)
+            //    {
+            //        await taskRepository.DeleteTaskById(r.Id);
+            //    }
+            //    await taskRepository.SaveChanges();
+            //}
 
-          var tasks =   await taskRepository.DeleteTaskBy_ParentCheckPoint(checkPointId);
-            if (tasks.Count() != 0)
-            {
-                foreach (RTask r in tasks)
-                {
-                    await taskRepository.DeleteTaskById(r.Id);
-                }
-               await taskRepository.SaveChanges();
-            }
+            return await checkpointRepository.SaveChanges();
 
-
-            return  await checkpointRepository.SaveChanges();
 
         }
 
         public async Task<bool> DeleteCheckPointByParentTask(int parentTaskId)
         {
-          var checkPoints =  await checkpointRepository.DeleteCheckpoint_ByParentTask(parentTaskId);
+          var checkPoints =  await checkpointRepository.GetAllCheckpointsByParentTaskId(parentTaskId);
 
 
-            if(checkPoints!=null)
+            if(checkPoints.Count().Equals(0))
             {
                 return false;
             }
+            foreach (CheckPoint c in checkPoints)
+            {
+                 await DeleteCheckPoint(c.Id);
+            }
 
-           return await DeleteCheckPoint(checkPoints.Id);
+            return true;
         }
 
 

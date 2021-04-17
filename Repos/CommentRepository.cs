@@ -20,20 +20,7 @@ namespace work_platform_backend.Repos
             await context.Comments.AddAsync(comment);
         }
 
-        public async Task<List<Comment>> DeleteCommentsByParentComment(int parentCommentId)
-        {
-            var comment = await context.Comments.Where(c => c.ParentCommentId == parentCommentId).ToListAsync();
-            if (comment.Count()!=0)
-            {
-                foreach (Comment com in comment)
-                {
-                    context.Comments.Remove(com);
-                }
-            }
-            return comment;
-        }
-
-      
+         
         public async Task<List<Comment>> DeleteCommentsByTask(int taskId)
         {
             var comment = await context.Comments.Where(c => c.TaskId == taskId).ToListAsync();
@@ -49,7 +36,16 @@ namespace work_platform_backend.Repos
 
         public async Task<Comment> DeleteCommentById(int commentId)
         {
-            Comment comment = await context.Comments.FindAsync(commentId);
+            Comment comment = await context.Comments.Include(c => c.Replies)
+                                    .Where(c=>c.Id == commentId)
+                                    .FirstOrDefaultAsync();
+
+            foreach (var replies in comment.Replies)
+            {
+                context.Comments.Remove(replies);
+                
+            }
+
             if (comment != null)
             {               
                 context.Comments.Remove(comment);

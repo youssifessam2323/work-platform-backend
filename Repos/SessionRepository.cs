@@ -15,18 +15,6 @@ namespace work_platform_backend.Repos
             this.context = context;
         }
 
-        public async Task<List<Session>> DeleteSessionsByTask(int taskId)
-        {
-            var sessions = await context.Sessions.Where(s => s.TaskId == taskId).ToListAsync();
-            if (sessions.Count()!=0)
-            {
-                foreach (Session session in sessions)
-                {
-                    context.Sessions.Remove(session);
-                }
-            }
-            return sessions;
-        }
 
         public async Task<List<Session>> GetSessionsByTaskAndUser(string userId, int taskId)
         {
@@ -34,9 +22,30 @@ namespace work_platform_backend.Repos
 
         }
 
+
+        public async Task<List<Session>> GetSessionsByTask(int taskId)
+        {
+            return await context.Sessions.Where(s=> s.TaskId == taskId).ToListAsync();
+
+        }
+
         public async Task<bool> SaveChanges()
         {
             return (await context.SaveChangesAsync() >= 0);
+        }
+
+        public async Task<List<Session>> DeleteSessionsByTask(int taskId)
+        {
+            var sessions =  await context.Sessions.Where(s => s.TaskId == taskId).ToListAsync();
+
+
+            foreach(Session session in sessions)
+            {
+                context.Sessions.Remove(session);
+            }
+
+            return sessions;
+            
         }
     }
 }

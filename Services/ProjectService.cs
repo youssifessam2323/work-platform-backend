@@ -66,10 +66,10 @@ namespace work_platform_backend.Services
                 throw new Exception("project not exist");
             }
             var project = await projectRepository.DeleteProjectById(projectId);
-
-            await taskService.DeleteTaskByProject(projectId);   //cause errors
-
+            
             await projectRepository.RemoveTeamProjectbyProject(projectId);  //not cause exception
+
+            await taskService.DeleteTaskByProject(projectId);
 
 
             await projectRepository.SaveChanges();
@@ -78,7 +78,7 @@ namespace work_platform_backend.Services
 
         public async Task<bool> DeleteProjectByRoom(int roomId)
         {
-            var projects = await projectRepository.DeleteProjectByRoom(roomId);
+            var projects = await projectRepository.GetAllProjectsByRoom(roomId);
             if (projects.Count().Equals(0))
             {
                 return false;

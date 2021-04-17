@@ -35,7 +35,7 @@ namespace work_platform_backend.Services
             var sessions = await sessionRepository.DeleteSessionsByTask(taskId);
 
 
-            if (sessions.Count()!=0)
+            if (sessions.Count().Equals(0))
             {
                 return false;
             }

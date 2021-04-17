@@ -71,21 +71,6 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<List<Comment>> DeleteCommentByParentComment(int parentCommentId)
-        {
-            var comments = await commentRepository.DeleteCommentsByParentComment(parentCommentId);
-            if (comments.Count().Equals(0))
-            {
-
-                return null;
-
-            }
-
-            return comments;
-
-
-        }
-
 
         public async Task<bool> DeleteComment(int commentId)
         {
@@ -97,17 +82,8 @@ namespace work_platform_backend.Services
 
             }
             
-          var subComments =  await DeleteCommentByParentComment(commentId);
-
-            if (subComments != null)
-            {
-
-                foreach (Comment c in subComments)
-                {
-                    await commentRepository.DeleteCommentById(c.Id);                  
-                }
-                await commentRepository.SaveChanges();
-            }
+          
+            
 
            return await commentRepository.SaveChanges();
 
@@ -116,7 +92,7 @@ namespace work_platform_backend.Services
 
         public async Task<bool> DeleteCommentByTask(int taskId)
         {
-            var comments = await commentRepository.DeleteCommentsByTask(taskId);
+            var comments = await commentRepository.GetCommentsByTask(taskId);
             if (comments.Count().Equals(0))
             {
 

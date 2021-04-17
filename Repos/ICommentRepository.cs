@@ -11,7 +11,6 @@ namespace work_platform_backend.Repos
 
         Task<Comment> DeleteCommentById(int commentId);
         Task<List<Comment>> DeleteCommentsByTask(int taskId);
-        Task<List<Comment>> DeleteCommentsByParentComment(int parentCommentId);
 
 
         Task<bool> SaveChanges();

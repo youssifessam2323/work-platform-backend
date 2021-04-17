@@ -13,7 +13,6 @@ namespace work_platform_backend.Repos
         Task SaveTeam(Team team);
         Task <Team>UpdateTeamById(int teamId,Team team);
         Task<Team> DeleteTeamById(int teamId);
-        Task<List<Team>> DeleteTeamByRoom(int roomId);
         //Task<List<Team>> DeleteSubTeamsByParentTeam(int parentTeamId);
         public Task<bool> RemoveTeamProjectbyTeam(int teamId);
         Task<bool> SaveChanges();

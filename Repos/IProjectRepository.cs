@@ -11,7 +11,6 @@ namespace work_platform_backend.Repos
          Task SaveProject(Project project);
          Task<Project> UpdateProjectById(int projectId,Project project);
          Task <Project>DeleteProjectById(int projectId);
-        Task<List<Project>> DeleteProjectByRoom(int roomId);
         Task<bool> SaveChanges();
         Task<List<Project>> GetProjectByTeam(int teamId);
         Task AddTeamToProject(int projectId, int teamId);

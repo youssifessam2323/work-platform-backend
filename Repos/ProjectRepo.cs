@@ -72,18 +72,6 @@ namespace work_platform_backend.Repos
             return project;
         }
 
-        public async Task<List<Project>> DeleteProjectByRoom(int roomId)
-        {
-            var projects = await context.Projects.Where(p => p.RoomId == roomId).ToListAsync();
-            if (projects.Count()!=0)
-            {
-                foreach (Project proj in projects)
-                {
-                    context.Projects.Remove(proj);
-                }
-            }
-            return projects;
-        }
 
         public async Task<bool> SaveChanges()
         {

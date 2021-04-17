@@ -131,35 +131,41 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task DeleteRoom(int roomId)
+        public async Task DeleteRoom(int roomId)  //Not Working
         {
-            if(await isRoomExist(roomId))
+            if (await isRoomExist(roomId))
             {
 
-                //Must Delete Projectmanager
 
-            
+
+
+
                 await roomRepository.DeleteRoomById(roomId);
-
                 await teamService.DeleteTeamByRoom(roomId);
 
-                await projectService.DeleteProjectByRoom(roomId);  //Delete on Project not working
-                var settingsofRoom =  await settingService.GetSettingsOfRoom(roomId);
 
-                if(settingsofRoom!=null)
+                var settingsofRoom = await settingService.GetSettingsOfRoom(roomId);
+
+                if (settingsofRoom != null)
                 {
-                    foreach(Setting setting in settingsofRoom)
+                    foreach (Setting setting in settingsofRoom)
                     {
                         await settingService.RemoveSettingfromRoom(roomId, setting.Id);
                     }
                 }
-                
-                
+                await roomRepository.RemoveProjectManagerbyRoom(roomId);
+
+                await projectService.DeleteProjectByRoom(roomId);
+
+               
                 
                 await roomRepository.SaveChanges();
 
             }
-            throw new RoomNotFoundException("room not exist");
+            else
+            {
+                throw new RoomNotFoundException("room not exist");
+            }
 
         }
 

@@ -134,12 +134,16 @@ namespace work_platform_backend.Controllers
         //not working
         [HttpDelete]
         [Route("{TaskId}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> DeletTask(int TaskId)
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> DeleteTask(int TaskId)
         {
             try
             {
-                await taskService.DeleteTask(TaskId);
+               if( await taskService.DeleteTask(TaskId))
+                {
+                    return Ok($"Object with id = {TaskId} was  Deleted");
+                }
+                throw new Exception("Error nUll");
             }
             catch (Exception Ex)
             {
@@ -147,7 +151,7 @@ namespace work_platform_backend.Controllers
                 return NotFound(Ex.Message);
             }
 
-            return Ok($"Object with id = {TaskId} was  Deleted");
+            
         }
 
 
