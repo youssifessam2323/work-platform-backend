@@ -52,6 +52,18 @@ namespace work_platform_backend.Services
 
         }
 
+        public async Task<bool> DeleteAllMessageByTeamCHat(int ChatId)
+        {
+            var chatMessage = await chatMessageRepository.DeleteAllMessageByTeamCHat(ChatId);
+            if (chatMessage.Count().Equals(0))
+            {
+                return false;
+                
+            }
+
+          return await chatMessageRepository.SaveChanges();
+        }
+
 
         public async Task<ChatMessage> GetMessage(int chatMessageId)
         {
@@ -86,7 +98,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<ChatMessage>> GetAllMessagesOfTeamChat(int teamChatId)
         {
-            var AllMessages = await chatMessageRepository.GetAllMessageByTeamCHat(teamChatId);
+            var AllMessages = await chatMessageRepository.GetMessageHistorybyChat(teamChatId);
 
             if (AllMessages.Count().Equals(0))
             {

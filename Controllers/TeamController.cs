@@ -227,8 +227,11 @@ namespace work_platform_backend.Controllers
         {
             try
             {
-                await teamService.DeleteTeam(teamId);
-                return Ok();
+               if (await teamService.DeleteTeam(teamId))
+                {
+                    return Ok();
+                }
+                throw new NullReferenceException();
             }
             catch (DbUpdateException ex)
             {

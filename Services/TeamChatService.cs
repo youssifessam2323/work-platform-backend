@@ -12,11 +12,13 @@ namespace work_platform_backend.Services
     {
         private readonly IMapper mapper;
         private readonly ITeamChatRepository teamChatRepository;
+        private readonly ChatMessageService chatMessageService;
 
-        public TeamChatService(IMapper mapper, ITeamChatRepository teamChatRepository)
+        public TeamChatService(IMapper mapper, ITeamChatRepository teamChatRepository, ChatMessageService chatMessageService)
         {
             this.mapper = mapper;
             this.teamChatRepository = teamChatRepository;
+            this.chatMessageService = chatMessageService;
         }
 
 
@@ -36,34 +38,34 @@ namespace work_platform_backend.Services
 
         }
 
-        public async Task DeleteTeamChat(int teamChatId)
+        public async Task<bool> DeleteTeamChat(int teamChatId)
         {
             var teamChat = await teamChatRepository.DeleteTeamChatById(teamChatId);
             if (teamChat == null)
             {
 
-                throw new NullReferenceException();
+                return false; 
 
             }
+           await chatMessageService.DeleteAllMessageByTeamCHat(teamChatId);
 
-            await teamChatRepository.SaveChanges();
-
+           return await teamChatRepository.SaveChanges();      
 
         }
 
-        public async Task DeleteTeamChatByTeam(int teamId)
+        public async Task<bool> DeleteTeamChatByTeam(int teamId)
         {
             var teamChat = await teamChatRepository.DeleteTeamChatByTeamId(teamId);
             if (teamChat == null)
             {
 
-                throw new Exception("teamChat not exist");
+                return false;
 
             }
 
-            await teamChatRepository.SaveChanges();
+            return await DeleteTeamChat(teamChat.Id);
 
-
+            
         }
 
 

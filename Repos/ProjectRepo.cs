@@ -11,10 +11,12 @@ namespace work_platform_backend.Repos
     public class ProjectRepo : IProjectRepository
     {
         private readonly ApplicationContext context;
+       
 
         public ProjectRepo(ApplicationContext context)
         {
             this.context = context;
+           
         }
         public async Task<IEnumerable<Project>> GetAllProjectsByRoom(int roomId)
         {
@@ -65,6 +67,7 @@ namespace work_platform_backend.Repos
             if (project != null)
             {
                 context.Projects.Remove(project);
+                
             }
             return project;
         }
@@ -128,11 +131,31 @@ namespace work_platform_backend.Repos
             context.TeamProjects.Remove(teamProject);
         }
 
+
+        public async Task<bool> RemoveTeamProjectbyProject(int projectId)
+        {
+            var teamProjects = await context.TeamProjects
+                                                    .Where(tp => tp.ProjectId == projectId)
+                                                    .ToListAsync();
+
+            if (teamProjects.Count().Equals(0))
+            {
+                return false;
+            }
+            foreach (TeamProject tp in teamProjects)
+            {
+                context.TeamProjects.Remove(tp);
+            }
+
+            return true;
+        }
         public async Task<bool> IsProjectExist(int projectId)
         {
             var project = await context.Projects.FindAsync(projectId);
 
             return project != null ? true : false;
         }
+
+      
     }
 }

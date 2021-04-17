@@ -13,6 +13,8 @@ namespace work_platform_backend.Repos
         Task SaveTeam(Team team);
         Task <Team>UpdateTeamById(int teamId,Team team);
         Task<Team> DeleteTeamById(int teamId);
+        //Task<List<Team>> DeleteSubTeamsByParentTeam(int parentTeamId);
+        public Task<bool> RemoveTeamProjectbyTeam(int teamId);
         Task<bool> SaveChanges();
         Task<Team> GetTeamByTeamCode(string teamCode);
         Task<List<Team>> GetTeamSubTeamsById(int teamId);
@@ -23,5 +25,6 @@ namespace work_platform_backend.Repos
 
         Task<bool> IsTeamExist(int teamId);
 
+        public Task<List<Team>> GetTeamByProject(int projectId);
     }
 }

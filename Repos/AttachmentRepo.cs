@@ -52,6 +52,19 @@ namespace work_platform_backend.Repos
             return attachment;
         }
 
+
+        public async Task<List<Attachment>> DeleteAttachmentByTaskId(int taskId)
+        {
+            var attachments = await context.Attachments.Where(a => a.TaskId == taskId).ToListAsync();
+            if (attachments.Count()!=0)
+            {
+                foreach (Attachment attach in attachments)
+                {
+                    context.Attachments.Remove(attach);
+                }
+            }
+            return attachments;
+        }
         public async Task<bool> SaveChanges()
         {
             return (await context.SaveChangesAsync() >= 0);
@@ -61,5 +74,7 @@ namespace work_platform_backend.Repos
         {
             return await context.Attachments.FindAsync(attachmentId); 
         }
+
+      
     }
 }

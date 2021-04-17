@@ -1,3 +1,5 @@
+using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +28,33 @@ namespace work_platform_backend.Controllers
             return Ok(await commentService.AddNewReplyToComment(commentId,comment));
         }
 
-     
+
+       
+        [HttpDelete]
+        [Route("{commentId}")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            try
+            {
+                if (await commentService.DeleteComment(commentId))
+                {
+                    return Ok();
+                }
+                throw new NullReferenceException();
+
+
+            }
+            catch (Exception Ex)
+            {
+
+                return BadRequest(Ex.Message);
+            }
+
+        
+        }
+
     }
 }

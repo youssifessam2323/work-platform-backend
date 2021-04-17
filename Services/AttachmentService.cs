@@ -59,18 +59,38 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task DeleteAttachment(int attachmentId)
+        public async Task<bool> DeleteAttachment(int attachmentId)
         {
             var attachment = await attachmentRepository.DeleteAttachmentById(attachmentId);
             if (attachment == null)
             {
 
-                throw new NullReferenceException();
+                return false;
 
             }
 
-            await attachmentRepository.SaveChanges();
+           return await attachmentRepository.SaveChanges();
 
+
+        }
+
+        public async Task<bool> DeleteAttachmentByTask(int taskId)
+        {
+            var attachments = await attachmentRepository.GetAttachmentByTask(taskId);
+            if (attachments.Count().Equals(0))
+            {
+
+                return false;
+
+            }
+
+            foreach(Attachment attachment in attachments)
+            {
+
+                await DeleteAttachment(attachment.Id);
+            }
+
+            return true;
 
         }
 

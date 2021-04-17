@@ -19,7 +19,13 @@ namespace work_platform_backend.Services
         private IProjectRepository projectRepository;
         private ICheckpointRepository checkpointRepository;
 
-        public TaskService(IRTaskRepository taskRepository, IMapper mapper, ITeamRepository teamRepository, IProjectRepository projectRepository, ICheckpointRepository checkpointRepository)
+        private readonly SessionService sessionService;
+        private readonly AttachmentService attachmentService;
+        private readonly CommentService commentService;
+        private readonly CheckPointService checkPointService;
+
+
+        public TaskService(IRTaskRepository taskRepository, IMapper mapper, ITeamRepository teamRepository, IProjectRepository projectRepository, SessionService sessionService, AttachmentService attachmentService, CommentService commentService, CheckPointService checkPointService, ICheckpointRepository checkpointRepository)
         {
             this.taskRepository = taskRepository;
             this.mapper = mapper;
@@ -63,12 +69,72 @@ namespace work_platform_backend.Services
 
         }
 
-
-        public async Task DeleteTask(int taskId)
+        public async Task<bool> IsTaskExist(int taskId)
         {
-            await taskRepository.DeleteTaskById(taskId);
-            await taskRepository.SaveChanges();
+            return await taskRepository.isTaskExist(taskId);
+
         }
+
+        public async Task<bool> DeleteTask(int taskId) 
+        {
+            
+           
+            if (await IsTaskExist(taskId))
+            {
+                await checkPointService.DeleteCheckPointByParentTask(taskId);
+                var task = await taskRepository.DeleteTaskById(taskId);
+                await sessionService.DeleteSessionByTask(taskId);
+                await attachmentService.DeleteAttachmentByTask(taskId);
+                await commentService.DeleteCommentByTask(taskId);
+                await taskRepository.RemoveUserTaksbyTask(taskId);
+                return await taskRepository.SaveChanges();
+            }
+
+
+
+            return false;
+      
+           
+        }
+
+
+        public async Task<bool> DeleteTaskByTeam(int teamId)
+        {
+          var Rtasks = await taskRepository.GetTasksByTeam(teamId);  
+
+            if(Rtasks.Count().Equals(0))
+            {
+                return false;
+            }
+
+            foreach(RTask rTask in Rtasks)
+            {
+                await DeleteTask(rTask.Id);
+            }
+
+            return true;
+        }
+
+
+        public async Task<bool> DeleteTaskByProject(int projectId)
+        {
+            var Rtasks = await taskRepository.GetAllTasksByProject(projectId);
+
+            if (Rtasks.Count().Equals(0))
+            {
+                return false;
+            }
+
+            foreach (RTask rTask in Rtasks)
+            {
+                await DeleteTask(rTask.Id);
+            }
+
+            return true;
+        }
+
+    
+
 
         public async Task<TaskDetailsDto> GetTask(int TaskId)
         {
@@ -136,7 +202,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<TaskDto>> GetSubTasksByParentCheckPoint(int checkpointId)
         {
-            if(! await checkpointRepository.IsCheckpointExist(checkpointId))
+            if (!await checkPointService.IsCheckpointExist(checkpointId))
             {
                 throw new Exception("checkpoint not exist");
             }

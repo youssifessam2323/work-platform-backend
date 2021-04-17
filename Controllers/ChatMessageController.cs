@@ -61,6 +61,21 @@ namespace work_platform_backend.Controllers
             return Ok($"Message with id = {messageChatId} was  Deleted");
         }
 
+        [HttpDelete]
+        [Route("{chatId}/chatTeam")]
+        public async Task<IActionResult> DeletMessageByChat(int chatId)
+        {
+            bool result = await chatMessageService.DeleteAllMessageByTeamCHat(chatId);
+
+               if(result)
+              {
+                return Ok($"Messages of Chat : {chatId}  Deleted");
+
+              }
+
+          return  BadRequest("No Messages Found in This Chat to Delete");
+        }
+
 
         [HttpGet]
         [Route("{messageId}")]

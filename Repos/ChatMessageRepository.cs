@@ -39,10 +39,18 @@ namespace work_platform_backend.Repos
           
         }
 
-        public async Task<ICollection<ChatMessage>> GetAllMessageByTeamCHat(int ChatId)
+        public async Task<ICollection<ChatMessage>> DeleteAllMessageByTeamCHat(int ChatId)
         {
-           return( await context.ChatMessages.Where(m => m.ChatId == ChatId).ToListAsync());
-           
+            var chatMessage = await context.ChatMessages.Where(Tc => Tc.ChatId == ChatId).ToListAsync();
+            if (chatMessage.Count()!=0)
+            {
+                foreach (ChatMessage message in chatMessage)
+                {
+                    context.ChatMessages.Remove(message);
+                }
+            }
+            return chatMessage;
+
         }
 
         public async Task<ICollection<ChatMessage>> GetAllMessageByUser(string userId)

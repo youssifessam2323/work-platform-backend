@@ -16,9 +16,11 @@ namespace work_platform_backend.Services
         private readonly IProjectRepository projectRepository;
         private readonly IRTaskRepository taskRepository;
         private readonly IRoomRepository roomRepository;
+        private readonly ITeamMembersRepository teamMembersRepository;
         private readonly TeamChatService teamChatService;
+        private readonly TaskService taskService;
 
-        public TeamService(ITeamRepository teamRepository, IMapper mapper, IProjectRepository projectRepository, IRTaskRepository taskRepository, TeamChatService teamChatService, IRoomRepository roomRepository)
+        public TeamService(ITeamRepository teamRepository, IMapper mapper, IProjectRepository projectRepository, IRTaskRepository taskRepository, TeamChatService teamChatService,TaskService taskService, IRoomRepository roomRepository, ITeamMembersRepository teamMembersRepository)
         {
             this.teamRepository = teamRepository;
             this.mapper = mapper;
@@ -74,25 +76,62 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task DeleteTeam(int teamId)
+        public async Task<bool> DeleteTeam(int teamId)
         {
-            var Subteams = await teamRepository.GetTeamSubTeamsById(teamId);
+            //var Subteams = await teamRepository.GetTeamSubTeamsById(teamId);
             var team = await teamRepository.DeleteTeamById(teamId);
             if (team == null)
             {
 
-                throw new NullReferenceException();
+                return false;
 
             }
-            await teamChatService.DeleteTeamChatByTeam(teamId);
 
-            await teamRepository.SaveChanges();
+
+
+
+
+            var teamMembers = await teamMembersRepository.DeleteTeamsMembersByTeam(teamId);  //teamMember
+
+            if (teamMembers.Count() != 0)
+            {
+                await teamMembersRepository.SaveChanges();
+            }
+
+            await teamRepository.RemoveTeamProjectbyTeam(teamId);
+
+            await teamChatService.DeleteTeamChatByTeam(teamId);  
+
+            await taskService.DeleteTaskByTeam(teamId);
+
+            return  await teamRepository.SaveChanges();
+
 
 
         }
 
 
-  
+
+        public async Task<bool> DeleteTeamByRoom(int roomId)
+        {
+            var team = await teamRepository.GetAllTeamsByRoom(roomId);
+            if (team.Count().Equals(0))
+            {
+
+                return false;
+
+            }
+            foreach (Team t in team)
+            {
+                await DeleteTeam(t.Id);
+            }
+
+            return true;
+
+        }
+
+
+
 
         public async Task<IEnumerable<TeamDto>> GetTeamsByCreator(string CreatorId)
         {
@@ -184,7 +223,6 @@ namespace work_platform_backend.Services
             if (team== null)
             {
                 throw new Exception("team not exist");
-
             }
 
 

@@ -9,7 +9,11 @@ namespace work_platform_backend.Repos
         Task<List<Comment>> GetCommentsByTask(int taskId);
         Task AddComment(Comment comment);
 
-        Task SaveChanges();
+        Task<Comment> DeleteCommentById(int commentId);
+        Task<List<Comment>> DeleteCommentsByTask(int taskId);
+
+
+        Task<bool> SaveChanges();
         Task<bool> isTaskExist(int commentId);
     }
 }

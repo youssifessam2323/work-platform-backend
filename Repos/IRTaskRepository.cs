@@ -14,7 +14,8 @@ namespace work_platform_backend.Repos
          Task<RTask> GetTaskById(int taskId);
          Task SaveTask(RTask task);
          Task<RTask> UpdateTaskById(int taskId, RTask task);
-         Task  DeleteTaskById(int taskId);
+         Task<RTask> DeleteTaskById(int taskId);
+        Task<bool> RemoveUserTaksbyTask(int taskId);
         Task<bool> SaveChanges();
         Task<List<RTask>> GetTasksByTeam(int teamId);
         Task<List<Comment>> GetTaskComments(int taskId);

@@ -20,5 +20,31 @@ namespace work_platform_backend.Repos
             return await context.Sessions.Where(s => s.UserId == userId && s.TaskId == taskId).ToListAsync();
 
         }
+
+
+        public async Task<List<Session>> GetSessionsByTask(int taskId)
+        {
+            return await context.Sessions.Where(s=> s.TaskId == taskId).ToListAsync();
+
+        }
+
+        public async Task<bool> SaveChanges()
+        {
+            return (await context.SaveChangesAsync() >= 0);
+        }
+
+        public async Task<List<Session>> DeleteSessionsByTask(int taskId)
+        {
+            var sessions =  await context.Sessions.Where(s => s.TaskId == taskId).ToListAsync();
+
+
+            foreach(Session session in sessions)
+            {
+                context.Sessions.Remove(session);
+            }
+
+            return sessions;
+            
+        }
     }
 }

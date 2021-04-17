@@ -10,6 +10,7 @@ namespace work_platform_backend.Repos
         Task SaveAttachment(Attachment attachment);
         Task <Attachment>UpdateAttachmentById(int attachmentId,Attachment attachment);
         Task <Attachment>DeleteAttachmentById(int attachmentId);
+        Task<List<Attachment>> DeleteAttachmentByTaskId(int taskId);
         Task<bool> SaveChanges();
         Task<Attachment> GetAttachmentById(int attachmentId);
     }

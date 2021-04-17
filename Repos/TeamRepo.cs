@@ -12,10 +12,14 @@ namespace work_platform_backend.Repos
 
 
         private readonly ApplicationContext context;
+        
+      
 
         public TeamRepo(ApplicationContext context)
         {
             this.context = context;
+           
+           
         }
 
         public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId)
@@ -69,6 +73,38 @@ namespace work_platform_backend.Repos
                         .FirstOrDefaultAsync(T => T.Id == teamId));
         }
 
+        public async Task<List<Team>> GetTeamByProject(int projectId)
+        {
+            List<TeamProject> teamProjects = await context.TeamProjects
+                                                .Include(tp => tp.Team)
+                                                .Where(tp => tp.ProjectId == projectId)
+                                                .ToListAsync();
+
+
+            List<Team> teams = new List<Team>();
+
+            teamProjects.ForEach(tp => teams.Add(tp.Team));
+            return teams;
+        }
+
+        public async Task<bool> RemoveTeamProjectbyTeam(int teamId)
+        {
+            var teamProjects = await context.TeamProjects
+                                                    .Where(tp => tp.TeamId == teamId)
+                                                    .ToListAsync();
+
+            if (teamProjects.Count().Equals(0))
+            {
+                return false;
+            }
+            foreach(TeamProject tp in teamProjects) 
+            {
+                context.TeamProjects.Remove(tp);
+            }
+                          
+            return true;
+        }
+
         public async Task<bool> SaveChanges()
         {
             return (await context.SaveChangesAsync() >= 0);
@@ -96,13 +132,26 @@ namespace work_platform_backend.Repos
 
         public async Task<Team> DeleteTeamById(int teamId)
         {
-            Team team = await context.Teams.FindAsync(teamId);
+            Team team = await context.Teams.Include(t => t.SubTeams)
+                                    .Where(t => t.Id == teamId)
+                                    .FirstOrDefaultAsync();
+
+
+            foreach (var subteam in team.SubTeams)
+            {
+                await DeleteTeamById(subteam.Id);
+            }
+
             if (team != null)
             {
+
                 context.Teams.Remove(team);
+                                                          
             }
             return team;
         }
+
+      
 
         public async Task<Team> GetTeamByTeamCode(string teamCode)
         {

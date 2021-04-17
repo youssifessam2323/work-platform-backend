@@ -13,7 +13,7 @@ namespace work_platform_backend.Repos
         Task<ChatMessage> GetMessageById(int chatMessageId);
         Task<IEnumerable<ChatMessage>> GetMessageHistorybyChat(int chatId);
         Task <ICollection<ChatMessage>> GetAllMessageByUser(string userId);       
-        Task<ICollection<ChatMessage>> GetAllMessageByTeamCHat(int TeamChatId);
+        Task<ICollection<ChatMessage>> DeleteAllMessageByTeamCHat(int TeamChatId);
         Task<ICollection<ChatMessage>> GetAllMessageByMessageType(int chatmessageTypeId);
         Task<bool> SaveChanges();
     }

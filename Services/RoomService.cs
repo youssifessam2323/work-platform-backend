@@ -19,17 +19,22 @@ namespace work_platform_backend.Services
         private readonly IMapper mapper;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly TeamService teamService;
-        private  IProjectRepository projectRepository { get; set; }
 
+        private readonly IProjectRepository projectRepository;
+        public readonly ITeamRepository teamRepo;
+        private readonly SettingService settingService;
+        private readonly ProjectService projectService;
 
-
-        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null)
+        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null, ITeamRepository teamRepo=null,SettingService settingService=null,ProjectService projectService=null)
         {
             this.roomRepository = roomRepository;
             this.mapper = mapper;
             this.httpContextAccessor = httpContextAccessor;
             this.teamService = teamService;
             this.projectRepository = projectRepository;
+            this.teamRepo = teamRepo;
+            this.settingService = settingService;
+            this.projectService = projectService;
         }
 
         private string GetUserId() => (httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -126,14 +131,41 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task DeleteRoom(int roomId)
+        public async Task DeleteRoom(int roomId)  //Not Working
         {
-            if(await isRoomExist(roomId))
+            if (await isRoomExist(roomId))
             {
+
+
+
+
+
                 await roomRepository.DeleteRoomById(roomId);
+                await teamService.DeleteTeamByRoom(roomId);
+
+
+                var settingsofRoom = await settingService.GetSettingsOfRoom(roomId);
+
+                if (settingsofRoom != null)
+                {
+                    foreach (Setting setting in settingsofRoom)
+                    {
+                        await settingService.RemoveSettingfromRoom(roomId, setting.Id);
+                    }
+                }
+                await roomRepository.RemoveProjectManagerbyRoom(roomId);
+
+                await projectService.DeleteProjectByRoom(roomId);
+
+               
+                
                 await roomRepository.SaveChanges();
+
             }
-            throw new RoomNotFoundException("room not exist");
+            else
+            {
+                throw new RoomNotFoundException("room not exist");
+            }
 
         }
 

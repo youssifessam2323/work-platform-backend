@@ -11,6 +11,7 @@ namespace work_platform_backend.Repos
         Task SaveSetting(Setting setting);
         Task<Setting> UpdateSettingById(int settingId,Setting setting);
         Task<Setting> DeleteSettingById( int settingId);
+        Task<RoomSettings> RemoveSettingfromRoom(int roomId, int settingId);
         Task<bool> SaveChanges();
     }
 }

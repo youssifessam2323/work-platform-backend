@@ -20,6 +20,40 @@ namespace work_platform_backend.Repos
             await context.Comments.AddAsync(comment);
         }
 
+         
+        public async Task<List<Comment>> DeleteCommentsByTask(int taskId)
+        {
+            var comment = await context.Comments.Where(c => c.TaskId == taskId).ToListAsync();
+            if (comment != null)
+            {
+                foreach (Comment com in comment)
+                {
+                    context.Comments.Remove(com);
+                }
+            }
+            return comment;
+        }
+
+        public async Task<Comment> DeleteCommentById(int commentId)
+        {
+            Comment comment = await context.Comments.Include(c => c.Replies)
+                                    .Where(c=>c.Id == commentId)
+                                    .FirstOrDefaultAsync();
+
+            foreach (var replies in comment.Replies)
+            {
+                context.Comments.Remove(replies);
+                
+            }
+
+            if (comment != null)
+            {               
+                context.Comments.Remove(comment);
+
+            }
+            return comment;
+        }
+
         public async Task<List<Comment>> GetCommentsByTask(int taskId)
         {
             return  await context.Comments.Include(c => c.Replies).Where(c => c.TaskId == taskId).ToListAsync();
@@ -32,9 +66,11 @@ namespace work_platform_backend.Repos
            return comment != null ? true : false;
         }
 
-        public async Task SaveChanges()
+        public async Task<bool>  SaveChanges()
         {
-            await context.SaveChangesAsync();
+            return (await context.SaveChangesAsync() >= 0);
         }
+
+      
     }
 }

@@ -11,9 +11,12 @@ namespace work_platform_backend.Repos
     {
         private readonly ApplicationContext context;
 
+
         public RTaskRepo(ApplicationContext context)
+        
         {
             this.context = context;
+          
         }
       
         public async Task<IEnumerable<RTask>> GetAllSubTasksByParentCheckPointId(int checkpointId)
@@ -119,22 +122,16 @@ namespace work_platform_backend.Repos
 
 
         //not completed
-        public async Task DeleteTaskById(int taskId)
+        public async Task<RTask> DeleteTaskById(int taskId)
         {
-
-            RTask task = await context.Tasks.Include(t => t.DependantTasks)
-                                    .Include(t => t.Comments)
-                                    .ThenInclude(c => c.Replies)
-                                    .Where(t => t.Id == taskId)
-                                    .FirstAsync();
             
-            Console.WriteLine(task);
-            task.Comments.ForEach(c => Console.WriteLine(c));
-            task.Comments.ForEach( async c => {
-                c.Replies.ForEach(r =>  context.Comments.Remove(r));
-                await context.SaveChangesAsync();
-                context.Comments.Remove(c);
-            });
+
+            RTask task = await context.Tasks.Include(t => t.DependantTasks)                              
+                                    .Where(t => t.Id == taskId)
+                                    .FirstOrDefaultAsync();
+
+           
+            
 
             foreach(var dependantTask in task.DependantTasks)
             {
@@ -145,6 +142,35 @@ namespace work_platform_backend.Repos
                 context.Tasks.Remove(task);
 
             }
+
+            return task;
+
+          
+
+
+            
+
+        }
+
+      
+
+    
+
+
+        public async Task<bool> RemoveUserTaksbyTask(int taskId)
+        {
+            var userTasks = await context.UserTasks.Where(t => t.TaskId == taskId).ToListAsync();
+
+            if (userTasks.Count().Equals(0))
+            {
+                return false;
+            }
+            foreach (UserTask t in userTasks)
+            {
+                context.UserTasks.Remove(t);
+            }
+
+            return true;
         }
 
 
@@ -181,6 +207,6 @@ namespace work_platform_backend.Repos
             return task != null ? true : false ; 
         }
 
-     
-    }
+
+        }
 }

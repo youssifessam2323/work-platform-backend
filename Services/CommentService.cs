@@ -69,5 +69,46 @@ namespace work_platform_backend.Services
             await commentRepository.SaveChanges();
             return comment;
         }
+
+
+
+        public async Task<bool> DeleteComment(int commentId)
+        {
+            var comment = await commentRepository.DeleteCommentById(commentId);
+            if (comment == null)
+            {
+
+                return false;
+
+            }
+            
+          
+            
+
+           return await commentRepository.SaveChanges();
+
+
+        }
+
+        public async Task<bool> DeleteCommentByTask(int taskId)
+        {
+            var comments = await commentRepository.GetCommentsByTask(taskId);
+            if (comments.Count().Equals(0))
+            {
+
+                return false;
+
+            }
+
+           foreach(Comment c in comments)
+            {
+                await DeleteComment(c.Id);
+            }
+
+            return true;
+
+
+        }
+
     }
 }

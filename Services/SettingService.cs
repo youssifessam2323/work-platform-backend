@@ -85,5 +85,18 @@ namespace work_platform_backend.Services
             return RoomSettings;
 
         }
+
+        public async Task<bool> RemoveSettingfromRoom(int roomId, int settingId)
+        {
+            RoomSettings roomSettings = await _settingRepository.RemoveSettingfromRoom(roomId, settingId);
+            if (roomSettings != null)
+            {
+             return await  _settingRepository.SaveChanges();
+
+            }
+
+            return false;
+        }
+
     }
 }

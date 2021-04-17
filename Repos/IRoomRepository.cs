@@ -14,6 +14,7 @@ namespace work_platform_backend.Repos
          Task SaveRoom(Room room );
          Task<Room> UpdateRoomById(int roomId, Room room);
          Task<Room> DeleteRoomById(int roomId);
+        Task<bool> RemoveProjectManagerbyRoom(int roomId);
          Task<bool> SaveChanges();
         Task AddNewProjectManager(ProjectManager projectManager);
         Task<List<User>> GetRoomPorjectManagersByRoomId(int roomId);

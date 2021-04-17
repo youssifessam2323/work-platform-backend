@@ -41,6 +41,48 @@ namespace work_platform_backend.Hubs
 
 
       
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task CreateTeam(TeamViewModel teamVieweDto, int roomId)    //Change => Enter Team{Name , Description}
+        {
+
+            try
+            {
+              
+
+                var userId = userService.GetUserId();
+
+
+                var Team = mapper.Map<TeamViewModel, Team>(teamVieweDto);
+
+                var newTeam = await teamService.AddTeam(Team, roomId, userId);
+                if (newTeam != null)
+                {
+
+                    var JoinChatOfTeamByDefault = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
+
+                    if (JoinChatOfTeamByDefault != null)
+                    {
+                        //await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeamByDefault.ChatName);
+                        await Clients.Caller.SendAsync("ReceiveMessageOnAdd", $" Chat Group Called {JoinChatOfTeamByDefault} Created");
+
+                    }
+
+                    var teamViewModel = mapper.Map<Team, TeamViewModel>(newTeam);
+                  
+                    await Clients.All.SendAsync("addTeam", teamViewModel);  //Change soon Tell all Clients on Hub That a New Team Added
+                }
+                
+
+               
+                
+            
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("onError", "Couldn't create team: " + ex.Message);
+            }
+        }
+
 
 
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -64,7 +106,7 @@ namespace work_platform_backend.Hubs
                     {
                        var user = await userService.getUserById(userId);
                         
-                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join
+                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join  *Must Saved  inHistory
                         await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //add to Group to tell Clients on Group new User Come
                     }         
                 }
@@ -130,7 +172,7 @@ namespace work_platform_backend.Hubs
 
                         };
                         
-                        await Clients.Group(Chat.ChatName).SendAsync("newMessage", messageViewModel);
+                        await Clients.Group(Chat.ChatName).SendAsync("newMessage", messageViewModel);   //get Content,Timestamp , FromUser Details , ToChatDetails
                     }
 
                 }
