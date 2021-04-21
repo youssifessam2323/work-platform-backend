@@ -54,7 +54,7 @@ namespace work_platform_backend.Hubs
 
                 var Team = mapper.Map<TeamViewModel, Team>(teamVieweDto);
 
-                var newTeam = await teamService.AddTeam(Team, roomId, userId);
+                var newTeam = await teamService.AddTeam(Team, roomId, userId,0);
                 if (newTeam != null)
                 {
 
@@ -103,11 +103,8 @@ namespace work_platform_backend.Hubs
                    var JoinChatOfTeam = await teamChatService.GetTeamChatOfTeam(teamJoin.Id);
 
                     if (JoinChatOfTeam != null)
-                    {
+                    {   
                        var user = await userService.getUserById(userId);
-                        
-                        await Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join  *Must Saved  inHistory
-                        await Groups.AddToGroupAsync(Context.ConnectionId, JoinChatOfTeam.ChatName);  //add to Group to tell Clients on Group new User Come
                     }         
                 }
 
@@ -141,6 +138,11 @@ namespace work_platform_backend.Hubs
           
         }
 
+        [Authorize]
+        public string GetConnectionId()
+        {       
+            return Context.ConnectionId;
+        }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task SendToTeam(string message, int teamId)

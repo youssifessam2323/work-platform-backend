@@ -163,7 +163,7 @@ namespace work_platform_backend.Controllers
         [HttpDelete("{roomId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
 
-        public async Task<IActionResult> DeletRoom(int roomId)
+        public async Task<IActionResult> DeleteRoom(int roomId)
         {
             try
             {

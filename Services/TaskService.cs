@@ -32,6 +32,10 @@ namespace work_platform_backend.Services
             this.teamRepository = teamRepository;
             this.projectRepository = projectRepository;
             this.checkpointRepository = checkpointRepository;
+            this.sessionService = sessionService;
+            this.attachmentService = attachmentService;
+            this.checkPointService = checkPointService;
+            this.commentService = commentService;
         }
 
 

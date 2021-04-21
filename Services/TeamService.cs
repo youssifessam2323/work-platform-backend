@@ -28,12 +28,14 @@ namespace work_platform_backend.Services
             this.taskRepository = taskRepository;
             this.teamChatService = teamChatService;
             this.roomRepository = roomRepository;
+            this.taskService = taskService;
+            this.teamMembersRepository = teamMembersRepository;
+        
         }
 
 
-        public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId,int parentTeamId = 0)
+        public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId,int parentTeamId)
         {
-
 
    
                 newTeam.RoomId = roomId;
@@ -45,7 +47,7 @@ namespace work_platform_backend.Services
                 {
                     newTeam.ParentTeamId = parentTeamId;
                 }
-
+                
                 await teamRepository.SaveTeam(newTeam);
                 await teamRepository.SaveChanges();
 

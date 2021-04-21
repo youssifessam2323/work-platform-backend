@@ -68,7 +68,7 @@ namespace work_platform_backend.Services
                         CreatedAt = DateTime.Now,
                     };
 
-                await teamService.AddTeam(newTeam,room.Id,creatorId);
+                await teamService.AddTeam(newTeam,room.Id,creatorId,0);
 
                 }
                 throw new  RoomNotFoundException("Error While Saving the Room");

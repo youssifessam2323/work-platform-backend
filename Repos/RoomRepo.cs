@@ -24,12 +24,14 @@ namespace work_platform_backend.Repos
 
         public async Task<Room> GetRoomById(int roomId)
         {
-          return await context.Rooms
+          var room =  await context.Rooms
                             .Include(r => r.Creator)
                             .Include(r => r.Projects)
+                            .Include(r => r.ProjectManagers).ThenInclude(p => p.User)
                             .Include(r => r.Teams)
-                            .Include(r => r.ProjectManagers)
                             .FirstOrDefaultAsync(R=>R.Id==roomId);
+
+            return room;
         }
 
         public async Task<IEnumerable<Room>> GetAllRooms()

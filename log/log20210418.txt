@@ -1,0 +1,2 @@
+2021-04-18 16:01:53.954 +02:00 [DBG] Failed to locate the development https certificate at 'null'.
+2021-04-18 16:01:54.393 +02:00 [DBG] Using development certificate: CN=localhost (Thumbprint: D29D0D8DEEAC113DCA4AA34C73CAFD3345955083)

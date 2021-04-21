@@ -138,65 +138,80 @@ namespace work_platform_backend.Controllers
         }
 
 
+        //THIS WILL BE ADDED WHEN WE USE NOTIFICATION SERVICE
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpGet("request/create/team/{parentTeamId}")]
-        public async Task<IActionResult> RequestAddTeam(int parentTeamId)
-        {
-            try
-            {
 
-                var team = await teamService.GetTeamOnlyById(parentTeamId);
-                var parentTeamLeaderId = team.LeaderId;
-                var userId = userService.GetUserId();
+        // [Authorize(AuthenticationSchemes = "Bearer")]
+        // [HttpGet("request/create/team/{parentTeamId}")]
+        // public async Task<IActionResult> RequestAddTeam(int parentTeamId)
+        // {
+        //     try
+        //     {
 
-                if(userId == parentTeamLeaderId)
-                {
-                    throw new Exception("you are the leader of the team");
-                }
+        //         var team = await teamService.GetTeamOnlyById(parentTeamId);
+        //         var parentTeamLeaderId = team.LeaderId;
+        //         var userId = userService.GetUserId();
 
-                var user = await userService.getUserById(userId);
+        //         if(userId == parentTeamLeaderId)
+        //         {
+        //             throw new Exception("you are the leader of the team");
+        //         }
+
+        //         var user = await userService.getUserById(userId);
             
-                var notification = new Notification
-                {
-                    Content = $"the user {user.Name} want to create a subteam from your team",
-                    Url = $"{this.Request.Host}/api/v1/teams/{team.RoomId}/{team.Id}/creator/{userId}",
-                    UserId = parentTeamLeaderId
-                };
+        //         var notification = new Notification
+        //         {
+        //             Content = $"the user {user.Name} want to create a subteam from your team",
+        //             Url = $"{this.Request.Host}/api/v1/teams/{team.RoomId}/{team.Id}/creator/{userId}",
+        //             UserId = parentTeamLeaderId
+        //         };
 
-                notification = await notificationService.CreateNewNotificaition(notification);
-                await notificationHub.Clients.User(parentTeamLeaderId).SendAsync("recievenotification",notification);
+        //         notification = await notificationService.CreateNewNotificaition(notification);
+        //         await notificationHub.Clients.User(parentTeamLeaderId).SendAsync("recievenotification",notification);
 
-                return Ok();
-            }   
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+        //         return Ok();
+        //     }   
+        //     catch (Exception e)
+        //     {
+        //         return NotFound(e.Message);
+        //     }
 
-        }
+        // }
 
-
+        ///<summary>
+        /// add new team in room 
+        ///</summary>
+        [HttpPut("{roomId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpPost("{roomId}/{parentTeamId}/creator/{userId}")]
-        public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId, string userId)
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        // [HttpPost("{roomId}/{parentTeamId}/creator/{userId}")]
+        [HttpPost("/rooms/{roomId}/{teamCode}/{parentTeamId}/connection/{connectionId}")]
+        // public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId, string userId)
+        // public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId,connectionId)
+        public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId)
         {
             try
             {
-                var newTeam = await teamService.AddTeam(team, roomId, userService.GetUserId(),parentTeamId);
-
-                var JoinChatOfTeamByDefault = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
+                var userId = userService.GetUserId();
+                // var newTeam = await teamService.AddTeam(team, roomId, userId,parentTeamId);
+                var user = await userService.getUserById(userId);
+                var newTeam = await teamService.AddTeam(team,roomId, userId ,parentTeamId);
                 
+                var JoinChatOfTeam = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
+
+                  await chatHub.Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join  *Must Saved  inHistory
+                //   await chatHub.Groups.AddToGroupAsync(chatHub.Clients.User(userId), JoinChatOfTeam.ChatName);  //add to Group to tell Clients on Group new User Come       
                 var parentTeam = await teamService.GetTeamOnlyById(parentTeamId);
                 var notification = notificationService.CreateNewNotificaition(new Notification
                 {
-                    Content = $"the leader of team {parentTeam.Name} accept your request to creat a sub team from this team",
+                    Content = $"the leader of team {parentTeam.Name} accept your request to creatث a sub team from this team",
                     UserId = userId
                 });
 
                 await notificationHub.Clients.User(userId).SendAsync("recievenotification",notification);
                 return Ok();
-
 
             }
             catch(Exception e)
@@ -228,7 +243,7 @@ namespace work_platform_backend.Controllers
             try
             {
                if (await teamService.DeleteTeam(teamId))
-                {
+                {   
                     return Ok();
                 }
                 throw new NullReferenceException();
@@ -236,7 +251,8 @@ namespace work_platform_backend.Controllers
             catch (DbUpdateException ex)
             {
 
-                return Unauthorized("You cannot delete this team because it has subteams, go and delete subteams before deleting it.");
+                // return Unauthorized("You cannot delete this team because it has subteams, go and delete subteams before deleting it.");
+                return Unauthorized(ex.InnerException);
             }
 
         }

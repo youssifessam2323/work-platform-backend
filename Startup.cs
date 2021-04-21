@@ -20,6 +20,8 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
 using work_platform_backend.Hubs;
+using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace work_platform_backend
 {
@@ -147,14 +149,17 @@ namespace work_platform_backend
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+                              ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            // loggerFactory.AddSerilog();
+            
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -179,13 +184,33 @@ namespace work_platform_backend
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-            //    endpoints.MapRazorPages();
-               endpoints.MapControllers();
-               endpoints.MapHub<ChatHub>("/chathub");
-               endpoints.MapHub<NotificationHub>("/notificationHub");
+            app.UseEndpoints((routes) =>
+            { 
+                routes.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Hello World!");
+                });
+
+               routes.MapControllers();
+               routes.MapHub<ChatHub>("/chathub");
+               routes.MapHub<NotificationHub>("/notificationHub");
             });
+
+         
+            var MyAssembly = Assembly.GetExecutingAssembly()
+                .GetName();
+
+            // Log.Logger = new LoggerConfiguration()
+            //     .ReadFrom.Configuration(Configuration)
+            //     .MinimumLevel.Debug()
+            //     .Enrich.FromLogContext()
+            //     .Enrich.WithMachineName()
+            //     .Enrich.WithProperty(nameof(MyAssembly.Name), $"{MyAssembly.Name}")
+            //     .Enrich.WithProperty(nameof(MyAssembly.Version), $"{MyAssembly.Version}")
+            //     .CreateLogger();
+
+
         }
+        
     }
 }
