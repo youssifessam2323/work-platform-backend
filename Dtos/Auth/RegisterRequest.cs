@@ -27,6 +27,9 @@ namespace work_platform_backend.Dtos
         
         [Required]
          public string PhoneNumber { get; set; }
+
+         [Required]
+         public string JobTitle { get; set; }
          
          [Required]
          public string BirthDate { get; set; }

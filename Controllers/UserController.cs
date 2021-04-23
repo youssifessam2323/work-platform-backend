@@ -58,6 +58,18 @@ namespace work_platform_backend.Controllers
 
 
         /// <summary>
+        /// return a true if the username is already used 
+        /// </summary>
+        [HttpGet]
+        [Route("{username}/exists")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> isUsernameExists(string username )
+        {
+            return Ok( await userService.IsUsernameExists(username));    
+        }
+
+
+        /// <summary>
         ///  get all  the teams of auth user in specific team
         /// </summary>
         [ProducesResponseType(typeof(List<TeamDto>), (int)HttpStatusCode.OK)]

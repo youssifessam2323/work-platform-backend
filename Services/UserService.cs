@@ -71,6 +71,11 @@ namespace work_platform_backend.Services
             return teamsDto;
         }
 
+        public async Task<bool> IsUsernameExists(string username)
+        {
+            return await userRepository.IsUserExistByUsername(username); 
+        }
+
 
         //Complete from here 
         public async Task JoinTeam(string teamCode,string userId)
