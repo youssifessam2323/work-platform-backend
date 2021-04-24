@@ -152,7 +152,11 @@ namespace work_platform_backend.Services
                 return new AuthenticationResponse
                 {
                     Message = "User is not Exist...",
-                    IsSuccess = false
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "this email not exist"
+                    }
                 } ;  
                 
 
@@ -176,6 +180,10 @@ namespace work_platform_backend.Services
                 {
                     Message = "Invalid password",
                     IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "incorrect password"
+                    }
                 };
             }
              
@@ -183,7 +191,8 @@ namespace work_platform_backend.Services
             var token = CreateJWTToken(user); 
             return new AuthenticationResponse
             {
-                Message = token ,
+                Message = "login successfully" ,
+                Token = token,
                 IsSuccess = true,
                 Errors = new List<string>()
             };

@@ -43,7 +43,7 @@ namespace work_platform_backend.Controllers
                 var response = new AuthenticationResponse
                 {
                     Message = "One or more validation errors occurred.",
-                    Errors = errors
+                    Errors = null
                 };
             }
             AuthenticationResponse authenticationResponse = null ;
