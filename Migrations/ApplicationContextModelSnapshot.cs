@@ -541,7 +541,7 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ParentTeamId")
+                    b.Property<int?>("ParentTeamId")
                         .HasColumnType("int");
 
                     b.Property<int>("RoomId")
@@ -937,8 +937,7 @@ namespace work_platform_backend.Migrations
                     b.HasOne("work_platform_backend.Models.Team", "ParentTeam")
                         .WithMany("SubTeams")
                         .HasForeignKey("ParentTeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("work_platform_backend.Models.Room", "Room")
                         .WithMany("Teams")

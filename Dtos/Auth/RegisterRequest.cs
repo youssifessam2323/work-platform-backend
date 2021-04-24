@@ -12,10 +12,8 @@ namespace work_platform_backend.Dtos
          public string Email { get; set; }
         
         [Required]
-         public  string FirstName { get; set; }
+         public  string Name { get; set; }
         
-        [Required]
-         public string LastName { get; set; }
          
          [MinLength(6)]
          [Required]
@@ -33,11 +31,6 @@ namespace work_platform_backend.Dtos
          
          [Required]
          public string BirthDate { get; set; }
-
-             public string GetName()
-             {
-                return $"{this.FirstName} {this.LastName}";
-             }
 
     }
 }
