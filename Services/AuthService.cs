@@ -166,8 +166,12 @@ namespace work_platform_backend.Services
             {
                 return new AuthenticationResponse
                 {
-                    Message = "cred is right but email is not verified..",
-                    IsSuccess = false
+                    Message = "cred is right but email is not verified",
+                    IsSuccess = false,
+                    Errors = new List<string>()
+                    {
+                        "cred is right but email is not verified"
+                    }
                 };
             }
 
