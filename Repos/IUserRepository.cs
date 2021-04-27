@@ -17,5 +17,6 @@ namespace work_platform_backend.Repos
         Task<bool> IsUserExistByUsername(string username);
         Task<bool> IsUserExistById(string userId);
         Task<User> UpdateUser(string userId, User newUser);
+        Task<bool> IsUserExistByEmail(string username);
     }
 }

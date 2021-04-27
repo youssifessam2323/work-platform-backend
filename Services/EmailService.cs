@@ -1,3 +1,6 @@
+using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MimeKit;
@@ -10,6 +13,28 @@ namespace work_platform_backend.Services
         public readonly EmailConfiguration _emailConfig ;
         
         
+        public async Task CheckIfEmailExist(string email)
+        {
+            try
+            {
+                string[] host = (email.Split('@'));
+                string hostname = host[1];       
+                Console.WriteLine("after splitting the email = "+ hostname);
+                IPHostEntry IPhst = await Dns.GetHostEntryAsync(hostname);
+                Console.WriteLine("host name = " + IPhst.HostName);
+                IPEndPoint endPt = new IPEndPoint(IPhst.AddressList[0], 465);
+
+                Socket s= new Socket(endPt.AddressFamily, 
+                SocketType.Stream,ProtocolType.Tcp);
+                s.Connect(endPt);
+
+                }
+                catch(Exception e)
+                {
+                    throw new Exception(e.Message   );
+                }
+        }
+
         public EmailService(EmailConfiguration emailConfig)
         {
             _emailConfig = emailConfig ;
@@ -26,6 +51,11 @@ namespace work_platform_backend.Services
 
         private MimeMessage CreateEmailMessage(Message message)
         {   
+            string[] host = (message.To.Address.Split('@'));
+            string hostname = host[1];
+
+          
+
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(MailboxAddress.Parse(_emailConfig.From));
             emailMessage.To.Add(message.To);

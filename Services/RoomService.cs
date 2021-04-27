@@ -65,11 +65,12 @@ namespace work_platform_backend.Services
                     {
                         Name = $" {room.Name}/main ",
                         Description = room.Description,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.Now
                     };
 
                 await teamService.AddTeam(newTeam,room.Id,creatorId,0);
 
+                    return;
                 }
                 throw new  RoomNotFoundException("Error While Saving the Room");
             }

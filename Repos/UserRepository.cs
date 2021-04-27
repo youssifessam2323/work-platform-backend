@@ -101,5 +101,11 @@ namespace work_platform_backend.Repos
             var user = await context.Users.FindAsync(userId);
             return user != null ? true : false;
         }
+
+        public async Task<bool> IsUserExistByEmail(string email)
+        {
+            var user = await context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+            return user != null ? true : false;
+        }
     }
 }

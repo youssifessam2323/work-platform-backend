@@ -61,10 +61,21 @@ namespace work_platform_backend.Controllers
         /// return a true if the username is already used 
         /// </summary>
         [HttpGet]
-        [Route("{username}/exists")]
+        [Route("username/{username}/exists")]
                 public async Task<IActionResult> isUsernameExists(string username )
         {
             return Ok( await userService.IsUsernameExists(username));    
+        }
+
+
+        /// <summary>
+        /// return a true if the username is already used 
+        /// </summary>
+        [HttpGet]
+        [Route("email/{email}/exists")]
+                public async Task<IActionResult> isEmailExists(string email )
+        {
+            return Ok( await userService.IsEmailExistsExists(email));    
         }
 
 

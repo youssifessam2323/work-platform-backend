@@ -6,5 +6,6 @@ namespace work_platform_backend.Services
     public interface IEmailService
     {
         Task SendEmailAsync(Message message);
+        Task CheckIfEmailExist(string email);
     }
 }

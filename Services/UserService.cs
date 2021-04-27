@@ -76,6 +76,11 @@ namespace work_platform_backend.Services
             return await userRepository.IsUserExistByUsername(username); 
         }
 
+        internal async Task<bool> IsEmailExistsExists(string username)
+        {
+            return await userRepository.IsUserExistByEmail(username); 
+        }
+
 
         //Complete from here 
         public async Task JoinTeam(string teamCode,string userId)

@@ -45,6 +45,8 @@ namespace work_platform_backend.Services
                 };
             }
 
+            // await emailService.CheckIfEmailExist(registerRequest.Email);
+
             var newUser = mapper.Map<User>(registerRequest);
             var isCreated = await userManager.CreateAsync(newUser,registerRequest.Password);
 

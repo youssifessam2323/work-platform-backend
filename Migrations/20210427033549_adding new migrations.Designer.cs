@@ -10,8 +10,8 @@ using work_platform_backend.Models;
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20210415001220_notificationAndChatEdit")]
-    partial class notificationAndChatEdit
+    [Migration("20210427033549_adding new migrations")]
+    partial class addingnewmigrations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -543,22 +543,22 @@ namespace work_platform_backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ParentTeamId")
+                        .HasColumnType("int");
+
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
                     b.Property<Guid>("TeamCode")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TeamId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("LeaderId");
 
-                    b.HasIndex("RoomId");
+                    b.HasIndex("ParentTeamId");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("RoomId");
 
                     b.ToTable("Teams");
                 });
@@ -691,6 +691,10 @@ namespace work_platform_backend.Migrations
                         .HasMaxLength(256);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");
@@ -936,15 +940,16 @@ namespace work_platform_backend.Migrations
                         .HasForeignKey("LeaderId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("work_platform_backend.Models.Team", "ParentTeam")
+                        .WithMany("SubTeams")
+                        .HasForeignKey("ParentTeamId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("work_platform_backend.Models.Room", "Room")
                         .WithMany("Teams")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("work_platform_backend.Models.Team", null)
-                        .WithMany("SubTeams")
-                        .HasForeignKey("TeamId");
                 });
 
             modelBuilder.Entity("work_platform_backend.Models.TeamChat", b =>

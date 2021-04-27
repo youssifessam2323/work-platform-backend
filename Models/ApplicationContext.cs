@@ -346,6 +346,12 @@ namespace work_platform_backend.Models
                     .HasForeignKey("CreatorId")
                     .OnDelete(DeleteBehavior.Cascade);
 
+
+            modelBuilder.Entity<User>()
+                .HasIndex(e => e.Email)
+                .IsUnique(true);
+
+
             base.OnModelCreating(modelBuilder);
 
         }
