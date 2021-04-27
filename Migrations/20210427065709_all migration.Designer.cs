@@ -10,8 +10,8 @@ using work_platform_backend.Models;
 namespace work_platform_backend.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20210427033549_adding new migrations")]
-    partial class addingnewmigrations
+    [Migration("20210427065709_all migration")]
+    partial class allmigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
