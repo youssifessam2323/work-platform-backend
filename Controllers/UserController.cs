@@ -283,7 +283,8 @@ namespace work_platform_backend.Controllers
 
 
 
-        [HttpGet("request/jointeam/{teamCode}")]
+        // [HttpGet("request/jointeam/{teamCode}")]
+        [HttpGet("jointeam/{teamCode}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> RequestJoinTeam(string teamCode)
         {
@@ -291,39 +292,39 @@ namespace work_platform_backend.Controllers
             {
                 var team = await teamService.GetTeamByTeamCode(teamCode);
 
-                var teamLeaderId = team.LeaderId;
+                // var teamLeaderId = team.LeaderId;
 
                 var userId = userService.GetUserId();
 
-                 if(userId == teamLeaderId)
-                {
-                    throw new Exception("you are the leader of the team");
-                }
+                //  if(userId == teamLeaderId)
+                // {
+                //     throw new Exception("you are the leader of the team");
+                // }
 
-                if(await teamService.isUserinThisTeamExist(team.Id,userId))
-                {
-                    throw new Exception("user is already in this team");
-                }
+                // if(await teamService.isUserinThisTeamExist(team.Id,userId))
+                // {
+                //     throw new Exception("user is already in this team");
+                // }
 
-                var user = await userService.getUserById(userId);
+                
+                await userService.JoinTeam(teamCode,userId);
+                // var notification = new Notification
+                // {
+                //     Content = $"a new user {user.Name} wants to join the team {team.Name} that you lead",
+                //     Url  = $"{this.Request.Host}/api/v1/users/{userId}/join/teams/{teamCode}",
+                //     UserId = teamLeaderId
+                // }; 
 
-                var notification = new Notification
-                {
-                    Content = $"a new user {user.Name} wants to join the team {team.Name} that you lead",
-                    Url  = $"{this.Request.Host}/api/v1/users/{userId}/join/teams/{teamCode}",
-                    UserId = teamLeaderId
-                }; 
-
-                var newNotification = await notificationService.CreateNewNotificaition(notification);
-                Console.WriteLine("no id ===========================>" + newNotification.Id); 
-                await notificationHub.Clients.User(teamLeaderId).SendAsync("recievenotification",notification);                                    
+                // var newNotification = await notificationService.CreateNewNotificaition(notification);
+                // Console.WriteLine("no id ===========================>" + newNotification.Id); 
+                // await notificationHub.Clients.User(teamLeaderId).SendAsync("recievenotification",notification);                                    
                 
 
                 return Ok();
             }
             catch(Exception e)
             {
-                return NotFound(e.Message);
+                return BadRequest(e.Message);
             }
         }
     }

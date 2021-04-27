@@ -25,7 +25,7 @@ namespace work_platform_backend.Services
             
                 var user = await context.Users.Where(u => u.Email == email).SingleOrDefaultAsync();
 
-                if(user == null)
+                if(user != null)
                 {
                     throw new Exception("email already exist");
                 }

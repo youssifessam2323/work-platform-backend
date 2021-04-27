@@ -214,8 +214,17 @@ namespace work_platform_backend.Services
             Console.WriteLine("Authenticad User = " + userId);
             List<Team> teams =await userRepository.getUserTeams(userId);
 
+            var creatorTeams =  await teamRepository.GetAllTeamsByCreator(userId);
+            
+            foreach(var t in creatorTeams)
+            {
+                teams.Add(t);
+            }
+
             HashSet<Room> rooms = new HashSet<Room>();
 
+            
+            
             foreach(var team in teams)
             {
                 rooms.Add(await roomRepository.GetRoomById(team.RoomId));

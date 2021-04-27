@@ -52,17 +52,7 @@ namespace work_platform_backend.Repos
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<Team>> getUserTeams(string userId)
-        {
-            var teamMembers =  await context.TeamsMembers
-                    .Where(tm => tm.UserId == userId)
-                    .Include(tm => tm.Team)
-                    .ToListAsync();
-            
-            teamMembers.ForEach(tm => Console.WriteLine("Team Members ====> "+tm));
-            return teamMembers.Select( tm => tm.Team).ToList();
-        }
-
+     
         public async Task<User> GetUserByUsername(string username)
         {
             return await context.Users.Where(u => u.UserName == username).SingleOrDefaultAsync();
@@ -107,5 +97,17 @@ namespace work_platform_backend.Repos
             var user = await context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
             return user != null ? true : false;
         }
-    }
+
+        public async Task<List<Team>> getUserTeams(string userId)
+        {
+            var teamMembers = await context.TeamsMembers
+                                                .Include(tm => tm.Team)
+                                                .Where(tm => tm.UserId == userId)
+                                                .ToListAsync();
+                                                            
+            teamMembers.ForEach(tm => Console.WriteLine("Team Members ====> "+tm));
+            return teamMembers.Select( tm => tm.Team).ToList();
+        }
+
+        }
 }

@@ -24,8 +24,9 @@ namespace work_platform_backend.Services
         public readonly ITeamRepository teamRepo;
         private readonly SettingService settingService;
         private readonly ProjectService projectService;
+        private readonly UserService userService;
 
-        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null, ITeamRepository teamRepo=null,SettingService settingService=null,ProjectService projectService=null)
+        public RoomService(IRoomRepository roomRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor, TeamService teamService = null, IProjectRepository projectRepository = null, ITeamRepository teamRepo = null, SettingService settingService = null, ProjectService projectService = null, UserService userService = null)
         {
             this.roomRepository = roomRepository;
             this.mapper = mapper;
@@ -35,6 +36,7 @@ namespace work_platform_backend.Services
             this.teamRepo = teamRepo;
             this.settingService = settingService;
             this.projectService = projectService;
+            this.userService = userService;
         }
 
         private string GetUserId() => (httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -65,10 +67,12 @@ namespace work_platform_backend.Services
                     {
                         Name = $" {room.Name}/main ",
                         Description = room.Description,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.Now,
+                        LeaderId = creatorId
                     };
 
-                await teamService.AddTeam(newTeam,room.Id,creatorId,0);
+                    await teamService.AddTeam(newTeam,room.Id,creatorId,0);
+                     
 
                     return;
                 }
