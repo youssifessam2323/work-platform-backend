@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
+using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using work_platform_backend.Models;
 
@@ -11,38 +13,34 @@ namespace work_platform_backend.Services
     public class EmailService : IEmailService
     {
         public readonly EmailConfiguration _emailConfig ;
-        
-        
+        private readonly ApplicationContext context;
+
+        public EmailService(ApplicationContext context)
+        {
+            this.context = context;
+        }
+
         public async Task CheckIfEmailExist(string email)
         {
-            try
-            {
-                string[] host = (email.Split('@'));
-                string hostname = host[1];       
-                Console.WriteLine("after splitting the email = "+ hostname);
-                IPHostEntry IPhst = await Dns.GetHostEntryAsync(hostname);
-                Console.WriteLine("host name = " + IPhst.HostName);
-                IPEndPoint endPt = new IPEndPoint(IPhst.AddressList[0], 465);
+            
+                var user = await context.Users.Where(u => u.Email == email).SingleOrDefaultAsync();
 
-                Socket s= new Socket(endPt.AddressFamily, 
-                SocketType.Stream,ProtocolType.Tcp);
-                s.Connect(endPt);
-
-                }
-                catch(Exception e)
+                if(user == null)
                 {
-                    throw new Exception(e.Message   );
+                    throw new Exception("email already exist");
                 }
+            
         }
 
-        public EmailService(EmailConfiguration emailConfig)
+        public EmailService(EmailConfiguration emailConfig, ApplicationContext context)
         {
-            _emailConfig = emailConfig ;
+            _emailConfig = emailConfig;
+            this.context = context;
         }
 
 
 
-         public async Task SendEmailAsync(Message message)
+        public async Task SendEmailAsync(Message message)
         {
             var emailMessage = CreateEmailMessage(message);
             await SendAsync(emailMessage);
