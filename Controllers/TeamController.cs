@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using work_platform_backend.Dtos;
 using work_platform_backend.Exceptions;
 using work_platform_backend.Hubs;
 using work_platform_backend.Models;
@@ -28,8 +30,9 @@ namespace work_platform_backend.Controllers
         private readonly IHubContext<NotificationHub> notificationHub;
         private readonly IHubContext<ChatHub> chatHub;
         private readonly TeamChatService teamChatService;
+        private readonly IMapper mapper;
 
-        public TeamController(TeamService teamService, UserService userService, TaskService taskService, NotificationService notificationService, TeamChatService teamChatService, IHubContext<ChatHub> chatHub, IHubContext<NotificationHub> notificationHub)
+        public TeamController(TeamService teamService, UserService userService, TaskService taskService, NotificationService notificationService, TeamChatService teamChatService, IHubContext<ChatHub> chatHub, IHubContext<NotificationHub> notificationHub, IMapper mapper)
 
         {
             this.teamService = teamService;
@@ -40,6 +43,7 @@ namespace work_platform_backend.Controllers
             this.teamChatService = teamChatService;
             this.chatHub = chatHub;
             this.notificationHub = notificationHub;
+            this.mapper = mapper;
         }
 
 
@@ -187,16 +191,20 @@ namespace work_platform_backend.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [Authorize(AuthenticationSchemes = "Bearer")]
         // [HttpPost("{roomId}/{parentTeamId}/creator/{userId}")]
-        [HttpPost("/rooms/{roomId}/{teamCode}/{parentTeamId}/connection/{connectionId}")]
+        // [HttpPost("/rooms/{roomId}/{teamCode}/{parentTeamId}/connection/{connectionId}")]
         // public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId, string userId)
         // public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId,connectionId)
-        public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId)
+        [HttpPost("rooms/{roomId}/parentteam/{parentTeamId}")]
+        // public async Task<IActionResult> AddTeam(Team team, int roomId, int parentTeamId)
+        public async Task<IActionResult> AddTeam(int roomId, int parentTeamId, TeamDto teamDto)
         {
             try
             {
                 var userId = userService.GetUserId();
                 // var newTeam = await teamService.AddTeam(team, roomId, userId,parentTeamId);
                 var user = await userService.getUserById(userId);
+
+                var team = mapper.Map<Team>(teamDto);
                 var newTeam = await teamService.AddTeam(team,roomId, userId ,parentTeamId);
                 
                 var JoinChatOfTeam = await teamChatService.GetTeamChatOfTeam(newTeam.Id);

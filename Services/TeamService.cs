@@ -34,9 +34,36 @@ namespace work_platform_backend.Services
         }
 
 
-        public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId,int parentTeamId)
+        // public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId,int parentTeamId)
+        // {
+
+   
+        //         newTeam.RoomId = roomId;
+        //         newTeam.LeaderId = creatorId;
+        //         newTeam.CreatedAt = DateTime.Now;
+        //         newTeam.TeamCode = Guid.NewGuid();
+                
+        //         if(parentTeamId != 0)
+        //         {
+        //             newTeam.ParentTeamId = parentTeamId;
+        //         }
+                
+        //         await teamRepository.SaveTeam(newTeam);
+        //         await teamRepository.SaveChanges();
+
+        //         TeamChat newTeamChat = new TeamChat()
+        //         {
+        //             ChatName = $" {newTeam.Name}/GroupChat ",
+        //         };
+
+        //         await teamChatService.CreateTeamChat(newTeamChat, newTeam.LeaderId, newTeam.Id);  
+
+        //         return newTeam;
+        // }
+  public async Task<Team> AddTeam(Team newTeam,int roomId,string creatorId,int parentTeamId)
         {
 
+                
    
                 newTeam.RoomId = roomId;
                 newTeam.LeaderId = creatorId;
