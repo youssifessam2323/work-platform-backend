@@ -66,6 +66,10 @@ namespace work_platform_backend.Services
             
             List<Team> teams =((List<Team>) await teamRepository.GetAllTeamsByMember(userId)).Where(t => t.RoomId == roomId).ToList();
             
+            List<Team> myLeadTeams =(List<Team>) await teamRepository.GetAllTeamsByCreator(userId);
+
+            myLeadTeams.ForEach(mlt => teams.Add(mlt));
+
             var teamsDto = teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
             
             return teamsDto;
