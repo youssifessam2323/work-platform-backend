@@ -8,7 +8,7 @@ namespace work_platform_backend.Repos
     {
         Task<IEnumerable<Team>> GetAllTeamsByRoom(int roomId);    
         Task<IEnumerable<Team>> GetAllTeamsByMember(string userId);
-        Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId, int roomId);
+        Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId);
         Task<Team> GetTeamById(int teamId);       
         Task SaveTeam(Team team);
         Task <Team>UpdateTeamById(int teamId,Team team);
@@ -26,5 +26,6 @@ namespace work_platform_backend.Repos
         Task<bool> IsTeamExist(int teamId);
 
         public Task<List<Team>> GetTeamByProject(int projectId);
+        Task<List<Team>> GetAllTeamsByCreatorAndRoom(string userId, int roomId);
     }
 }

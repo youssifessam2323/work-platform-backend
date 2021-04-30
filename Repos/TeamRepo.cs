@@ -22,15 +22,10 @@ namespace work_platform_backend.Repos
            
         }
 
-        public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId, int roomId)
+        public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId)
         {
-            IEnumerable<Team> ListOfUserCreator;
-            if(roomId ==0){
-
-             ListOfUserCreator = await context.Teams.Where(T => T.LeaderId == userId).ToListAsync();
-            } else {
-             ListOfUserCreator = await context.Teams.Where(T => T.LeaderId == userId && T.RoomId == roomId).ToListAsync();
-            }
+            
+             var ListOfUserCreator = await context.Teams.Where(T => T.LeaderId == userId).ToListAsync();
             return ListOfUserCreator;
         }
 
@@ -212,6 +207,11 @@ namespace work_platform_backend.Repos
 
             return team != null ? true : false;
 
+        }
+
+        public async Task<List<Team>> GetAllTeamsByCreatorAndRoom(string userId, int roomId)
+        {
+           return await context.Teams.Where(t => t.LeaderId == userId && t.RoomId == roomId).ToListAsync();
         }
     }
 }

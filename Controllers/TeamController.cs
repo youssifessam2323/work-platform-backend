@@ -209,16 +209,16 @@ namespace work_platform_backend.Controllers
                 
                 var JoinChatOfTeam = await teamChatService.GetTeamChatOfTeam(newTeam.Id);
 
-                  await chatHub.Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join  *Must Saved  inHistory
+                //   await chatHub.Clients.Group(JoinChatOfTeam.ChatName).SendAsync("ReceiveMessageOnJoin", $"User: {user.UserName} Join Group of {JoinChatOfTeam} "); //Not Show to New User That Join  *Must Saved  inHistory
                 //   await chatHub.Groups.AddToGroupAsync(chatHub.Clients.User(userId), JoinChatOfTeam.ChatName);  //add to Group to tell Clients on Group new User Come       
                 var parentTeam = await teamService.GetTeamOnlyById(parentTeamId);
-                var notification = notificationService.CreateNewNotificaition(new Notification
-                {
-                    Content = $"the leader of team {parentTeam.Name} accept your request to creatث a sub team from this team",
-                    UserId = userId
-                });
+                // var notification = notificationService.CreateNewNotificaition(new Notification
+                // {
+                //     Content = $"the leader of team {parentTeam.Name} accept your request to creatث a sub team from this team",
+                //     UserId = userId
+                // });
 
-                await notificationHub.Clients.User(userId).SendAsync("recievenotification",notification);
+                // await notificationHub.Clients.User(userId).SendAsync("recievenotification",notification);
                 return Ok();
 
             }

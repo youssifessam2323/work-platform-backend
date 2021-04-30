@@ -64,11 +64,11 @@ namespace work_platform_backend.Services
                 throw new RoomNotFoundException("room not exist");
             }
             
-            List<Team> teams =((List<Team>) await teamRepository.GetAllTeamsByMember(userId)).Where(t => t.RoomId == roomId).ToList();
+            HashSet<Team> teams =((List<Team>) await teamRepository.GetAllTeamsByMember(userId)).Where(t => t.RoomId == roomId).ToHashSet();
             
-            List<Team> myLeadTeams =(List<Team>) await teamRepository.GetAllTeamsByCreator(userId,roomId);
+            List<Team> myLeadTeams =(List<Team>) await teamRepository.GetAllTeamsByCreatorAndRoom(userId,roomId);
 
-            //myLeadTeams.ForEach(mlt => teams.Add(mlt));
+            myLeadTeams.ForEach(mlt => teams.Add(mlt));
 
             var teamsDto = teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
             
@@ -218,7 +218,7 @@ namespace work_platform_backend.Services
             Console.WriteLine("Authenticad User = " + userId);
             List<Team> teams =await userRepository.getUserTeams(userId);
 
-            var creatorTeams =  await teamRepository.GetAllTeamsByCreator(userId,0);
+            var creatorTeams =  await teamRepository.GetAllTeamsByCreator(userId);
             
             foreach(var t in creatorTeams)
             {

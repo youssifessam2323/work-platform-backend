@@ -164,7 +164,7 @@ namespace work_platform_backend.Services
 
         public async Task<IEnumerable<TeamDto>> GetTeamsByCreator(string CreatorId)
         {
-            var teams = await teamRepository.GetAllTeamsByCreator(CreatorId,0);
+            var teams = await teamRepository.GetAllTeamsByCreator(CreatorId);
 
             return teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
 
