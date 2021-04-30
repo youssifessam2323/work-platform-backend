@@ -66,9 +66,9 @@ namespace work_platform_backend.Services
             
             List<Team> teams =((List<Team>) await teamRepository.GetAllTeamsByMember(userId)).Where(t => t.RoomId == roomId).ToList();
             
-            List<Team> myLeadTeams =(List<Team>) await teamRepository.GetAllTeamsByCreator(userId);
+            List<Team> myLeadTeams =(List<Team>) await teamRepository.GetAllTeamsByCreator(userId,roomId);
 
-            myLeadTeams.ForEach(mlt => teams.Add(mlt));
+            //myLeadTeams.ForEach(mlt => teams.Add(mlt));
 
             var teamsDto = teams.Select(t => mapper.Map<TeamDto>(t)).ToList();
             
@@ -218,7 +218,7 @@ namespace work_platform_backend.Services
             Console.WriteLine("Authenticad User = " + userId);
             List<Team> teams =await userRepository.getUserTeams(userId);
 
-            var creatorTeams =  await teamRepository.GetAllTeamsByCreator(userId);
+            var creatorTeams =  await teamRepository.GetAllTeamsByCreator(userId,0);
             
             foreach(var t in creatorTeams)
             {

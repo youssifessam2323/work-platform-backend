@@ -22,9 +22,15 @@ namespace work_platform_backend.Repos
            
         }
 
-        public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId)
+        public async Task<IEnumerable<Team>> GetAllTeamsByCreator(string userId, int roomId)
         {
-            var ListOfUserCreator = await context.Teams.Where(T => T.LeaderId == userId).ToListAsync();
+            IEnumerable<Team> ListOfUserCreator;
+            if(roomId ==0){
+
+             ListOfUserCreator = await context.Teams.Where(T => T.LeaderId == userId).ToListAsync();
+            } else {
+             ListOfUserCreator = await context.Teams.Where(T => T.LeaderId == userId && T.RoomId == roomId).ToListAsync();
+            }
             return ListOfUserCreator;
         }
 
